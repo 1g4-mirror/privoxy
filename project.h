@@ -1,7 +1,7 @@
 #ifndef PROJECT_H_INCLUDED
 #define PROJECT_H_INCLUDED
 /** Version string. */
-#define PROJECT_H_VERSION "$Id: project.h,v 1.72.2.1 2002/08/10 11:25:18 oes Exp $"
+#define PROJECT_H_VERSION "$Id: project.h,v 1.72.2.2 2002/11/28 18:15:44 oes Exp $"
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/Attic/project.h,v $
@@ -37,6 +37,11 @@
  *
  * Revisions   :
  *    $Log: project.h,v $
+ *    Revision 1.72.2.2  2002/11/28 18:15:44  oes
+ *    Added flag to each cgi_dispatcher that allows or denies
+ *    external linking and removed const qualifier from
+ *    struct list_entry.str.
+ *
  *    Revision 1.72.2.1  2002/08/10 11:25:18  oes
  *    - Include config.h for access to config data
  *    - Include <pcre*.h> depending on where they are
@@ -978,6 +983,22 @@ struct url_actions
  */
 #define CSP_FLAG_TOGGLED_ON 0x20
 
+
+/*
+ * Flags for use in return codes of child processes
+ */
+
+/**
+ * Flag for process return code: Set if exiting porcess has been toggled
+ * during its lifetime.
+ */
+#define RC_FLAG_TOGGLED   0x10
+
+/**
+ * Flag for process return code: Set if exiting porcess has blocked its
+ * request.
+ */
+#define RC_FLAG_BLOCKED   0x20
 
 /**
  * Maximum number of actions files.  This limit is arbitrary - it's just used
