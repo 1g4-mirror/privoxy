@@ -1,4 +1,4 @@
-const char filters_rcs[] = "$Id: filters.c,v 1.58 2002/04/24 02:11:17 oes Exp $";
+const char filters_rcs[] = "$Id: filters.c,v 1.58.2.1 2002/07/26 15:18:53 oes Exp $";
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/Attic/filters.c,v $
@@ -38,6 +38,12 @@ const char filters_rcs[] = "$Id: filters.c,v 1.58 2002/04/24 02:11:17 oes Exp $"
  *
  * Revisions   :
  *    $Log: filters.c,v $
+ *    Revision 1.58.2.1  2002/07/26 15:18:53  oes
+ *    - Bugfix: Executing a filters without jobs no longer results in
+ *      turing off *all* filters.
+ *    - Security fix: Malicious web servers can't cause a seg fault
+ *      through bogus chunk sizes anymore
+ *
  *    Revision 1.58  2002/04/24 02:11:17  oes
  *    Jon's multiple AF patch: url_actions now evaluates rules
  *    from all AFs.
@@ -1078,8 +1084,9 @@ struct http_response *redirect_url(struct client_state *csp)
  *
  * Description :  Given a URL, decide whether it is an image or not,
  *                using either the info from a previous +image action
- *                or, #ifdef FEATURE_IMAGE_DETECT_MSIE, the info from
- *                the browser's accept header.
+ *                or, #ifdef FEATURE_IMAGE_DETECT_MSIE, and the browser
+ *                is MSIE and not on a Mac, tell from the browser's accept
+ *                header.
  *
  * Parameters  :
  *          1  :  csp = Current client state (buffers, headers, etc...)
@@ -1094,7 +1101,7 @@ int is_imageurl(struct client_state *csp)
    char *tmp;
 
    tmp = get_header_value(csp->headers, "User-Agent:");
-   if (tmp && strstr(tmp, "MSIE"))
+   if (tmp && strstr(tmp, "MSIE") && !strstr(tmp, "Mac_"))
    {
       tmp = get_header_value(csp->headers, "Accept:");
       if (tmp && strstr(tmp, "image/gif"))
