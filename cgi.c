@@ -1,4 +1,4 @@
-const char cgi_rcs[] = "$Id: cgi.c,v 1.70.2.10 2003/06/06 07:54:25 oes Exp $";
+const char cgi_rcs[] = "$Id: cgi.c,v 1.70.2.11 2003/10/23 12:29:26 oes Exp $";
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/Attic/cgi.c,v $
@@ -38,6 +38,10 @@ const char cgi_rcs[] = "$Id: cgi.c,v 1.70.2.10 2003/06/06 07:54:25 oes Exp $";
  *
  * Revisions   :
  *    $Log: cgi.c,v $
+ *    Revision 1.70.2.11  2003/10/23 12:29:26  oes
+ *    Bugfix: Transparent PNG was not transparent. Thanks to
+ *    Dan Razzell of Starfish Systems for notice and new PNG.
+ *
  *    Revision 1.70.2.10  2003/06/06 07:54:25  oes
  *    Security fix: dspatch_known_cgi no longer considers an empty
  *    referrer safe for critical CGIs, since malicious links could
@@ -524,6 +528,9 @@ static const struct cgi_dispatcher cgi_dispatchers[] = {
    { "ear", /* Shortcut for edit-actions-remove-url-form */
          cgi_edit_actions_remove_url_form, 
          NULL, FALSE },
+   { "eal", /* Shortcut for edit-actions-list */
+         cgi_edit_actions_list, 
+         NULL, FALSE },
    { "eafu", /* Shortcut for edit-actions-for-url */
          cgi_edit_actions_for_url, 
          NULL, FALSE },
@@ -709,7 +716,7 @@ struct http_response *dispatch_cgi(struct client_state *csp)
       else if (*path != '\0')
       {
          /*
-          * wierdness: URL is /configXXX, where XXX is some string
+          * weirdness: URL is /configXXX, where XXX is some string
           * Do *NOT* intercept.
           */
          return NULL;
@@ -867,7 +874,7 @@ static struct http_response *dispatch_known_cgi(struct client_state * csp,
             }
             else
             {
-               err = cgi_error_404(csp, rsp, param_list);
+               err = cgi_error_disabled(csp, rsp);
             }
          }
 
@@ -1476,6 +1483,42 @@ jb_err cgi_error_bad_param(struct client_state *csp,
 
 /*********************************************************************
  *
+ * Function    :  cgi_redirect 
+ *
+ * Description :  CGI support function to generate a HTTP redirect
+ *                message
+ *
+ * Parameters  :
+ *          1  :  rsp = http_response data structure for output
+ *          2  :  target = string with the target URL
+ *
+ * CGI Parameters : None
+ *
+ * Returns     :  JB_ERR_OK on success
+ *                JB_ERR_MEMORY on out-of-memory error.  
+ *
+ *********************************************************************/
+jb_err cgi_redirect (struct http_response * rsp, const char *target)
+{
+   jb_err err;
+
+   assert(rsp);
+   assert(target);
+
+   err = enlist_unique_header(rsp->headers, "Location", target);
+
+   rsp->status = strdup("302 Local Redirect from Privoxy");
+   if (rsp->status == NULL)
+   {
+      return JB_ERR_MEMORY;
+   }
+
+   return err;
+}
+
+
+/*********************************************************************
+ *
  * Function    :  add_help_link
  *
  * Description :  Produce a copy of the string given as item,
@@ -1679,7 +1722,7 @@ struct http_response *finish_http_response(struct http_response *rsp)
       get_http_time(0, buf);
       if (!err) err = enlist_unique_header(rsp->headers, "Date", buf);
       if (!err) err = enlist_unique_header(rsp->headers, "Last-Modified", buf);
-      if (!err) err = enlist_unique_header(rsp->headers, "Expires", buf);
+      if (!err) err = enlist_unique_header(rsp->headers, "Expires", "Sat, 17 Jun 2000 12:00:00 GMT");
    }
 
 
