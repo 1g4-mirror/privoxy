@@ -816,9 +816,7 @@ function show_send_wafer_opts(tf)
     <tr>
       <td class="box">
         <h2>More Privoxy:</h2>
-        <ul>@menu@
-         <li><a href="@user-manual@">Documentation</a></li>
-        </ul>
+        <ul>@menu@<li><a href="@user-manual@">Documentation</a></li></ul>
       </td>
     </tr>
 

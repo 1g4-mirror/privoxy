@@ -174,9 +174,7 @@ function validate(text)
     <tr>
       <td class="box">
         <h2>More Privoxy:</h2>
-        <ul>@menu@
-         <li><a href="@user-manual@">Documentation</a></li>
-        </ul>
+        <ul>@menu@<li><a href="@user-manual@">Documentation</a></li></ul>
       </td>
     </tr>
 
