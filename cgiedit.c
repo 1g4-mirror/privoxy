@@ -1,4 +1,4 @@
-const char cgiedit_rcs[] = "$Id: cgiedit.c,v 1.41 2002/05/21 19:09:45 oes Exp $";
+const char cgiedit_rcs[] = "$Id: cgiedit.c,v 1.41.2.1 2002/08/02 12:43:14 oes Exp $";
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/Attic/cgiedit.c,v $
@@ -42,6 +42,9 @@ const char cgiedit_rcs[] = "$Id: cgiedit.c,v 1.41 2002/05/21 19:09:45 oes Exp $"
  *
  * Revisions   :
  *    $Log: cgiedit.c,v $
+ *    Revision 1.41.2.1  2002/08/02 12:43:14  oes
+ *    Fixed bug #588514: first_time now set on a per-string basis in actions_from_radio; javascriptify now called on copies
+ *
  *    Revision 1.41  2002/05/21 19:09:45  oes
  *     - Made Add/Edit/Remove URL Submit and Cancel
  *       buttons jump back to relevant section in eal
@@ -2877,12 +2880,13 @@ jb_err cgi_edit_actions_list(struct client_state *csp,
 
       /* Could also do section-specific exports here, but it wouldn't be as fast */
 
+      snprintf(buf, 150, "%d", line_number);
+      if (!err) err = map(section_exports, "s-next", 1, buf, 1);
+
       if ( (cur_line != NULL)
         && (cur_line->type == FILE_LINE_ACTION))
       {
          /* Not last section */
-         snprintf(buf, 150, "%d", line_number);
-         if (!err) err = map(section_exports, "s-next", 1, buf, 1);
          if (!err) err = map_block_keep(section_exports, "s-next-exists");
       }
       else
@@ -3999,10 +4003,10 @@ jb_err cgi_edit_actions_section_add(struct client_state *csp,
    line_number = 1;
    cur_line = file->lines;
 
-   if (sectionid < 1U)
+   if (sectionid <= 1U)
    {
       /* Add to start of file */
-      if (cur_line != NULL)
+      if (cur_line != NULL && cur_line->type != FILE_LINE_ACTION)
       {
          /* There's something in the file, find the line before the first
           * action.
@@ -4013,6 +4017,11 @@ jb_err cgi_edit_actions_section_add(struct client_state *csp,
             cur_line = cur_line->next;
             line_number++;
          }
+      }
+      else
+      {
+         /* File starts with action line, so insert at top */
+         cur_line = NULL;
       }
    }
    else
