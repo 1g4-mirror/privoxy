@@ -8,9 +8,12 @@
               This file belongs in
               ijbswa.sourceforge.net:/home/groups/i/ij/ijbswa/htdocs/
 
-  $Id: index.php,v 1.25.2.4 2003/03/19 14:00:20 oes Exp $
+  $Id: index.php,v 1.25.2.5 2003/09/01 15:20:45 oes Exp $
 
   $Log: index.php,v $
+  Revision 1.25.2.5  2003/09/01 15:20:45  oes
+  Require AF 1.7
+
   Revision 1.25.2.4  2003/03/19 14:00:20  oes
   Require AF 1.6
 
@@ -275,7 +278,7 @@ if (!isset($headers["X-Actions-File-Version"]) || $headers["X-Actions-File-Versi
         <option selected value="INVALID">Please select...</option>
         <option value="P1">An advertisment was NOT blocked</option>
         <option value="P2">An innocent image WAS blocked</option>
-        <option value="P3">The whole page was erraneously blocked</option>
+        <option value="P3">The whole page was erroneously blocked</option>
         <option value="P4">The page needs popups but they don't work</option>
         <option value="P5">Other problem</option>
        </select>
