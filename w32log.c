@@ -1,7 +1,7 @@
-const char w32log_rcs[] = "$Id: w32log.c,v 1.25.2.1 2002/08/21 17:59:05 oes Exp $";
+const char w32log_rcs[] = "$Id: w32log.c,v 1.25.2.2 2002/09/25 15:23:10 oes Exp $";
 /*********************************************************************
  *
- * File        :  $Source: /cvsroot/ijbswa//current/Attic/w32log.c,v $
+ * File        :  $Source: /cvsroot/ijbswa/current/Attic/w32log.c,v $
  *
  * Purpose     :  Functions for creating and destroying the log window,
  *                ouputting strings, processing messages and so on.
@@ -32,6 +32,9 @@ const char w32log_rcs[] = "$Id: w32log.c,v 1.25.2.1 2002/08/21 17:59:05 oes Exp 
  *
  * Revisions   :
  *    $Log: w32log.c,v $
+ *    Revision 1.25.2.2  2002/09/25 15:23:10  oes
+ *    Uncheck the "Show Privoxy Window" taskbar menu item when window gets minimized. Fixes bug #606804
+ *
  *    Revision 1.25.2.1  2002/08/21 17:59:05  oes
  *     - "Show Privoxy Window" now a toggle
  *     - Temp kludge to let user and default action file be edited through win32 GUI (FR 592080)
@@ -317,6 +320,7 @@ static struct _Pattern
  * Public variables
  */
 HWND g_hwndLogFrame;
+HICON g_hiconApp;
 
 /*
  * Private variables
@@ -327,7 +331,6 @@ static HWND g_hwndLogBox;
 static WNDPROC g_fnLogBox;
 static HICON g_hiconAnim[ANIM_FRAMES];
 static HICON g_hiconIdle;
-static HICON g_hiconApp;
 static int g_nAnimFrame;
 static BOOL g_bClipPending = FALSE;
 static int g_nRichEditVersion = 0;

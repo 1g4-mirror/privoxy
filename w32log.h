@@ -1,9 +1,9 @@
 #ifndef W32LOG_H_INCLUDED
 #define W32LOG_H_INCLUDED
-#define W32LOG_H_VERSION "$Id: w32log.h,v 1.10 2002/03/26 22:57:10 jongfoster Exp $"
+#define W32LOG_H_VERSION "$Id: w32log.h,v 1.10.2.1 2002/08/21 17:58:05 oes Exp $"
 /*********************************************************************
  *
- * File        :  $Source: /cvsroot/ijbswa//current/Attic/w32log.h,v $
+ * File        :  $Source: /cvsroot/ijbswa/current/Attic/w32log.h,v $
  *
  * Purpose     :  Functions for creating and destroying the log window,
  *                ouputting strings, processing messages and so on.
@@ -34,6 +34,9 @@
  *
  * Revisions   :
  *    $Log: w32log.h,v $
+ *    Revision 1.10.2.1  2002/08/21 17:58:05  oes
+ *    Temp kludge to let user and default action file be edited through win32 GUI (FR 592080)
+ *
  *    Revision 1.10  2002/03/26 22:57:10  jongfoster
  *    Web server name should begin www.
  *
@@ -141,6 +144,7 @@ extern const char * g_trustfile;
 
 /* FIXME: end kludge */
 
+extern HICON g_hiconApp;
 extern int LogPutString(const char *pszText);
 extern BOOL InitLogWindow(void);
 extern void TermLogWindow(void);
