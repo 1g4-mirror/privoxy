@@ -1,7 +1,7 @@
-const char actions_rcs[] = "$Id: actions.c,v 1.32 2002/05/12 21:36:29 jongfoster Exp $";
+const char actions_rcs[] = "$Id: actions.c,v 1.32.2.1 2002/05/26 12:13:16 roro Exp $";
 /*********************************************************************
  *
- * File        :  $Source: /cvsroot/ijbswa/current/actions.c,v $
+ * File        :  $Source: /cvsroot/ijbswa/current/Attic/actions.c,v $
  *
  * Purpose     :  Declares functions to work with actions files
  *                Functions declared include: FIXME
@@ -33,6 +33,10 @@ const char actions_rcs[] = "$Id: actions.c,v 1.32 2002/05/12 21:36:29 jongfoster
  *
  * Revisions   :
  *    $Log: actions.c,v $
+ *    Revision 1.32.2.1  2002/05/26 12:13:16  roro
+ *    Change unsigned to unsigned long in actions_name struct.  This closes
+ *    SourceForge Bug #539284.
+ *
  *    Revision 1.32  2002/05/12 21:36:29  jongfoster
  *    Correcting function comments
  *
@@ -874,10 +878,15 @@ static struct file_list *current_actions_file[MAX_ACTION_FILES]  = {
  *********************************************************************/
 void unload_current_actions_file(void)
 {
-   if (current_actions_file)
+   int i;
+
+   for (i = 0; i < MAX_ACTION_FILES; i++)
    {
-      current_actions_file->unloader = unload_actions_file;
-      current_actions_file = NULL;
+      if (current_actions_file[i])
+      {
+         current_actions_file[i]->unloader = unload_actions_file;
+         current_actions_file[i] = NULL;
+      }
    }
 }
 #endif /* FEATURE_GRACEFUL_TERMINATION */
