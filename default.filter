@@ -2,7 +2,7 @@
 # 
 #  File        :  $Source: /cvsroot/ijbswa/current/default.filter,v $
 # 
-#  $Id: default.filter,v 1.11.2.11 2002/11/12 16:14:43 oes Exp $
+#  $Id: default.filter,v 1.11.2.12 2003/03/15 14:06:58 oes Exp $
 #
 #  Purpose     :  Rules to process the content of web pages
 # 
@@ -208,7 +208,7 @@ FILTER: img-reorder Reorder attributes in <img> tags to make the banners-by-* fi
 s|<img\s+?([^>]*) src\s*=\s*(['"])([^>\\\2]+)\2|<img src=$2$3$2 $1|siUg
 s|<img\s+?([^>]*) src\s*=\s*([^'">\\\s]+)|<img src=$2 $1|sig
 
-s|<img (src=(?:(['"])[^>\\\\2]+\2\|[^'">\\\s]+?))([^>]*)width\s*=\s*(["']?)(\d+?)|<img $1 width=$4$5$4$3|siUg
+s|<img (src=(?:(['"])[^>\\\\2]+\2\|[^'">\\\s]+?))([^>]*)width\s*=\s*(["']?)(\d+?)\4|<img $1 width=$4$5$4$3|siUg
 
 
 #################################################################################
@@ -442,6 +442,19 @@ s%<script language="JavaScript">(window\.open|1;''\.concat)\("readme\.eml", null
 #
 #  Revisions   :
 #     $Log: default.filter,v $
+#     Revision 1.11.2.12  2003/03/15 14:06:58  oes
+#      - Assorted refinements, optimizations and fixes in the js-annoyances,
+#        img-reorder, banners-by-size, banners-by-link, webbugs, refresh-tags,
+#        html-annoyances, content-cookies and fun filters
+#      - Replaced filter "popups" by choice between two modes:
+#        - "unsolicited-popups" tries to catch only the unsolicited ones
+#        - "all-popups" tries to kill them all (as before)
+#      - New filter "tiny-textforms" Help those tiny or hard-wrap textareas.
+#      - New filter "jumping-windows" that prevents windows from resizing
+#        and moving themselves
+#      - Replaced "nimda" with more general "ie-exploits" filter in which
+#        all filters for exploits shall be collected
+#
 #     Revision 1.11.2.11  2002/11/12 16:14:43  oes
 #     Exchanged js-annoyance filter against status bar rewrites with improved version by Don Libes
 #
