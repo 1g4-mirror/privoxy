@@ -1,4 +1,4 @@
-const char cgiedit_rcs[] = "$Id: cgiedit.c,v 1.41.2.3 2002/11/12 15:01:41 oes Exp $";
+const char cgiedit_rcs[] = "$Id: cgiedit.c,v 1.41.2.4 2003/03/11 11:53:59 oes Exp $";
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/Attic/cgiedit.c,v $
@@ -42,6 +42,9 @@ const char cgiedit_rcs[] = "$Id: cgiedit.c,v 1.41.2.3 2002/11/12 15:01:41 oes Ex
  *
  * Revisions   :
  *    $Log: cgiedit.c,v $
+ *    Revision 1.41.2.4  2003/03/11 11:53:59  oes
+ *    Cosmetic: Renamed cryptic variable
+ *
  *    Revision 1.41.2.3  2002/11/12 15:01:41  oes
  *    Fix: Don't free uninitialized struct editable_file
  *
@@ -2455,20 +2458,9 @@ jb_err cgi_edit_actions(struct client_state *csp,
    }
 
    /* FIXME: Incomplete */
-   rsp->status = strdup("302 Local Redirect from Privoxy");
-   if (rsp->status == NULL)
-   {
-      return JB_ERR_MEMORY;
-   }
-   if (enlist_unique_header(rsp->headers, "Location",
-      CGI_PREFIX "edit-actions-list?f=default"))
-   {
-      free(rsp->status);
-      rsp->status = NULL;
-      return JB_ERR_MEMORY;
-   }
 
-   return JB_ERR_OK;
+   return cgi_redirect(rsp, CGI_PREFIX "edit-actions-list?f=default");
+
 }
 
 
@@ -3194,7 +3186,7 @@ jb_err cgi_edit_actions_submit(struct client_state *csp,
    struct editable_file * file;
    struct file_line * cur_line;
    unsigned line_number;
-   char * target;
+   char target[1024];
    jb_err err;
    int index;
    const char * action_set_name;
@@ -3382,29 +3374,12 @@ jb_err cgi_edit_actions_submit(struct client_state *csp,
       return err;
    }
 
-   target = strdup(CGI_PREFIX "edit-actions-list?f=");
-   string_append(&target, file->identifier);
-   string_join(&target, section_target(sectionid));
-
+   snprintf(target, 1024, CGI_PREFIX "edit-actions-list?foo=%lu&f=%s#l%d",
+            (long) time(NULL), file->identifier, sectionid);
 
    edit_free_file(file);
 
-   if (target == NULL)
-   {
-      /* Out of memory */
-      return JB_ERR_MEMORY;
-   }
-
-   rsp->status = strdup("302 Local Redirect from Privoxy");
-   if (rsp->status == NULL)
-   {
-      free(target);
-      return JB_ERR_MEMORY;
-   }
-   err = enlist_unique_header(rsp->headers, "Location", target);
-   free(target);
-
-   return err;
+   return cgi_redirect(rsp, target);
 }
 
 
@@ -3443,8 +3418,12 @@ jb_err cgi_edit_actions_url(struct client_state *csp,
    struct file_line * cur_line;
    unsigned line_number;
    unsigned section_start_line_number = 0;
-   char * target;
+   char target[1024];
    jb_err err;
+
+   assert(csp);
+   assert(rsp);
+   assert(parameters);
 
    if (0 == (csp->config->feature_flags & RUNTIME_FEATURE_CGI_EDIT_ACTIONS))
    {
@@ -3516,28 +3495,12 @@ jb_err cgi_edit_actions_url(struct client_state *csp,
       return err;
    }
 
-   target = strdup(CGI_PREFIX "edit-actions-list?f=");
-   string_append(&target, file->identifier);
-   string_join(&target, section_target(section_start_line_number));
+   snprintf(target, 1024, CGI_PREFIX "edit-actions-list?foo=%lu&f=%s#l%d",
+            (long) time(NULL), file->identifier, section_start_line_number);
 
    edit_free_file(file);
 
-   if (target == NULL)
-   {
-      /* Out of memory */
-      return JB_ERR_MEMORY;
-   }
-
-   rsp->status = strdup("302 Local Redirect from Privoxy");
-   if (rsp->status == NULL)
-   {
-      free(target);
-      return JB_ERR_MEMORY;
-   }
-   err = enlist_unique_header(rsp->headers, "Location", target);
-   free(target);
-
-   return err;
+   return cgi_redirect(rsp, target);
 }
 
 
@@ -3575,7 +3538,7 @@ jb_err cgi_edit_actions_add_url(struct client_state *csp,
    struct editable_file * file;
    struct file_line * cur_line;
    unsigned line_number;
-   char * target;
+   char target[1024];
    jb_err err;
 
    if (0 == (csp->config->feature_flags & RUNTIME_FEATURE_CGI_EDIT_ACTIONS))
@@ -3661,28 +3624,12 @@ jb_err cgi_edit_actions_add_url(struct client_state *csp,
       return err;
    }
 
-   target = strdup(CGI_PREFIX "edit-actions-list?f=");
-   string_append(&target, file->identifier);
-   string_join(&target, section_target(sectionid));
+   snprintf(target, 1024, CGI_PREFIX "edit-actions-list?foo=%lu&f=%s#l%d",
+            (long) time(NULL), file->identifier, sectionid);
 
    edit_free_file(file);
 
-   if (target == NULL)
-   {
-      /* Out of memory */
-      return JB_ERR_MEMORY;
-   }
-
-   rsp->status = strdup("302 Local Redirect from Privoxy");
-   if (rsp->status == NULL)
-   {
-      free(target);
-      return JB_ERR_MEMORY;
-   }
-   err = enlist_unique_header(rsp->headers, "Location", target);
-   free(target);
-
-   return err;
+   return cgi_redirect(rsp, target);
 }
 
 
@@ -3719,7 +3666,7 @@ jb_err cgi_edit_actions_remove_url(struct client_state *csp,
    struct file_line * prev_line;
    unsigned line_number;
    unsigned section_start_line_number = 0;
-   char * target;
+   char target[1024];
    jb_err err;
 
    if (0 == (csp->config->feature_flags & RUNTIME_FEATURE_CGI_EDIT_ACTIONS))
@@ -3788,28 +3735,12 @@ jb_err cgi_edit_actions_remove_url(struct client_state *csp,
       return err;
    }
 
-   target = strdup(CGI_PREFIX "edit-actions-list?f=");
-   string_append(&target, file->identifier);
-   string_join(&target, section_target(section_start_line_number));
+   snprintf(target, 1024, CGI_PREFIX "edit-actions-list?foo=%lu&f=%s#l%d",
+            (long) time(NULL), file->identifier, section_start_line_number);
 
    edit_free_file(file);
 
-   if (target == NULL)
-   {
-      /* Out of memory */
-      return JB_ERR_MEMORY;
-   }
-
-   rsp->status = strdup("302 Local Redirect from Privoxy");
-   if (rsp->status == NULL)
-   {
-      free(target);
-      return JB_ERR_MEMORY;
-   }
-   err = enlist_unique_header(rsp->headers, "Location", target);
-   free(target);
-
-   return err;
+   return cgi_redirect(rsp, target);
 }
 
 
@@ -3846,7 +3777,7 @@ jb_err cgi_edit_actions_section_remove(struct client_state *csp,
    struct file_line * cur_line;
    struct file_line * prev_line;
    unsigned line_number;
-   char * target;
+   char target[1024];
    jb_err err;
 
    if (0 == (csp->config->feature_flags & RUNTIME_FEATURE_CGI_EDIT_ACTIONS))
@@ -3926,27 +3857,12 @@ jb_err cgi_edit_actions_section_remove(struct client_state *csp,
       return err;
    }
 
-   target = strdup(CGI_PREFIX "edit-actions-list?f=");
-   string_append(&target, file->identifier);
+   snprintf(target, 1024, CGI_PREFIX "edit-actions-list?foo=%lu&f=%s",
+            (long) time(NULL), file->identifier);
 
    edit_free_file(file);
 
-   if (target == NULL)
-   {
-      /* Out of memory */
-      return JB_ERR_MEMORY;
-   }
-
-   rsp->status = strdup("302 Local Redirect from Privoxy");
-   if (rsp->status == NULL)
-   {
-      free(target);
-      return JB_ERR_MEMORY;
-   }
-   err = enlist_unique_header(rsp->headers, "Location", target);
-   free(target);
-
-   return err;
+   return cgi_redirect(rsp, target);
 }
 
 
@@ -3984,7 +3900,7 @@ jb_err cgi_edit_actions_section_add(struct client_state *csp,
    struct editable_file * file;
    struct file_line * cur_line;
    unsigned line_number;
-   char * target;
+   char target[1024];
    jb_err err;
 
    if (0 == (csp->config->feature_flags & RUNTIME_FEATURE_CGI_EDIT_ACTIONS))
@@ -4110,27 +4026,12 @@ jb_err cgi_edit_actions_section_add(struct client_state *csp,
       return err;
    }
 
-   target = strdup(CGI_PREFIX "edit-actions-list?f=");
-   string_append(&target, file->identifier);
+   snprintf(target, 1024, CGI_PREFIX "edit-actions-list?foo=%lu&f=%s",
+            (long) time(NULL), file->identifier);
 
    edit_free_file(file);
 
-   if (target == NULL)
-   {
-      /* Out of memory */
-      return JB_ERR_MEMORY;
-   }
-
-   rsp->status = strdup("302 Local Redirect from Privoxy");
-   if (rsp->status == NULL)
-   {
-      free(target);
-      return JB_ERR_MEMORY;
-   }
-   err = enlist_unique_header(rsp->headers, "Location", target);
-   free(target);
-
-   return err;
+   return cgi_redirect(rsp, target);
 }
 
 
@@ -4314,27 +4215,12 @@ jb_err cgi_edit_actions_section_swap(struct client_state *csp,
       }
    } /* END if (section1 != section2) */
 
-   target = strdup(CGI_PREFIX "edit-actions-list?f=");
-   string_append(&target, file->identifier);
+   snprintf(target, 1024, CGI_PREFIX "edit-actions-list?foo=%lu&f=%s",
+            (long) time(NULL), file->identifier);
 
    edit_free_file(file);
 
-   if (target == NULL)
-   {
-      /* Out of memory */
-      return JB_ERR_MEMORY;
-   }
-
-   rsp->status = strdup("302 Local Redirect from Privoxy");
-   if (rsp->status == NULL)
-   {
-      free(target);
-      return JB_ERR_MEMORY;
-   }
-   err = enlist_unique_header(rsp->headers, "Location", target);
-   free(target);
-
-   return err;
+   return cgi_redirect(rsp, target);
 }
 
 
