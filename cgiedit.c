@@ -1,7 +1,7 @@
-const char cgiedit_rcs[] = "$Id: cgiedit.c,v 1.40 2002/05/19 11:34:35 jongfoster Exp $";
+const char cgiedit_rcs[] = "$Id: cgiedit.c,v 1.41 2002/05/21 19:09:45 oes Exp $";
 /*********************************************************************
  *
- * File        :  $Source: /cvsroot/ijbswa/current/cgiedit.c,v $
+ * File        :  $Source: /cvsroot/ijbswa/current/Attic/cgiedit.c,v $
  *
  * Purpose     :  CGI-based actionsfile editor.
  *
@@ -42,6 +42,11 @@ const char cgiedit_rcs[] = "$Id: cgiedit.c,v 1.40 2002/05/19 11:34:35 jongfoster
  *
  * Revisions   :
  *    $Log: cgiedit.c,v $
+ *    Revision 1.41  2002/05/21 19:09:45  oes
+ *     - Made Add/Edit/Remove URL Submit and Cancel
+ *       buttons jump back to relevant section in eal
+ *     - Bugfix: remove-url-form needs p export
+ *
  *    Revision 1.40  2002/05/19 11:34:35  jongfoster
  *    Handling read-only actions files better - report the actual
  *    error, not "Out of memory"!
@@ -4575,7 +4580,6 @@ static jb_err actions_to_radio(struct map * exports,
 static jb_err actions_from_radio(const struct map * parameters,
                                  struct action_spec *action)
 {
-   static int first_time = 1;
    const char * param;
    char * param_dup;
    char ch;
@@ -4589,16 +4593,22 @@ static jb_err actions_from_radio(const struct map * parameters,
     * but in this case we're safe and don't need semaphores.
     * Be careful if you modify this function.
     * - Jon
+    * The js_name_arr's are never free()d, but this is no
+    * problem, since they will only be created once and
+    * used by all threads thereafter. -oes
     */
 
 #define JAVASCRIPTIFY(dest_var, string)               \
    {                                                  \
-      static char js_name_arr[] = string;             \
+     static int first_time = 1;                       \
+     static char *js_name_arr;                        \
       if (first_time)                                 \
       {                                               \
+         js_name_arr = strdup(string);                \
          javascriptify(js_name_arr);                  \
       }                                               \
       dest_var = js_name_arr;                         \
+      first_time = 0;                                 \
    }                                                  \
 
 #define DEFINE_ACTION_BOOL(name, bit)                 \
@@ -4693,8 +4703,6 @@ static jb_err actions_from_radio(const struct map * parameters,
 #undef DEFINE_ACTION_BOOL
 #undef DEFINE_ACTION_ALIAS
 #undef JAVASCRIPTIFY
-
-   first_time = 0;
 
    return err;
 }
