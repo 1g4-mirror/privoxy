@@ -1,7 +1,7 @@
-const char win32_rcs[] = "$Id: win32.c,v 1.8 2002/03/26 22:57:10 jongfoster Exp $";
+const char win32_rcs[] = "$Id: win32.c,v 1.9 2002/03/31 17:19:00 jongfoster Exp $";
 /*********************************************************************
  *
- * File        :  $Source: /cvsroot/ijbswa/current/win32.c,v $
+ * File        :  $Source: /cvsroot/ijbswa//current/Attic/win32.c,v $
  *
  * Purpose     :  Win32 User Interface initialization and message loop
  *
@@ -31,6 +31,9 @@ const char win32_rcs[] = "$Id: win32.c,v 1.8 2002/03/26 22:57:10 jongfoster Exp 
  *
  * Revisions   :
  *    $Log: win32.c,v $
+ *    Revision 1.9  2002/03/31 17:19:00  jongfoster
+ *    Win32 only: Enabling STRICT to fix a VC++ compile warning.
+ *
  *    Revision 1.8  2002/03/26 22:57:10  jongfoster
  *    Web server name should begin www.
  *
@@ -92,15 +95,11 @@ const char win32_h_rcs[] = WIN32_H_VERSION;
 
 const char win32_blurb[] =
 "Privoxy version " VERSION " for Windows\n"
-"Copyright (C) 2000-2002 by members of the Privoxy Team\n"
-"Copyright (C) 1997-8 by Junkbusters Corp.\n"
+"Copyright (C) 2000-2002 the Privoxy Team (" HOME_PAGE_URL ")\n"
+"Based on the Internet Junkbuster by Junkbusters Corp.\n"
 "This is free software; it may be used and copied under the\n"
 "GNU General Public License: http://www.gnu.org/copyleft/gpl.html .\n"
 "This program comes with ABSOLUTELY NO WARRANTY OF ANY KIND.\n"
-"\n"
-"For information about how to to configure the proxy and your browser, see\n"
-"        " HOME_PAGE_URL "\n"
-"\n";
 
 #ifdef _WIN_CONSOLE
 
