@@ -2,15 +2,18 @@
 <html>
  <!--
 
-  File :  $Source: /cvsroot/ijbswa/current/doc/webserver/actions/step3.php,v $
+  File :  $Source: /cvsroot/ijbswa//current/doc/webserver/actions/step3.php,v $
 
   Purpose  :  Submit form for actions file feedback (step 1)
               This file belongs in
               ijbswa.sourceforge.net:/home/groups/i/ij/ijbswa/htdocs/
 
-  $Id: step3.php,v 1.15 2002/04/09 15:08:10 oes Exp $
+  $Id: step3.php,v 1.16 2002/04/13 14:34:59 oes Exp $
 
   $Log: step3.php,v $
+  Revision 1.16  2002/04/13 14:34:59  oes
+  Include unique ID in tracker and log; Include URL in tracker summary; add more newlines in tracker
+
   Revision 1.15  2002/04/09 15:08:10  oes
   Restoring lost text change
 
@@ -283,7 +286,7 @@ switch($problem)
 {
    case "P1": $category_id="412811"; $summary = "Ad not blocked "; break;
    case "P2": $category_id="412810"; $summary = "Image blocked ";break;
-   case "P3": $category_id="412812"; $summary = "Page plocked ";break;
+   case "P3": $category_id="412812"; $summary = "Page blocked ";break;
    case "P4": $category_id="412813"; $summary = "Popups blocked ";break;
    case "P5": $category_id="412814"; $summary = "Other problem ";break;
    default:   $category_id="412814"; $summary = "IMPOSSIBLE ";break;
