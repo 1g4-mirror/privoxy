@@ -1,8 +1,8 @@
-#        Sample Configuration File for Privoxy v2.9.18
+#        Sample Configuration File for Privoxy v2.9.20
 #  
 #  Copyright (C) 2001, 2002 Privoxy Developers http://privoxy.org
 #  
-#  $Id: p-config.sgml,v 1.1.2.6 2002/08/05 17:58:20 oes Exp $
+#  $Id: config,v 1.39.2.4 2002/08/07 01:35:23 hal9 Exp $
 #  
 ####################################################################
 #                                                                  #
