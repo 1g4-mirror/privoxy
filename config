@@ -1,7 +1,7 @@
-#  Sample Configuration file for Privoxy
+#  Sample Configuration file for the Internet Junkbuster 2.9.x
 
 #
-# $Id: config,v 1.30 2002/03/24 11:37:39 jongfoster Exp $
+# $Id: config,v 1.15 2001/06/29 13:23:20 oes Exp $
 #
 
 #  Table of Contents
@@ -14,14 +14,14 @@
 #
 #  1. INTRODUCTION
 #
-#  This file holds the Privoxy configuration.  If you modify this
-#  file, you will need to send a couple of requests to the proxy
-#  before any changes take effect.
+#  This file holds the Junkbuster configuration.  If you modify this
+#  file, you will need to stop & restart Junkbuster, or use the
+#  "Reload Config" option (Windows) before any changes take effect.
 #
-#  When starting Privoxy on Unix systems, give the name of this
-#  file as an argument.  On Windows systems, Privoxy will look for
-#  this file with the name 'config.txt' in the same directory where
-#  Privoxy is installed.
+#  When starting Junkbuster on Unix systems, give the name of this
+#  file as an argument.  On Windows systems, Junkbuster will look for
+#  this file with the name 'junkbustr.txt' in the same directory where
+#  Junkbuster is installed.
 #
 #  2. FORMAT OF THE CONFIGURATION FILE
 #
@@ -29,9 +29,9 @@
 #  of values, all separated by whitespace (any number of spaces or
 #  tabs).  For example,
 #
-#  actionsfile default.action
+#  blockfile blocklist.ini
 #
-#  Indicates that the actionsfile is named 'default.action'.
+#  Indicates that the blockfile is named 'blocklist.ini'.
 #
 #  The '#' indicates a comment.  Any part of a line following a '#' is
 #  ignored, except if the '#' is preceded by a '\'.
@@ -39,29 +39,28 @@
 #  Thus, by placing a # at the start of an existing configuration line,
 #  you can make it a comment and it will be treated as if it weren't there. 
 #  This is called "commenting out" an option and can be useful to turn
-#  off features: If you comment out the "logfile" line, Privoxy will
+#  off features: If you comment out the "logfile" line, junkbuster will
 #  not log to a file at all. Watch for the "default:" section in each 
 #  explanation to see what happens if the option is left unset (or 
 #  commented out). 
 #
 #  Long lines can be continued on the next line by using a `\' as
 #  the last character.
+#  
+
 #
 #  3. OTHER CONFIGURATION FILES
 #
-#  Privoxy uses a number of other files to tell it what ads to
+#  Junkbuster uses a number of other files to tell it what ads to
 #  block, what cookies to accept, etc.  This section of the
-#  configuration file tells Privoxy where to find all those other
+#  configuration file tells Junkbuster where to find all those other
 #  files.
 #
-#  Privoxy looks for these files in the directory specified with
-#  "confdir" option.
-#
-#  (Note that on Windows, Privoxy usually starts with the current
-#  directory (".") being the same directory as the executable)
-#
-#  An absolute path name can be used to avoid problems.
-#
+#  On Windows, Junkbuster looks for these files in the same
+#  directory as the executable.  On Unix, Junkbuster looks for these
+#  files in the current working directory.  In either case, an
+#  absolute path name can be used to avoid problems.
+
 #  While we go modular and multiuser, the blocker, filter, and 
 #  per-user config will be stored in subdirectories of confdir.
 #  Now, only confdir/templates is used for storing HTML templates
@@ -76,33 +75,36 @@ confdir .
 #
 logdir .
 
+#
 #  Note that all file specifications below are relative to 
 #  the above two directories!!!
+#
 
 #  The actions file contains patterns to specify the
 #  actions to apply to requests for each site.
 #
 #  Default: Cookies to and from all destinations are filtered.
 #           Popups are disabled for all sites.
-#           All sites are filtered if filterfile specified.
+#           All sites are filtered if re_filterfile specified.
 #           No sites are blocked.  Nothing is an image.
 #
-actionsfile default.action
+actionsfile actionsfile
 
-#  The filterfile contains content modification rules.  These rules
+#
+#  The re_filterfile contains content modification rules.  These rules
 #  permit powerful changes on the content of Web pages, e.g., you
 #  could disable your favourite JavaScript annoyances, rewrite the
 #  actual content, or just have some fun replacing "Microsoft"
 #  with "Microsuck" wherever it appears on a Web page.
 #
-#  Default: content modification. (see '+-filter' in actionsfile)
+#  Default: No content modification.
 #
-filterfile default.filter
+re_filterfile   re_filterfile
 
 #
 #  The logfile is where all logging and error messages are written.
 #  The logfile can be useful for tracking down a problem with
-#  Privoxy (e.g., it's not blocking an ad you think it should
+#  Junkbuster (e.g., it's not blocking an ad you think it should
 #  block) but in most cases you probably will never look at it.
 #
 #  Your logfile will grow indefinitely, and you will probably want to
@@ -110,25 +112,25 @@ filterfile default.filter
 #  cron job (see 'man cron').
 #
 #  On SuSE Linux systems, you can place a line like
-#  "/var/log/privoxy.* +1024k 644 nobody.nogroup" in /etc/logfiles,
+#  "/var/log/junkbuster.* +1024k 644 nobody.nogroup" in /etc/logfiles,
 #  with the effect that cron.daily will automatically archive, gzip,
 #  and empty the log, when it exceeds 1M size.
 #
 #  Default: Log to the standard error channel, not to a file
 #
-logfile logfile
+logfile      logfile
 
 #
-#  The jarfile defines where Privoxy stores the cookies it
+#  The jarfile defines where Junkbuster stores the cookies it
 #  intercepts.  Note that if you use a jarfile, it may grow quite
 #  large. 
 #
 #  Default: Don't store intercepted cookies
 #
-jarfile jarfile
+#jarfile     jarfile
 
 #
-#  If you specify a trustfile, Privoxy will only allow access
+#  If you specify a trustfile, Junkbuster will only allow access
 #  to sites that are named in the trustfile. You can also mark
 #  sites as trusted referrers, with the effect that access to
 #  untrusted sites will be granted, if a link from a trusted
@@ -153,22 +155,25 @@ jarfile jarfile
 trust-info-url http://www.your-site.com/why_we_block.html
 trust-info-url http://www.your-site.com/what_we_allow.html
 
+
+#
 #  4. OPTIONS
 #
 #  This part of the configuration file contains options that control
-#  how Privoxy operates.
+#  how Junkbuster operates.
 #
 
+#
 #  Admin-address should be set to the email address of the proxy
 #  administrator. It is used in many of the proxy-generated pages.
 #
-#  Default: Do not display an e-mail address
+#  Default: fill@me.in.please
 #
-admin-address fill@me.in.please
+#admin-address fill@me.in.please
 
 #
 #  Proxy-info-url can be set to a URL that contains more info about
-#  this Privoxy installation, it's configuration and policies.
+#  this junkbuster installation, it's configuration and policies.
 #  It is used in many of the proxy-generated pages and its use is
 #  highly recommended, since your users will want to know why certain
 #  content is blocked or modified.
@@ -178,41 +183,41 @@ admin-address fill@me.in.please
 proxy-info-url http://www.your-site.com/proxy.html
 
 #
-#  Listen-address specifies the address and port where Privoxy will
+#  Listen-address specifies the address and port where Junkbuster will
 #  listen for connections from your Web browser.  The default is to
-#  listen on the local host on port 8118, and this is suitable for
+#  listen on the local host on port 8000, and this is suitable for
 #  most users.  (In your web browser, under proxy configuration, list
-#  the proxy server as 'localhost' and the port as '8118').
+#  the proxy server as 'localhost' and the port as '8000').
 # 
-#  If you already have another service running on port 8118, or if you
+#  If you already have another service running on port 8000, or if you
 #  want to serve requests from other machines (e.g. on your local
 #  network) as well, you will need to override the default. The syntax
 #  is "listen-address [<ip-address>]:<port>" If you leave out the ip
-#  adress, Privoxy will bind to all interfaces (addresses) on your
+#  adress, junkbuster will bind to all interfaces (addresses) on your
 #  machine and may become reachable from the internet. In that case,
 #  consider using access control lists (acl's) (see "aclfile" above).
 #
-#  For example, suppose you are running Privoxy on a machine which
+#  For example, suppose you are running Junkbuster on a machine which
 #  has the address 192.168.0.1 on your local private network
 #  (192.168.0.0) and has another outside connection with a different
 #  address. You want it to serve requests from inside only:
 #
-#     listen-address 192.168.0.1:8118
+#     listen-address 192.168.0.1:8000
 #
 #  If you want it to listen on all addresses (including the outside
 #  connection):
 #
-#     listen-address :8118
+#     listen-address :8000
 #
 #  If you do this, consider using acls (see "aclfile" above).
 #
 #  Note: you will need to point your browser(s) to the address
 #  and port that you have configured here.
 #
-#  Default:  listen-address    localhost:8118 
-#            listen-address    127.0.0.1:8118
+#  Default:  listen-address    localhost:8000 
+#            listen-address    127.0.0.1:8000
 #
-listen-address 127.0.0.1:8118
+
 
 #
 #  The debug option sets the level of debugging information to log in
@@ -228,10 +233,8 @@ listen-address 127.0.0.1:8118
 #   debug        16 # LOG  = log all data into the logfile
 #   debug        32 # FRC  = debug force feature
 #   debug        64 # REF  = debug regular expression filter 
-#   debug       128 #      = debug fast redirects
-#   debug       256 #      = debug GIF deanimation
-#   debug       512 # CLF  = Common Log Format
-#   debug     1024 #        = debug kill popups
+#   debug       128 # RED  = debug fast redirects
+#   debug       256 # CLF  = Common Log Format
 #   debug      4096 # INFO = Startup banner and warnings.
 #   debug      8192 # ERROR = Non-fatal errors
 #
@@ -239,9 +242,9 @@ listen-address 127.0.0.1:8118
 #  reporting.  (debug 8192).
 #
 #  The reporting of FATAL errors (i.e. ones which crash 
-#  Privoxy) is always on and cannot be disabled.
+#  JunkBuster) is always on and cannot be disabled.
 #
-#  If you want to use CLF, you should set "debug 512" ONLY,
+#  If you want to use CLF, you should set "debug 256" ONLY,
 #  do not enable anything else.
 #
 #  Multiple "debug" directives, are OK - they're logical-OR'd
@@ -256,86 +259,36 @@ debug   4096 # Info
 debug   8192 # Errors - *we highly recommended enabling this*
 
 #
-#  Privoxy normally uses "multi-threading", a software technique
+#  Junkbuster normally uses "multi-threading", a software technique
 #  that permits it to handle many different requests simultaneously.
 #  In some cases you may wish to disable this -- particularly if
 #  you're trying to debug a problem.  The 'single-threaded' option
-#  forces Privoxy to handle requests sequentially.
+#  forces Junkbuster to handle requests sequentially.
 #
 #  Default: Multithreaded mode
 #
 #single-threaded
 
 #
-#    'toggle' allows you to temporarily disable all Privoxy's 
+#    'toggle' allows you to temporarily disable all Junkbuster's 
 #    filtering.  Just set "toggle 0".
 #    
-#    This can now be toggled remotely, through the web-based config
-#    interface.  There is no reason to edit this file any more.
-#
-#    The Windows version of Privoxy puts an icon in the system
+#    The Windows version of Junkbuster puts an icon in the system
 #    tray, which allows you to change this option without having
 #    to edit this file.  If you right-click on that icon (or select
 #    the 'Options' menu), one choice is "Enable".  Clicking on enable
-#    toggles Privoxy on and off.  This is useful if you want to
-#    temporarily disable Privoxy, e.g., to access a site that
+#    toggles Junkbuster on and off.  This is useful if you want to
+#    temporarily disable Junkbuster, e.g., to access a site that
 #    requires cookies which you normally have blocked.
 #
-#    'toggle 1' means Privoxy runs normally, 'toggle 0' means
-#    that Privoxy becomes a non-anonymizing non-blocking
+#    'toggle 1' means Junkbuster runs normally, 'toggle 0' means
+#    that Junkbuster becomes a non-anonymizing non-blocking
 #    proxy.
 #
 #  Default: 1
 #
 toggle 1
 
-#
-#  For content filtering, i.e. the +filter and +deanimate-gif
-#  actions, it is neccessary that Privoxy buffers up the
-#  whole document body. This can be potentially dangerous, since
-#  a server could just keep sending data indefinitely and wait
-#  for your RAM to exhaust.
-#  The buffer-limit option lets you set the size in Kbytes that
-#  each buffer may use at maximum. When the documents buffer
-#  exceeds that size, it is flushed to the client unfiltered and 
-#  no further attempt to filter the rest of it is taken.
-#  Remember that there may multiple threads running, which might
-#  require up to buffer-limit Kbytes *each*, unless you have set
-#  single-threaded below.
-#
-#  Default: 4069, i.e. 4 MB
-#
-buffer-limit 4069
-
-
-#
-#  Enable the web-based actionsfile editor.  Set to 1 to enable,
-#  0 to disable.  Note that you must have compiled Privoxy
-#  with support for this feature, otherwise this option has no
-#  effect.
-#
-#  Security note:  If this is enabled, anyone who can use the proxy
-#  can edit the actions file, and their changes will affect all users.
-#  For shared proxies, you probably want to disable this.
-#
-#  Default: Disabled
-#
-enable-edit-actions 1
-
-
-#
-#  Allow Privoxy to be toggled on and off remotely, using your
-#  web browser.  Set to 1 to enable, 0 to disable.  Note that you
-#  must have compiled Privoxy with support for this feature,
-#  otherwise this option has no effect.
-#
-#  Security note:  If this is enabled, anyone who can use the proxy
-#  can toggle it on or off, and their changes will affect all users.
-#  For shared proxies, you probably want to disable this.
-#
-#  Default: Disabled
-#
-enable-remote-toggle 1
 
 #############################################################################
 # Access Control List
@@ -377,11 +330,11 @@ enable-remote-toggle 1
 #
 # IMPORTANT NOTE
 # ==============
-# If Privoxy is using a forwarder or a gateway for a particular 
+# If the junkbuster is using a forwarder or a gateway for a particular 
 # destination URL, the DST_ADDRR that is examined is the address of
 # the forwarder or the gateway and NOT the address of the ultimate target.
 # This is necessary because it may be impossible for the local
-# Privoxy to determine the address of the ultimate target
+# junkbuster to determine the address of the ultimate target
 # (that's often what gateways are used for).
 #
 # Here are a few examples to show how the ACL works:
@@ -391,14 +344,13 @@ enable-remote-toggle 1
 #
 # a silly example to illustrate:
 #
-# permit any host on the class-C subnet with our web server to go
-# anywhere
+# permit any host on the class-C subnet with junkbusters to go anywhere
 #
-# permit-access www.example.com/24
+# permit-access www.junkbusters.com/24
 #
 # except deny one particular IP address from using it at all
 #
-# deny-access      hacker.example.com
+# deny-access      ident.junkbusters.com
 #
 # another example
 #
@@ -417,7 +369,7 @@ enable-remote-toggle 1
 #
 # to allow all .org domains; every IP-address listed must resolve fully.
 #
-# An ISP may want to provide a Privoxy that is accessible by "the world"
+# An ISP may want to provide a junkbuster that is accessible by "the world"
 # and yet restrict use of some of their private content to hosts on its
 # internal network (i.e. its own subscribers).  Say, for instance the
 # ISP owns the Class-B IP address block 123.124.0.0 (a 16 bit netmask).
@@ -475,13 +427,13 @@ enable-remote-toggle 1
 #
 # In the following common configuration, everything goes to Lucent's LPWA,
 # except SSL on port 443 (which it doesn't handle)
-#    forward .*    lpwa.com:8118
+#    forward .*    lpwa.com:8000
 #    forward :443 .
 #
 # See the FAQ for instructions on how to automate the login procedure for LPWA.
 # Some users have reported difficulties related to LPWA's use of . as the
 # last element of the domain, and have said that this can be fixed with this:
-#    forward lpwa.  lpwa.com:8118
+#    forward lpwa.  lpwa.com:8000
 # (NOTE: the syntax for specifiying target_domain has changed since the
 # previous paragraph weas written - it will not work now.  More information
 # is welcome.)
@@ -489,7 +441,7 @@ enable-remote-toggle 1
 # In this fictitious example, everything goes via an ISP's caching proxy,
 # except requests to that ISP:
 #
-# forward .* caching.myisp.net:8118
+# forward .* caching.myisp.net:8000
 # forward myisp.net .
 #
 # For the @home network, we're told the forwarding configuration is this:
@@ -502,12 +454,12 @@ enable-remote-toggle 1
 # but everything else goes through Lucent's LPWA by way of the company's
 # SOCKS gateway to the Internet.
 #
-# forward-socks4 .* lpwa.com:8118 firewall.my_company.com:1080
+# forward_socks4 .* lpwa.com:8000 firewall.my_company.com:1080
 # forward my_company.com .
 #
 # This is how you could set up a site that always uses SOCKS but no forwarders
 #
-# forward-socks4a .* . firewall.my_company.com:1080
+# forward_socks4a .* . firewall.my_company.com:1080
 #
 # An advanced example for network administrators:
 #
@@ -521,13 +473,13 @@ enable-remote-toggle 1
 # host-a has a PPP connection to isp-a.com
 # host-b has a PPP connection to isp-b.com
 #
-# host-a can run Privoxy with forwarding like this:
+# host-a can run an Internet Junkbuster proxy with forwarding like this:
 #   forward .* .
-#   forward isp-b.com host-b:8118
+#   forward isp-b.com host-b:8000
 #
-# host-b can run Privoxy with forwarding like this:
+# host-b can run an Internet Junkbuster proxy with forwarding like this:
 #   forward .* .
-#   forward isp-a.com host-a:8118
+#   forward isp-a.com host-a:8000
 #
 # Now, *anyone* on the Internet (including users on host-a and host-b)
 # can set their browser's proxy to *either* host-a or host-b and
@@ -546,45 +498,25 @@ enable-remote-toggle 1
 #   forward localhost.localdomain . # Loopback address
 #   forward www.ukc.mirror.ac.uk  . # Specific host
 #
-#
-# Note: If you intend to chain Privoxy and squid locally, the chain
-#       broswer -> squid -> Privoxy is the recommended way.
-#
-#       Your squid configuration could then look like this:
-#
-#       # Define Privoxy as parent cache 
-#       cache_peer 127.0.0.1 8118 parent 0 no-query 
-#
-#       # Define ACL for protocol FTP 
-#       acl FTP proto FTP 
-#
-#       # Do not forward ACL FTP to Privoxy 
-#       always_direct allow FTP 
-#
-#       # Do not forward ACL CONNECT (https) to Privoxy 
-#       always_direct allow CONNECT 
-#
-#       # Forward the rest to Privoxy 
-#       never_direct allow all 
-#
+
 
 #############################################################################
 #  5. WINDOWS GUI OPTIONS
 #############################################################################
 #
-#  Privoxy has a number of options specific to the Windows GUI
+#  Junkbuster has a number of options specific to the Windows GUI
 #  interface:
 #
 #    activity-animation      {1 or 0}
 #
-#    If set to 1, the Privoxy icon will animate when Privoxy is
+#    If set to 1, the Junkbuster icon will animate when Junkbuster is
 #    active.
 #
 #Win32-only: activity-animation      1
 
 #    log-messages            {1 or 0}
 #
-#    If set to 1, Privoxy will log messages to the console window.
+#    If set to 1, Junkbuster will log messages to the console window.
 #
 #Win32-only: log-messages            1
 
@@ -607,7 +539,7 @@ enable-remote-toggle 1
 
 #    log-highlight-messages  {1 or 0}
 #
-#    If set to 1, Privoxy will highlight portions of the log
+#    If set to 1, Junkbuster will highlight portions of the log
 #    messages with a bold-faced font.
 #
 #Win32-only: log-highlight-messages  1
@@ -626,7 +558,7 @@ enable-remote-toggle 1
 
 #    show-on-task-bar        {1 or 0}
 #
-#    Controls whether or not Privoxy will appear as a button on the Task
+#    Controls whether or not Junkbuster will appear as a button on the Task
 #    bar when minimized.
 #
 #Win32-only: show-on-task-bar        0
@@ -634,7 +566,7 @@ enable-remote-toggle 1
 
 #    close-button-minimizes  1
 #
-#    If set, the Windows close button will minimize Privoxy instead
+#    If set, the Windows close button will minimize Junkbuster instead
 #    of closing the program (close with the exit option on the File
 #    menu).
 #
@@ -642,15 +574,15 @@ enable-remote-toggle 1
 
 
 #
-#  This option is specific to the Win32 console version of Privoxy:
+#  This option is specific to the Win32 console version of JunkBuster:
 #
 #    hide-console
 #
-#    If this option is used, Privoxy will disconnect from and hide 
+#    If this option is used, Junkbuster will disconnect from and hide 
 #    the command console.
 #
 #Win32-only: #hide-console
 
 
-# Note: Privoxy is distributed under the GNU General Public License (GPL)
+# Note: Junkbuster is distributed under the GNU General Public License (GPL)
 #       For details, see http://www.gnu.org/copyleft/gpl.html

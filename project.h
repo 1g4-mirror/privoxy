@@ -1,6 +1,6 @@
-#ifndef PROJECT_H_INCLUDED
-#define PROJECT_H_INCLUDED
-#define PROJECT_H_VERSION "$Id: project.h,v 1.61 2002/03/26 22:29:55 swa Exp $"
+#ifndef _PROJECT_H
+#define _PROJECT_H
+#define PROJECT_H_VERSION "$Id: project.h,v 1.19 2001/06/29 13:33:36 oes Exp $"
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/project.h,v $
@@ -10,13 +10,13 @@
  *                (though it does declare some macros).
  *
  * Copyright   :  Written by and Copyright (C) 2001 the SourceForge
- *                Privoxy team. http://www.privoxy.org/
+ *                IJBSWA team.  http://ijbswa.sourceforge.net
  *
  *                Based on the Internet Junkbuster originally written
- *                by and Copyright (C) 1997 Anonymous Coders and
+ *                by and Copyright (C) 1997 Anonymous Coders and 
  *                Junkbusters Corporation.  http://www.junkbusters.com
  *
- *                This program is free software; you can redistribute it
+ *                This program is free software; you can redistribute it 
  *                and/or modify it under the terms of the GNU General
  *                Public License as published by the Free Software
  *                Foundation; either version 2 of the License, or (at
@@ -36,206 +36,6 @@
  *
  * Revisions   :
  *    $Log: project.h,v $
- *    Revision 1.61  2002/03/26 22:29:55  swa
- *    we have a new homepage!
- *
- *    Revision 1.60  2002/03/24 15:52:17  jongfoster
- *    Changing CGI URL prefixes for new name
- *
- *    Revision 1.59  2002/03/24 15:23:33  jongfoster
- *    Name changes
- *
- *    Revision 1.58  2002/03/24 13:25:43  swa
- *    name change related issues
- *
- *    Revision 1.57  2002/03/16 20:28:34  oes
- *    Added descriptions to the filters so users will know what they select in the cgi editor
- *
- *    Revision 1.56  2002/03/13 20:27:30  oes
- *    Fixing bug with CT_TABOO
- *
- *    Revision 1.55  2002/03/12 01:42:50  oes
- *    Introduced modular filters
- *
- *    Revision 1.54  2002/03/09 20:03:52  jongfoster
- *    - Making various functions return int rather than size_t.
- *      (Undoing a recent change).  Since size_t is unsigned on
- *      Windows, functions like read_socket that return -1 on
- *      error cannot return a size_t.
- *
- *      THIS WAS A MAJOR BUG - it caused frequent, unpredictable
- *      crashes, and also frequently caused JB to jump to 100%
- *      CPU and stay there.  (Because it thought it had just
- *      read ((unsigned)-1) == 4Gb of data...)
- *
- *    - The signature of write_socket has changed, it now simply
- *      returns success=0/failure=nonzero.
- *
- *    - Trying to get rid of a few warnings --with-debug on
- *      Windows, I've introduced a new type "jb_socket".  This is
- *      used for the socket file descriptors.  On Windows, this
- *      is SOCKET (a typedef for unsigned).  Everywhere else, it's
- *      an int.  The error value can't be -1 any more, so it's
- *      now JB_INVALID_SOCKET (which is -1 on UNIX, and in
- *      Windows it maps to the #define INVALID_SOCKET.)
- *
- *    - The signature of bind_port has changed.
- *
- *    Revision 1.53  2002/03/08 16:48:55  oes
- *    Added FEATURE_NO_GIFS and BUILTIN_IMAGE_MIMETYPE
- *
- *    Revision 1.52  2002/03/07 03:46:17  oes
- *    Fixed compiler warnings
- *
- *    Revision 1.51  2002/03/05 04:52:42  oes
- *    Deleted non-errlog debugging code
- *
- *    Revision 1.50  2002/03/04 19:32:07  oes
- *    Changed default port to 8118
- *
- *    Revision 1.49  2002/03/04 18:28:55  oes
- *    Deleted PID_FILE_NAME
- *
- *    Revision 1.48  2002/03/03 14:50:40  oes
- *    Fixed CLF logging: Added ocmd member for client's request to struct http_request
- *
- *    Revision 1.47  2002/02/20 23:15:13  jongfoster
- *    Parsing functions now handle out-of-memory gracefully by returning
- *    an error code.
- *
- *    Revision 1.46  2002/01/17 21:06:09  jongfoster
- *    Now #defining the URLs of the config interface
- *
- *    Minor changes to struct http_request and struct url_spec due to
- *    standardizing that struct http_request is used to represent a URL, and
- *    struct url_spec is used to represent a URL pattern.  (Before, URLs were
- *    represented as seperate variables and a partially-filled-in url_spec).
- *
- *    Revision 1.45  2002/01/09 14:33:27  oes
- *    Added HOSTENT_BUFFER_SIZE
- *
- *    Revision 1.44  2001/12/30 14:07:32  steudten
- *    - Add signal handling (unix)
- *    - Add SIGHUP handler (unix)
- *    - Add creation of pidfile (unix)
- *    - Add action 'top' in rc file (RH)
- *    - Add entry 'SIGNALS' to manpage
- *    - Add exit message to logfile (unix)
- *
- *    Revision 1.43  2001/11/22 21:57:51  jongfoster
- *    Making action_spec->flags into an unsigned long rather than just an
- *    unsigned int.
- *    Adding ACTION_NO_COOKIE_KEEP
- *
- *    Revision 1.42  2001/11/05 21:42:41  steudten
- *    Include DBG() macro.
- *
- *    Revision 1.41  2001/10/28 19:12:06  jongfoster
- *    Adding ijb_toupper()
- *
- *    Revision 1.40  2001/10/26 17:40:47  oes
- *    Moved ijb_isspace and ijb_tolower to project.h
- *    Removed http->user_agent, csp->referrer and csp->accept_types
- *
- *    Revision 1.39  2001/10/25 03:45:02  david__schmidt
- *    Adding a (void*) cast to freez() because Visual Age C++ won't expand the
- *    macro when called with a cast; so moving the cast to the macro def'n
- *    seems to both eliminate compiler warnings (on darwin and OS/2, anyway) and
- *    doesn't make macro expansion complain.  Hope this works for everyone else
- *    too...
- *
- *    Revision 1.38  2001/10/23 21:19:04  jongfoster
- *    New error-handling support: jb_err type and JB_ERR_xxx constants
- *    CGI functions now return a jb_err, and their parameters map is const.
- *    Support for RUNTIME_FEATUREs to enable/disable config editor
- *    Adding a few comments
- *
- *    Revision 1.37  2001/10/14 22:14:01  jongfoster
- *    Removing name_length field from struct cgi_dispatcher, as this is
- *    now calculated at runtime from the "name" field.
- *
- *    Revision 1.36  2001/10/10 16:45:15  oes
- *    Added LIMIT_CONNECT action and string
- *    Fixed HTTP message line termination
- *    Added CFORBIDDEN HTTP message
- *
- *    Revision 1.35  2001/10/07 18:06:43  oes
- *    Added status member to struct http_request
- *
- *    Revision 1.34  2001/10/07 15:45:25  oes
- *    Added url member to struct http_request and commented all
- *      members
- *
- *    Added CT_TABOO
- *
- *    Added ACTION_DOWNGRADE and ACTION_NO_COMPRESSION
- *
- *    Replaced struct client_state members rejected,
- *      force, active and toggled_on with "flags" bitmap.
- *
- *    Added CSP_FLAG_MODIFIED and CSP_FLAG_CHUNKED
- *
- *    Added buffer_limit to struct configuration_spec
- *
- *    Revision 1.33  2001/09/20 13:30:08  steudten
- *
- *    Make freez() more secure in case of: if (exp) { free(z) ; a=*z }
- *    Last case will set z to NULL in free(z) and thats bad..
- *
- *    Revision 1.32  2001/09/16 23:02:51  jongfoster
- *    Fixing warning
- *
- *    Revision 1.31  2001/09/16 13:20:29  jongfoster
- *    Rewrite of list library.  Now has seperate header and list_entry
- *    structures.  Also added a large sprinking of assert()s to the list
- *    code.
- *
- *    Revision 1.30  2001/09/13 23:52:00  jongfoster
- *    Support for both static and dynamically generated CGI pages
- *
- *    Revision 1.29  2001/09/13 23:29:43  jongfoster
- *    Defining FORWARD_SPEC_INITIALIZER
- *
- *    Revision 1.28  2001/09/13 23:05:50  jongfoster
- *    Changing the string paramater to the header parsers a "const".
- *
- *    Revision 1.27  2001/08/05 16:06:20  jongfoster
- *    Modifiying "struct map" so that there are now separate header and
- *    "map_entry" structures.  This means that functions which modify a
- *    map no longer need to return a pointer to the modified map.
- *    Also, it no longer reverses the order of the entries (which may be
- *    important with some advanced template substitutions).
- *
- *    Revision 1.26  2001/07/30 22:08:36  jongfoster
- *    Tidying up #defines:
- *    - All feature #defines are now of the form FEATURE_xxx
- *    - Permanently turned off WIN_GUI_EDIT
- *    - Permanently turned on WEBDAV and SPLIT_PROXY_ARGS
- *
- *    Revision 1.25  2001/07/29 18:43:08  jongfoster
- *    Changing #ifdef _FILENAME_H to FILENAME_H_INCLUDED, to conform to
- *    ANSI C rules.
- *
- *    Revision 1.24  2001/07/25 17:20:27  oes
- *    Introduced http->user_agent
- *
- *    Revision 1.23  2001/07/18 12:32:23  oes
- *    - Added ACTION_STRING_DEANIMATE
- *    - moved #define freez from jcc.h to project.h
- *
- *    Revision 1.22  2001/07/15 17:51:41  jongfoster
- *    Renaming #define STATIC to STATIC_PCRE
- *
- *    Revision 1.21  2001/07/13 14:03:19  oes
- *     - Reorganized regex header inclusion and #defines to
- *       comply to the scheme in configure.in
- *     - Added csp->content_type and its CT_* keys
- *     - Added ACTION_DEANIMATE
- *     - Removed all #ifdef PCRS
- *
- *    Revision 1.20  2001/06/29 21:45:41  oes
- *    Indentation, CRLF->LF, Tab-> Space
- *
  *    Revision 1.19  2001/06/29 13:33:36  oes
  *    - Improved comments
  *    - Introduced http_request.host_ip_addr_str
@@ -413,199 +213,96 @@
 
 /*
  * Include appropriate regular expression libraries.
- * Note that pcrs and pcre (native) are needed for cgi
- * and are included anyway.
+ *
+ * PCRS           ==> Include pcre
+ * REGEX && PCRE  ==> Include pcre and pcreposix
+ * REGEX && !PCRE ==> Include gnu_regex
+ *
+ * STATIC  ==> Use  #include "pcre.h"  (compiling at same time)
+ * !STATIC ==> Use  #include <pcre.h>  (System library)
+ *
  */
+#if (defined(REGEX) && defined(PCRE)) || defined(PCRS)
+#  ifdef STATIC
+#    include "pcre.h"
+#  else
+#    include <pcre.h>
+#  endif
+#endif /* (defined(REGEX) && defined(PCRE)) || defined(PCRS) */
 
-#if defined(REGEX_PCRE) || defined (REGEX_GNU)
-# define REGEX
-#endif /* defined(REGEX_PCRE) || defined (REGEX_GNU) */
-
-#ifdef STATIC_PCRE
-#  include "pcre.h"
-#else
-#  include <pcre.h>
-#endif
-
-#ifdef STATIC_PCRS
-#  include "pcrs.h"
-#else
-#  include <pcrs.h>
-#endif
-
-#if defined(REGEX_PCRE)
-#  ifdef STATIC_PCRE
+#if defined(REGEX) && defined(PCRE)
+#  ifdef STATIC
 #    include "pcreposix.h"
 #  else
 #    include <pcreposix.h>
 #  endif
-#endif /* defined(REGEX_PCRE) */
+#endif /* defined(REGEX) && defined(PCRE) */
 
-#if defined(REGEX_GNU)
+#if defined(REGEX) && !defined(PCRE)
 #  include "gnu_regex.h"
 #endif
 
-#ifdef AMIGA
-#include "amiga.h"
+#ifdef PCRS
+#include "pcrs.h"
+#endif /* def PCRS */
+
+#ifdef AMIGA 
+#include "amiga.h" 
 #endif /* def AMIGA */
-
-#ifdef _WIN32
-/*
- * I don't want to have to #include all this just for the declaration
- * of SOCKET.  However, it looks like we have to...
- */
-#include <windows.h>
-#endif
-
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/*
- * The type used by sockets.  On UNIX it's an int.  Microsoft decided to
- * make it an unsigned.
- */
-#ifdef _WIN32
-typedef SOCKET jb_socket;
-#define JB_INVALID_SOCKET INVALID_SOCKET
-#else /* ndef _WIN32 */
-typedef int jb_socket;
-#define JB_INVALID_SOCKET (-1)
-#endif /* ndef _WIN32 */
-
-
-/*
- * Error codes.  Functions returning these should return a jb_err
- */
-#define JB_ERR_OK         0 /* Success, no error                        */
-#define JB_ERR_MEMORY     1 /* Out of memory                            */
-#define JB_ERR_CGI_PARAMS 2 /* Missing or corrupt CGI parameters        */
-#define JB_ERR_FILE       3 /* Error opening, reading or writing a file */
-#define JB_ERR_PARSE      4 /* Error parsing file                       */
-#define JB_ERR_MODIFIED   5 /* File has been modified outside of the    */
-                            /* CGI actions editor.                      */
-typedef int jb_err;
-
-
-/*
- * This macro is used to free a pointer that may be NULL
- */
-#define freez(X)  { if(X) { free((void*)X); X = NULL ; } }
-
-
-/* Fix a problem with Solaris.  There should be no effect on other
- * platforms.
- * Solaris's isspace() is a macro which uses it's argument directly
- * as an array index.  Therefore we need to make sure that high-bit
- * characters generate +ve values, and ideally we also want to make
- * the argument match the declared parameter type of "int".
- *
- * Note: Remember to #include <ctype.h> if you use these macros.
- */
-#define ijb_toupper(__X) toupper((int)(unsigned char)(__X))
-#define ijb_tolower(__X) tolower((int)(unsigned char)(__X))
-#define ijb_isspace(__X) isspace((int)(unsigned char)(__X))  
-
-/*
- * Use for statically allocated buffers if you have no other choice.
- * Remember to check the length of what you write into the buffer
- * - we don't want any buffer overflows!
- */
 #define BUFFER_SIZE 5000
 
-/*
- * Buffer size for capturing struct hostent data in the
- * gethostby(name|addr)_r library calls. Since we don't
- * loop over gethostbyname_r, the buffer must be sufficient
- * to accomodate multiple IN A RRs, as used in DNS round robin
- * load balancing. W3C's wwwlib uses 1K, so that should be
- * good enough for us, too.
- */
-#define HOSTENT_BUFFER_SIZE 1024
-
-/*
- * So you can say "while (FOREVER) { ...do something... }"
- */
 #define FOREVER 1
 
 /* Default IP and port to listen on */
 #define HADDR_DEFAULT   "127.0.0.1"
-#define HADDR_PORT      8118
+#define HADDR_PORT      8000
 
-/* Forward defs for various structures */
 
 /* Need this for struct client_state */
 struct configuration_spec;
 
-
 /* Generic linked list of strings */
-
-struct list_entry
+struct list /* FIXME: Why not separate entries and header? */
 {
-   const char *str;
-   struct list_entry *next;
-};
-
-struct list
-{
-   struct list_entry *first;
-   struct list_entry *last;
-};
-
-
-/* A map from a string to another string */
-
-struct map_entry
-{
-   const char *name;
-   const char *value;
-   struct map_entry *next;
+   char *       str;  /* valid in an entry */
+   struct list *last; /* valid in header */
+   struct list *next;
 };
 
 struct map
 {
-   struct map_entry *first;
-   struct map_entry *last;
+  char *name;
+  char *value;
+  struct map *next;
 };
-
 
 struct http_request
 {
-   char *cmd;      /* Whole command line: method, URL, Version */
-   char *ocmd;     /* Backup of original cmd for CLF logging */
-   char *gpc;      /* HTTP method: GET, POST, .. */
-   char *url;      /* The URL */
-   char *ver;      /* Protocol version */
-   int status;     /* HTTP Status */
-
-   char *host;     /* Host part of URL */
-   int   port;     /* Port of URL or 80 (default) */
-   char *path;     /* Path of URL */
-   char *hostport; /* host[:port] */
-   int   ssl;      /* Flag if protocol is https */
-
-   char *host_ip_addr_str; /* String with dotted decimal representation
-                            * of host's IP. NULL before connect_to() */
-
-   char  *dbuffer;     /* Buffer with '\0'-delimited domain name.           */
-   char **dvec;        /* List of pointers to the strings in dbuffer.       */
-   int    dcount;      /* How many parts to this domain? (length of dvec)   */
+   char *cmd;
+   char *gpc;
+   char *host;
+   char *host_ip_addr_str; /* NULL before connect_to() */
+   int   port;
+   char *path;
+   char *ver;
+   char *hostport; /* "host[:port]" */
+   int   ssl;
 };
 
-/* 
- * Response generated by CGI, blocker, or error handler
- */
+/* Response generated by CGI, blocker, or error handler */
 struct http_response
 {
-  char  *status;          /* HTTP status (string) */
+  char *status;           /* HTTP status (string)*/
   struct list headers[1]; /* List of header lines */
-  char  *head;            /* Formatted http response head */
-  size_t head_length;     /* Length of http response head */
-  char  *body;            /* HTTP document body */
-  size_t content_length;  /* Length of body, REQUIRED if binary body */
-  int    is_static;       /* Nonzero if the content will never change and
-                           * should be cached by the brwoser (e.g. images) */
+  char *head;             /* Formatted http response head */
+  int   head_length;      /* Length of http response head */
+  char *body;             /* HTTP document body */
+  int   content_length;   /* Length of body, REQUIRED if binary body*/
 };
 
 /* A URL pattern */
@@ -614,11 +311,13 @@ struct url_spec
    char  *spec;        /* The string which was parsed to produce this       */
                        /* url_spec.  Used for debugging or display only.    */
 
-   /* Hostname matching, or dbuffer == NULL to match all hosts */
-   char  *dbuffer;     /* Buffer with '\0'-delimited domain name.           */
-   char **dvec;        /* List of pointers to the strings in dbuffer.       */
-   int    dcount;      /* How many parts to this domain? (length of dvec)   */
-   int    unanchored;  /* Bitmap - flags are ANCHOR_LEFT and ANCHOR_RIGHT.  */
+   /* Hostname matching: */
+   char  *domain;      /* Fully qalified domain name (FQDN) pattern.        */
+                       /* May contain "*".                                  */
+   char  *dbuf;        /* Buffer with '\0'-delimited fqdn                   */
+   char **dvec;        /* Domain ptr vector into dbuf                       */
+   int    dcnt;        /* How many domains in fqdn?                         */
+   int    unanchored;  /* Bitmap - flags are ANCHOR_LEFT and ANCHOR_RIGHT   */
 
    /* Port matching: */
    int   port;         /* The port number, or 0 to match all ports.         */
@@ -631,15 +330,10 @@ struct url_spec
    regex_t *preg;      /* Regex for matching path part                      */
 #endif
 };
-#ifdef REGEX
-#define URL_SPEC_INITIALIZER { NULL, NULL, NULL, 0, 0, 0, NULL, 0, NULL }
-#else /* ifndef REGEX */
-#define URL_SPEC_INITIALIZER { NULL, NULL, NULL, 0, 0, 0, NULL, 0 }
-#endif /* ndef REGEX */
 
-/* Constants for host part matching in URLs */
 #define ANCHOR_LEFT  1
 #define ANCHOR_RIGHT 2
+
 
 
 /* An I/O buffer */
@@ -654,46 +348,35 @@ struct iob
 #define IOB_PEEK(CSP) ((CSP->iob->cur > CSP->iob->eod) ? (CSP->iob->eod - CSP->iob->cur) : 0)
 #define IOB_RESET(CSP) if(CSP->iob->buf) free(CSP->iob->buf); memset(CSP->iob, '\0', sizeof(CSP->iob));
 
-/* Bits for csp->content_type */
-#define CT_TEXT   1 /* Suitable for pcrs filtering */
-#define CT_GIF    2 /* Suitable for GIF filtering */
-#define CT_TABOO  4 /* DONT filter */
+
 
 #define ACTION_MASK_ALL        (~0U)
 
-#define ACTION_MOST_COMPATIBLE 0x00000000UL
+#define ACTION_MOST_COMPATIBLE 0x0000U
 
-#define ACTION_BLOCK           0x00000001UL
-#define ACTION_DEANIMATE       0x00000002UL
-#define ACTION_DOWNGRADE       0x00000004UL
-#define ACTION_FAST_REDIRECTS  0x00000008UL
-#define ACTION_HIDE_FORWARDED  0x00000010UL
-#define ACTION_HIDE_FROM       0x00000020UL
-#define ACTION_HIDE_REFERER    0x00000040UL /* sic - follow HTTP, not English */
-#define ACTION_HIDE_USER_AGENT 0x00000080UL
-#define ACTION_IMAGE           0x00000100UL
-#define ACTION_IMAGE_BLOCKER   0x00000200UL
-#define ACTION_NO_COMPRESSION  0x00000400UL
-#define ACTION_NO_COOKIE_KEEP  0x00000800UL
-#define ACTION_NO_COOKIE_READ  0x00001000UL
-#define ACTION_NO_COOKIE_SET   0x00002000UL
-#define ACTION_NO_POPUPS       0x00004000UL
-#define ACTION_VANILLA_WAFER   0x00008000UL
-#define ACTION_LIMIT_CONNECT   0x00010000UL
+#define ACTION_BLOCK           0x0001U
+#define ACTION_FAST_REDIRECTS  0x0002U
+#define ACTION_FILTER          0x0004U
+#define ACTION_HIDE_FORWARDED  0x0008U
+#define ACTION_HIDE_FROM       0x0010U
+#define ACTION_HIDE_REFERER    0x0020U /* sic - follow HTTP, not English */
+#define ACTION_HIDE_USER_AGENT 0x0040U
+#define ACTION_IMAGE           0x0080U
+#define ACTION_IMAGE_BLOCKER   0x0100U
+#define ACTION_NO_COOKIE_READ  0x0200U
+#define ACTION_NO_COOKIE_SET   0x0400U
+#define ACTION_NO_POPUPS       0x0800U
+#define ACTION_VANILLA_WAFER   0x1000U
 
-#define ACTION_STRING_DEANIMATE     0
-#define ACTION_STRING_FROM          1
-#define ACTION_STRING_IMAGE_BLOCKER 2
-#define ACTION_STRING_REFERER       3
-#define ACTION_STRING_USER_AGENT    4
-#define ACTION_STRING_LIMIT_CONNECT 5
-#define ACTION_STRING_COUNT         6
+#define ACTION_STRING_FROM          0
+#define ACTION_STRING_IMAGE_BLOCKER 1
+#define ACTION_STRING_REFERER       2
+#define ACTION_STRING_USER_AGENT    3
+#define ACTION_STRING_COUNT         4
 
 #define ACTION_MULTI_ADD_HEADER     0
 #define ACTION_MULTI_WAFER          1
-#define ACTION_MULTI_FILTER         2
-#define ACTION_MULTI_COUNT          3
-
+#define ACTION_MULTI_COUNT          2
 
 /*
  * This structure contains a list of actions to apply to a URL.
@@ -703,7 +386,7 @@ struct iob
  */
 struct current_action_spec
 {
-   unsigned long flags;    /* a bit set to "1" = add action    */
+   unsigned flags;    /* a bit set to "1" = add action    */
 
    /* For those actions that require parameters: */
 
@@ -722,8 +405,8 @@ struct current_action_spec
  */
 struct action_spec
 {
-   unsigned long mask;   /* a bit set to "0" = remove action */
-   unsigned long add;    /* a bit set to "1" = add action    */
+   unsigned mask;   /* a bit set to "0" = remove action */
+   unsigned add;    /* a bit set to "1" = add action    */
 
    /* For those actions that require parameters: */
 
@@ -756,23 +439,29 @@ struct url_actions
 };
 
 
-/*
- * Flags for use in csp->flags
- */
-#define CSP_FLAG_ACTIVE     0x01 /* Set if this client is processing data.
-                                  * Cleared when the thread associated with
-                                  * this structure dies. */
-#define CSP_FLAG_CHUNKED    0x02 /* Set if the server's reply is in "chunked"
-                                  * transfer encoding */
-#define CSP_FLAG_FORCED     0x04 /* Set if this request was enforced, although
-                                  * it would normally have been blocked. */
-#define CSP_FLAG_MODIFIED   0x08 /* Set if any modification to the body was done */
-#define CSP_FLAG_REJECTED   0x10 /* Set if request was blocked.  */
-#define CSP_FLAG_TOGGLED_ON 0x20 /* Set if we are toggled on (FEATURE_TOGGLE) */
+/* Constants defining bitmask for csp->accept_types */
+
+#ifdef DETECT_MSIE_IMAGES
+
+/* MSIE detected by user-agent string */
+#define ACCEPT_TYPE_IS_MSIE     0x0001
 
 /*
- * The state of a Privoxy processing thread.
+ * *If* this is MSIE, it wants an image.  (Or this is a shift-reload, or
+ * it's got an image from this URL before...  yuck!)
+ * Only meaningful if ACCEPT_TYPE_IS_MSIE set 
  */
+#define ACCEPT_TYPE_MSIE_IMAGE  0x0002
+
+/*
+ * *If* this is MSIE, it wants a HTML document.
+ * Only meaningful if ACCEPT_TYPE_IS_MSIE set
+ */
+#define ACCEPT_TYPE_MSIE_HTML   0x0004
+
+#endif /* def DETECT_MSIE_IMAGES */
+
+
 struct client_state
 {
    /* The proxy's configuration */
@@ -782,13 +471,26 @@ struct client_state
    struct current_action_spec  action[1];
 
    /* socket to talk to client (web browser) */
-   jb_socket cfd;
+   int  cfd;
 
    /* socket to talk to server (web server or proxy) */
-   jb_socket sfd;
+   int  sfd;
 
-   /* Multi-purpose flag container, see CSP_FLAG_* above */
-   unsigned short int flags;
+
+#ifdef STATISTICS
+   /* 1 if this URL was rejected, 0 otherwise. Allows actual stats inc to 
+    * occur in main thread only for thread-safety. 
+    */
+   int  rejected;
+#endif /* def STATISTICS */
+
+#ifdef FORCE_LOAD
+   int force;
+#endif /* def FORCE_LOAD */
+
+#ifdef TOGGLE
+   int   toggled_on;
+#endif /* def TOGGLE */
 
    /*
     * Client PC's IP address, as reported by the accept()_ function.
@@ -805,6 +507,18 @@ struct client_state
    char *my_ip_addr_str;
    char *my_hostname;
 
+#ifdef TRUST_FILES
+   /* The referer in this request, if one was specified. */
+   char *referrer;
+#endif /* def TRUST_FILES */
+
+#if defined(DETECT_MSIE_IMAGES)
+   /* Types the client will accept.
+    * Bitmask - see ACCEPT_TYPE_XXX constants.
+    */
+   int accept_types;
+#endif /* defined(DETECT_MSIE_IMAGES) */
+
    /* The URL that was requested */
    struct http_request http[1];
 
@@ -817,61 +531,51 @@ struct client_state
    /* List of all cookies for this request */
    struct list cookie_list[1];
 
-   /* MIME-Type key, see CT_* above */
-   unsigned short int content_type;
+#if defined(PCRS) || defined(KILLPOPUPS)
+   /* Nonzero if this has a text MIME type */
+   int is_text;
+#endif /* defined(PCRS) || defined(KILLPOPUPS) */
 
    /* The "X-Forwarded-For:" header sent by the client */
    char   *x_forwarded;
 
+   /*
+    * Nonzero if this client is processing data.
+    * Set to zero when the thread associated with this structure dies.
+    */
+   int active;
+
    /* files associated with this client */
    struct file_list *actions_list;
 
-   struct file_list *rlist;   /* pcrs job file */
-   size_t content_length;     /* Length after content modification */
+#ifdef PCRS
+     struct file_list *rlist;   /* Perl re_filterfile */
+     size_t content_length;     /* Length after processing */ 
+#endif /* def PCRS */
 
-#ifdef FEATURE_TRUST
+#ifdef TRUST_FILES
    struct file_list *tlist;   /* trustfile */
-#endif /* def FEATURE_TRUST */
+#endif /* def TRUST_FILES */
 
    struct client_state *next;
 };
 
 
-/*
- * A function to add a header
- */
-typedef jb_err (*add_header_func_ptr)(struct client_state *);
-
-/*
- * A function to process a header
- */
-typedef jb_err (*parser_func_ptr    )(struct client_state *, char **);
-
-/*
- * List of functions to run on a list of headers
- */
 struct parsers
 {
-   char   *str;
-   size_t len;
-   parser_func_ptr parser;
+   char *str;
+   char  len;
+   char *(*parser)(const struct parsers *, char *, struct client_state *);
 };
 
-
-/*
- * List of available CGI functions.
- */
 struct cgi_dispatcher
 {
-   const char * const name;
-   jb_err    (* const handler)(struct client_state *csp, struct http_response *rsp, const struct map *parameters);
-   const char * const description;
+   const char *name;
+   int         name_length;
+   int         (*handler)(struct client_state *csp, struct http_response *rsp, struct map *parameters);
+   const char *description;
 };
 
-
-/*
- * A data file used by Privoxy.  Kept in a linked list.
- */
 struct file_list
 {
    /*
@@ -879,17 +583,24 @@ struct file_list
     * Read-only once the structure has been created.
     */
    void *f;
-
+   
    /* Normally NULL.  When we are finished with file (i.e. when we have
     * loaded a new one), set to a pointer to an unloader function.
     * Unloader will be called by sweep() (called from main loop) when
-    * all clients using this file are done.  This prevents threading
+    * all clients using this file are done.  This prevents threading 
     * problems.
     */
    void (*unloader)(void *);
 
    /* Used internally by sweep().  Do not access from elsewhere. */
    int active;
+
+#ifndef SPLIT_PROXY_ARGS
+   /* String to be displayed as part of show-proxy-args display.
+    * Read-only once the structure has been created.
+    */
+   char *proxy_args;
+#endif /* ndef SPLIT_PROXY_ARGS */
 
    /* Following variables allow us to check if file has been changed.
     * Read-only once the structure has been created.
@@ -907,14 +618,14 @@ struct file_list
 };
 
 
-#ifdef FEATURE_TRUST
+#ifdef TRUST_FILES
 struct block_spec
 {
    struct url_spec url[1];
    int    reject;
    struct block_spec *next;
 };
-#endif /* def FEATURE_TRUST */
+#endif /* def TRUST_FILES */
 
 
 #define SOCKS_NONE    0    /* Don't use a SOCKS server */
@@ -939,25 +650,18 @@ struct forward_spec
    /* For the linked list */
    struct forward_spec *next;
 };
-#define FORWARD_SPEC_INITIALIZER { { URL_SPEC_INITIALIZER }, 0, NULL, 0, NULL, 0, NULL }
 
 
-/*
- * This struct represents one filter (one block) from
- * the re_filterfile. If there is more than one filter
- * in the file, the file will be represented by a
- * chained list of re_filterfile specs.
- */
+#ifdef PCRS
 struct re_filterfile_spec
 {
-   char *name;                      /* Name from FILTER: statement in re_filterfile */
-   char *description;               /* Description from FILTER: statement in re_filterfile */
-   struct list patterns[1];         /* The patterns from the re_filterfile */
-   pcrs_job *joblist;               /* The resulting compiled pcrs_jobs */
-   struct re_filterfile_spec *next; /* The pointer for chaining */
+   struct list patterns[1];
+   pcrs_job *joblist;
 };
+#endif /* def PCRS */
 
-#ifdef FEATURE_ACL
+
+#ifdef ACL_FILES
 #define ACL_PERMIT   1  /* accept connection request */
 #define ACL_DENY     2  /* reject connection request */
 
@@ -976,16 +680,11 @@ struct access_control_list
    short action;
    struct access_control_list *next;
 };
-#endif /* def FEATURE_ACL */
+#endif /* def ACL_FILES */
 
 
 /* Maximum number of loaders (actions, re_filter, ...) */
 #define NLOADERS 8
-
-
-#define RUNTIME_FEATURE_CGI_EDIT_ACTIONS  1
-#define RUNTIME_FEATURE_CGI_TOGGLE        2
-
 
 /*
  * Data loaded from the configuration file.
@@ -996,9 +695,6 @@ struct configuration_spec
 {
    int debug;
    int multi_threaded;
-
-   /* Features that can be enabled/disabled throuigh the config file */
-   unsigned feature_flags;
 
    const char *logfile;
 
@@ -1012,33 +708,41 @@ struct configuration_spec
    /* A URL with info on this proxy */
    char *proxy_info_url;
 
+#ifdef PCRS
    const char *re_filterfile;
+#endif /* def PCRS */
 
-#ifdef FEATURE_COOKIE_JAR
+#ifdef JAR_FILES
    const char * jarfile;
    FILE * jar;
-#endif /* def FEATURE_COOKIE_JAR */
+#endif /* def JAR_FILES */
 
    /*
     * Port and IP to bind to.
-    * Defaults to HADDR_DEFAULT:HADDR_PORT == 127.0.0.1:8118
+    * Defaults to HADDR_DEFAULT:HADDR_PORT == 127.0.0.1:8000
     */
    const char *haddr;
    int         hport;
 
-   /* Size limit for IOB */
-   size_t buffer_limit;
+#ifndef SPLIT_PROXY_ARGS
+   const char *suppress_message;
+#endif /* ndef SPLIT_PROXY_ARGS */
 
-#ifdef FEATURE_TRUST
+#ifndef SPLIT_PROXY_ARGS
+   /* suppress listing config files */
+   int suppress_blocklists;
+#endif /* ndef SPLIT_PROXY_ARGS */
+
+#ifdef TRUST_FILES
    const char * trustfile;
 
    struct list trust_info[1];
    struct url_spec *trust_list[64];
-#endif /* def FEATURE_TRUST */
+#endif /* def TRUST_FILES */
 
-#ifdef FEATURE_ACL
+#ifdef ACL_FILES
    struct access_control_list *acl;
-#endif /* def FEATURE_ACL */
+#endif /* def ACL_FILES */
 
    struct forward_spec *forward;
 
@@ -1058,57 +762,28 @@ struct configuration_spec
 
 #define SZ(X)  (sizeof(X) / sizeof(*X))
 
-#ifdef FEATURE_FORCE_LOAD
-#define FORCE_PREFIX "/PRIVOXY-FORCE"
-#endif /* def FEATURE_FORCE_LOAD */
-
-#ifdef FEATURE_NO_GIFS
-#define BUILTIN_IMAGE_MIMETYPE "image/png"
-#else
-#define BUILTIN_IMAGE_MIMETYPE "image/gif"
-#endif /* def FEATURE_NO_GIFS */
-
+#ifdef FORCE_LOAD
+#define FORCE_PREFIX "/IJB-FORCE-LOAD"
+#endif /* def FORCE_LOAD */
 
 /* Hardwired URLs */
-#define HOME_PAGE_URL       "http://www.privoxy.org"
-#define REDIRECT_URL        HOME_PAGE_URL "/redirect.php?v=" VERSION "&to="
-
-/*
- * The "hosts" to intercept and display CGI pages.
- * First one is a hostname only, second one can specify host and path.
- *
- * Notes:
- * 1) Do not specify the http: prefix
- * 2) CGI_SITE_2_PATH must not end with /, one will be added automatically.
- * 3) CGI_SITE_2_PATH must start with /, unless it is the empty string.
- */
-#define CGI_SITE_1_HOST "p.p"
-#define CGI_SITE_2_HOST "config.privoxy.org"
-#define CGI_SITE_2_PATH ""
-
-/*
- * The prefix for CGI pages.  Written out in generated HTML.
- * INCLUDES the trailing slash.
- */
-#define CGI_PREFIX  "http://" CGI_SITE_2_HOST CGI_SITE_2_PATH "/"
-
+#define HOME_PAGE_URL  "http://ijbswa.sourceforge.net"
+#define REDIRECT_URL HOME_PAGE_URL "/redirect.php?v=" VERSION "&to="
+#define CGI_PREFIX_HOST "i.j.b"
 
 /* HTTP snipplets */
 static const char CSUCCEED[] =
    "HTTP/1.0 200 Connection established\n"
-   "Proxy-Agent: Privoxy/" VERSION "\r\n\r\n";
+   "Proxy-Agent: IJ/" VERSION "\n\n";
 
 static const char CHEADER[] =
-   "HTTP/1.0 400 Invalid header received from browser\r\n\r\n";
-
-static const char CFORBIDDEN[] =
-   "HTTP/1.0 403 Connection not allowable\r\nX-Hint: If you read this message interactively, then you know why this happens ,-)\r\n\r\n";
+   "HTTP/1.0 400 Invalid header received from browser\n\n";
 
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
 
-#endif /* ndef PROJECT_H_INCLUDED */
+#endif /* ndef _PROJECT_H */
 
 /*
   Local Variables:

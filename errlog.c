@@ -1,4 +1,4 @@
-const char errlog_rcs[] = "$Id: errlog.c,v 1.36 2002/03/26 22:29:54 swa Exp $";
+const char errlog_rcs[] = "$Id: errlog.c,v 1.11 2001/06/01 18:14:49 jongfoster Exp $";
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/errlog.c,v $
@@ -7,7 +7,7 @@ const char errlog_rcs[] = "$Id: errlog.c,v 1.36 2002/03/26 22:29:54 swa Exp $";
  *                printf-like fashion.
  *
  * Copyright   :  Written by and Copyright (C) 2001 the SourceForge
- *                Privoxy team. http://www.privoxy.org/
+ *                IJBSWA team.  http://ijbswa.sourceforge.net
  *
  *                Based on the Internet Junkbuster originally written
  *                by and Copyright (C) 1997 Anonymous Coders and 
@@ -33,96 +33,6 @@ const char errlog_rcs[] = "$Id: errlog.c,v 1.36 2002/03/26 22:29:54 swa Exp $";
  *
  * Revisions   :
  *    $Log: errlog.c,v $
- *    Revision 1.36  2002/03/26 22:29:54  swa
- *    we have a new homepage!
- *
- *    Revision 1.35  2002/03/24 15:23:33  jongfoster
- *    Name changes
- *
- *    Revision 1.34  2002/03/24 13:25:43  swa
- *    name change related issues
- *
- *    Revision 1.33  2002/03/13 00:27:04  jongfoster
- *    Killing warnings
- *
- *    Revision 1.32  2002/03/07 03:46:17  oes
- *    Fixed compiler warnings
- *
- *    Revision 1.31  2002/03/06 23:02:57  jongfoster
- *    Removing tabs
- *
- *    Revision 1.30  2002/03/05 22:43:45  david__schmidt
- *    - Better error reporting on OS/2
- *    - Fix double-slash comment (oops)
- *
- *    Revision 1.29  2002/03/04 23:45:13  jongfoster
- *    Printing thread ID if using Win32 native threads
- *
- *    Revision 1.28  2002/03/04 17:59:59  oes
- *    Deleted deletePidFile(), cosmetics
- *
- *    Revision 1.27  2002/03/04 02:08:01  david__schmidt
- *    Enable web editing of actions file on OS/2 (it had been broken all this time!)
- *
- *    Revision 1.26  2002/01/09 19:05:45  steudten
- *    Fix big memory leak.
- *
- *    Revision 1.25  2002/01/09 14:32:08  oes
- *    Added support for gmtime_r and localtime_r.
- *
- *    Revision 1.24  2001/12/30 14:07:32  steudten
- *    - Add signal handling (unix)
- *    - Add SIGHUP handler (unix)
- *    - Add creation of pidfile (unix)
- *    - Add action 'top' in rc file (RH)
- *    - Add entry 'SIGNALS' to manpage
- *    - Add exit message to logfile (unix)
- *
- *    Revision 1.23  2001/11/07 00:02:13  steudten
- *    Add line number in error output for lineparsing for
- *    actionsfile and configfile.
- *    Special handling for CLF added.
- *
- *    Revision 1.22  2001/11/05 23:43:05  steudten
- *    Add time+date to log files.
- *
- *    Revision 1.21  2001/10/25 03:40:47  david__schmidt
- *    Change in porting tactics: OS/2's EMX porting layer doesn't allow multiple
- *    threads to call select() simultaneously.  So, it's time to do a real, live,
- *    native OS/2 port.  See defines for __EMX__ (the porting layer) vs. __OS2__
- *    (native). Both versions will work, but using __OS2__ offers multi-threading.
- *
- *    Revision 1.20  2001/09/16 23:04:34  jongfoster
- *    Fixing a warning
- *
- *    Revision 1.19  2001/09/13 20:08:06  jongfoster
- *    Adding support for LOG_LEVEL_CGI
- *
- *    Revision 1.18  2001/09/10 11:27:24  oes
- *    Declaration of w32_socket_strerr now conditional
- *
- *    Revision 1.17  2001/09/10 10:17:13  oes
- *    Removed unused variable; Fixed sprintf format
- *
- *    Revision 1.16  2001/07/30 22:08:36  jongfoster
- *    Tidying up #defines:
- *    - All feature #defines are now of the form FEATURE_xxx
- *    - Permanently turned off WIN_GUI_EDIT
- *    - Permanently turned on WEBDAV and SPLIT_PROXY_ARGS
- *
- *    Revision 1.15  2001/07/29 17:41:10  jongfoster
- *    Now prints thread ID for each message (pthreads only)
- *
- *    Revision 1.14  2001/07/19 19:03:48  haroon
- *    - Added case for LOG_LEVEL_POPUPS
- *
- *    Revision 1.13  2001/07/13 13:58:58  oes
- *     - Added case for LOG_LEVEL_DEANIMATE
- *     - Removed all #ifdef PCRS
- *
- *    Revision 1.12  2001/06/09 10:55:28  jongfoster
- *    Changing BUFSIZ ==> BUFFER_SIZE
- *
  *    Revision 1.11  2001/06/01 18:14:49  jongfoster
  *    Changing the calls to strerr() to check HAVE_STRERR (which is defined
  *    in config.h if appropriate) rather than the NO_STRERR macro.
@@ -206,22 +116,18 @@ const char errlog_rcs[] = "$Id: errlog.c,v 1.36 2002/03/26 22:29:54 swa Exp $";
 
 
 #include "config.h"
-#include "miscutil.h"
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
 
-#if !defined(_WIN32) && !defined(__OS2__)
+#ifndef _WIN32
 #include <unistd.h>
-#endif /* !defined(_WIN32) && !defined(__OS2__) */
+#endif /* ndef _WIN32 */
 
 #include <errno.h>
-#include <assert.h>
-#ifdef FEATURE_PTHREAD
-#include <pthread.h>
-#endif /* def FEATURE_PTHREAD */
+/* #include <pthread.h> */
 
 #ifdef _WIN32
 #include <windows.h>
@@ -230,15 +136,8 @@ const char errlog_rcs[] = "$Id: errlog.c,v 1.36 2002/03/26 22:29:54 swa Exp $";
 #endif /* ndef _WIN_CONSOLE */
 #endif /* def _WIN32 */
 
-#ifdef __OS2__
-#include <sys/socket.h> /* For sock_errno */
-#define INCL_DOS
-#include <os2.h>
-#endif
-
 #include "errlog.h"
 #include "project.h"
-#include "jcc.h"
 
 const char errlog_h_rcs[] = ERRLOG_H_VERSION;
 
@@ -253,14 +152,16 @@ const char errlog_h_rcs[] = ERRLOG_H_VERSION;
 /* where to log (default: stderr) */
 static FILE *logfp = NULL;
 
+/* where to log (NULL == stderr) */
+static char * logfilename = NULL;
+
 /* logging detail level.  */
 static int debug = (LOG_LEVEL_FATAL | LOG_LEVEL_ERROR | LOG_LEVEL_INFO);  
 
 /* static functions */
 static void fatal_error(const char * error_message);
-#ifdef _WIN32
-static char *w32_socket_strerr(int errcode, char *tmp_buf);
-#endif
+static char * w32_socket_strerr(int errcode, char * tmp_buf);
+
 
 /*********************************************************************
  *
@@ -279,7 +180,7 @@ static char *w32_socket_strerr(int errcode, char *tmp_buf);
 static void fatal_error(const char * error_message)
 {
 #if defined(_WIN32) && !defined(_WIN_CONSOLE)
-   MessageBox(g_hwndLogFrame, error_message, "Privoxy Error", 
+   MessageBox(g_hwndLogFrame, error_message, "Internet JunkBuster Error", 
       MB_OK | MB_ICONERROR | MB_TASKMODAL | MB_SETFOREGROUND | MB_TOPMOST);  
 
    /* Cleanup - remove taskbar icon etc. */
@@ -289,17 +190,13 @@ static void fatal_error(const char * error_message)
    fputs(error_message, stderr);
 #endif /* defined(_WIN32) && !defined(_WIN_CONSOLE) */
 
-#if defined(unix)
-   unlink(pidfile);
-#endif /* unix */
-
    exit(1);
 }
 
 
 /*********************************************************************
  *
- * Function    :  init_error_log
+ * Function    :  init_errlog
  *
  * Description :  Initializes the logging module.  Must call before
  *                calling log_error.
@@ -323,7 +220,6 @@ void init_error_log(const char *prog_name, const char *logfname, int debuglevel)
 
    if ((logfp != NULL) && (logfp != stderr))
    {
-      log_error(LOG_LEVEL_INFO, "(Re-)Open logfile %s", logfname ? logfname : "none");
       fclose(logfp);
    }
    logfp = stderr;
@@ -331,9 +227,9 @@ void init_error_log(const char *prog_name, const char *logfname, int debuglevel)
    /* set the designated log file */
    if( logfname )
    {
-      if( NULL == (fp = fopen(logfname, "a")) )
+      if( !(fp = fopen(logfname, "a")) )
       {
-         log_error(LOG_LEVEL_FATAL, "init_error_log(): can't open logfile: %s", logfname);
+         log_error(LOG_LEVEL_FATAL, "init_errlog(): can't open logfile: %s", logfname);
       }
 
       /* set logging to be completely unbuffered */
@@ -342,7 +238,7 @@ void init_error_log(const char *prog_name, const char *logfname, int debuglevel)
       logfp = fp;
    }
 
-   log_error(LOG_LEVEL_INFO, "Privoxy version " VERSION);
+   log_error(LOG_LEVEL_INFO, "Internet JunkBuster version " VERSION);
    if (prog_name != NULL)
    {
       log_error(LOG_LEVEL_INFO, "Program name: %s", prog_name);
@@ -370,15 +266,10 @@ void init_error_log(const char *prog_name, const char *logfname, int debuglevel)
 void log_error(int loglevel, char *fmt, ...)
 {
    va_list ap;
-   char *outbuf= NULL;
-   static char *outbuf_save = NULL;
+   char outbuf[BUFFER_SIZE];
    char * src = fmt;
    int outc = 0;
    long this_thread = 1;  /* was: pthread_t this_thread;*/
-#ifdef __OS2__
-   PTIB     ptib;
-   APIRET   ulrc;
-#endif /* __OS2__ */
 
 #if defined(_WIN32) && !defined(_WIN_CONSOLE)
    /*
@@ -399,95 +290,52 @@ void log_error(int loglevel, char *fmt, ...)
    }
 
    /* FIXME get current thread id */
-#ifdef FEATURE_PTHREAD
-   this_thread = (long)pthread_self();
-#elif defined(_WIN32)
-   this_thread = GetCurrentThreadId();
-#elif defined(__OS2__)
-   ulrc = DosGetInfoBlocks(&ptib, NULL);
-   if (ulrc == 0)
-     this_thread = ptib -> tib_ptib2 -> tib2_ultid;
-#endif /* def FEATURE_PTHREAD */
+   /* this_thread = (long)pthread_self(); */
 
-   if ( !outbuf_save ) 
-   {
-      outbuf_save = outbuf = (char*)malloc(BUFFER_SIZE);
-      assert(outbuf);
-   }
-   outbuf = outbuf_save;
-
-    {
-       /*
-        * Write timestamp into tempbuf.
-        *
-        * Complex because not all OSs have tm_gmtoff or
-        * the %z field in strftime()
-        */
-       time_t now; 
-       struct tm tm_now; 
-       time (&now);
-#ifdef HAVE_LOCALTIME_R
-       tm_now = *localtime_r(&now, &tm_now);
-#else
-       tm_now = *localtime (&now); 
-#endif
-       strftime(outbuf, BUFFER_SIZE-6, "%b %d %H:%M:%S ", &tm_now); 
-       outbuf += strlen( outbuf );
-    }
    switch (loglevel)
    {
       case LOG_LEVEL_ERROR:
-         outc = sprintf(outbuf, "Privoxy(%ld) Error: ", this_thread);
+         outc = sprintf(outbuf, "IJB(%d) Error: ", this_thread);
          break;
       case LOG_LEVEL_FATAL:
-         outc = sprintf(outbuf, "Privoxy(%ld) Fatal error: ", this_thread);
+         outc = sprintf(outbuf, "IJB(%d) Fatal error: ", this_thread);
          break;
       case LOG_LEVEL_GPC:
-         outc = sprintf(outbuf, "Privoxy(%ld) Request: ", this_thread);
+         outc = sprintf(outbuf, "IJB(%d) Request: ", this_thread);
          break;
       case LOG_LEVEL_CONNECT:
-         outc = sprintf(outbuf, "Privoxy(%ld) Connect: ", this_thread);
+         outc = sprintf(outbuf, "IJB(%d) Connect: ", this_thread);
          break;
       case LOG_LEVEL_LOG:
-         outc = sprintf(outbuf, "Privoxy(%ld) Writing: ", this_thread);
+         outc = sprintf(outbuf, "IJB(%d) Writing: ", this_thread);
          break;
       case LOG_LEVEL_HEADER:
-         outc = sprintf(outbuf, "Privoxy(%ld) Header: ", this_thread);
+         outc = sprintf(outbuf, "IJB(%d) Header: ", this_thread);
          break;
       case LOG_LEVEL_INFO:
-         outc = sprintf(outbuf, "Privoxy(%ld) Info: ", this_thread);
+         outc = sprintf(outbuf, "IJB(%d) Info: ", this_thread);
          break;
+#ifdef PCRS
       case LOG_LEVEL_RE_FILTER:
-         outc = sprintf(outbuf, "Privoxy(%ld) Re-Filter: ", this_thread);
+         outc = sprintf(outbuf, "IJB(%d) Re-Filter: ", this_thread);
          break;
-#ifdef FEATURE_FORCE_LOAD
+#endif /* def PCRS */
+#ifdef FORCE_LOAD
       case LOG_LEVEL_FORCE:
-         outc = sprintf(outbuf, "Privoxy(%ld) Force: ", this_thread);
+         outc = sprintf(outbuf, "IJB(%d) Force: ", this_thread);
          break;
-#endif /* def FEATURE_FORCE_LOAD */
-#ifdef FEATURE_FAST_REDIRECTS
+#endif /* def FORCE_LOAD */
+#ifdef FAST_REDIRECTS
       case LOG_LEVEL_REDIRECTS:
-         outc = sprintf(outbuf, "Privoxy(%ld) Redirect: ", this_thread);
+         outc = sprintf(outbuf, "IJB(%d) Redirect: ", this_thread);
          break;
-#endif /* def FEATURE_FAST_REDIRECTS */
-      case LOG_LEVEL_DEANIMATE:
-         outc = sprintf(outbuf, "Privoxy(%ld) Gif-Deanimate: ", this_thread);
-         break;
+#endif /* def FAST_REDIRECTS */
       case LOG_LEVEL_CLF:
-         outbuf = outbuf_save;
          outc = 0;
          outbuf[0] = '\0';
          break;
-#ifdef FEATURE_KILL_POPUPS
-      case LOG_LEVEL_POPUPS:
-         outc = sprintf(outbuf, "Privoxy(%ld) Kill-Popups: ", this_thread);
-         break;
-#endif /* def FEATURE_KILL_POPUPS */
-      case LOG_LEVEL_CGI:
-         outc = sprintf(outbuf, "Privoxy(%ld) CGI: ", this_thread);
-         break;
       default:
-         outc = sprintf(outbuf, "Privoxy(%ld) UNKNOWN LOG TYPE(%d): ", this_thread, loglevel);
+         outc = sprintf(outbuf, "IJB(%d) UNKNOWN LOG TYPE(%d): ", this_thread, loglevel);
          break;
    }
    
@@ -498,7 +346,7 @@ void log_error(int loglevel, char *fmt, ...)
    while ((*src) && (outc < BUFFER_SIZE-2))
    {
       char tempbuf[BUFFER_SIZE];
-      char *sval = NULL;
+      char *sval;
       int ival;
       unsigned uval;
       long lval;
@@ -562,7 +410,7 @@ void log_error(int loglevel, char *fmt, ...)
             else
             {
                /* Error */
-               sprintf(outbuf, "Privoxy(%ld) Error: log_error(): Bad format string:\n"
+               sprintf(outbuf, "IJB(%d) Error: log_error(): Bad format string:\n"
                                "Format = \"%s\"\n"
                                "Exiting.", this_thread, fmt);
                /* FIXME RACE HAZARD: should start critical section error_log_use here */
@@ -619,7 +467,7 @@ void log_error(int loglevel, char *fmt, ...)
             outc += ival;
             if (outc < BUFFER_SIZE-1)
             {
-               memcpy(outbuf + oldoutc, sval, (size_t) ival);
+               memcpy(outbuf + oldoutc, sval, ival);
             }
             else
             {
@@ -631,11 +479,6 @@ void log_error(int loglevel, char *fmt, ...)
 #ifdef _WIN32
             ival = WSAGetLastError();
             sval = w32_socket_strerr(ival, tempbuf);
-#elif __OS2__
-            ival = sock_errno();
-            if (ival == 0)
-              ival = errno;
-            sval = strerror(ival);
 #else /* ifndef _WIN32 */
             ival = errno; 
 #ifdef HAVE_STRERROR
@@ -671,22 +514,11 @@ void log_error(int loglevel, char *fmt, ...)
                 */
                time_t now; 
                struct tm *tm_now; 
-               struct tm gmt;
-#ifdef HAVE_LOCALTIME_R
-               struct tm dummy;
-#endif
+               struct tm gmt; 
                int days, hrs, mins; 
                time (&now); 
-#ifdef HAVE_GMTIME_R
-               gmt = *gmtime_r(&now, &gmt);
-#else
-               gmt = *gmtime(&now);
-#endif
-#ifdef HAVE_LOCALTIME_R
-               tm_now = localtime_r(&now, &dummy);
-#else
+               gmt = *gmtime (&now); 
                tm_now = localtime (&now); 
-#endif
                days = tm_now->tm_yday - gmt.tm_yday; 
                hrs = ((days < -1 ? 24 : 1 < days ? -24 : days * 24) + tm_now->tm_hour - gmt.tm_hour); 
                mins = hrs * 60 + tm_now->tm_min - gmt.tm_min; 
@@ -705,7 +537,7 @@ void log_error(int loglevel, char *fmt, ...)
             }
             break;
          default:
-            sprintf(outbuf, "Privoxy(%ld) Error: log_error(): Bad format string:\n"
+            sprintf(outbuf, "IJB(%d) Error: log_error(): Bad format string:\n"
                             "Format = \"%s\"\n"
                             "Exiting.", this_thread, fmt);
             /* FIXME RACE HAZARD: should start critical section error_log_use here */
@@ -713,9 +545,9 @@ void log_error(int loglevel, char *fmt, ...)
             {
                logfp = stderr;
             }
-            fputs(outbuf_save, logfp);
+            fputs(outbuf, logfp);
             /* FIXME RACE HAZARD: should end critical section error_log_use here */
-            fatal_error(outbuf_save);
+            fatal_error(outbuf);
             /* Never get here */
             break;
 
@@ -759,11 +591,11 @@ void log_error(int loglevel, char *fmt, ...)
       logfp = stderr;
    }
 
-   fputs(outbuf_save, logfp);
+   fputs(outbuf, logfp);
 
    if (loglevel == LOG_LEVEL_FATAL)
    {
-      fatal_error(outbuf_save);
+      fatal_error(outbuf);
       /* Never get here */
    }
 
@@ -771,7 +603,7 @@ void log_error(int loglevel, char *fmt, ...)
 
 #if defined(_WIN32) && !defined(_WIN_CONSOLE)
    /* Write to display */
-   LogPutString(outbuf_save);
+   LogPutString(outbuf);
 #endif /* defined(_WIN32) && !defined(_WIN_CONSOLE) */
 
 }
@@ -795,7 +627,7 @@ void log_error(int loglevel, char *fmt, ...)
  *                tmp_buf.
  *
  *********************************************************************/
-static char *w32_socket_strerr(int errcode, char *tmp_buf)
+static char * w32_socket_strerr(int errcode, char * tmp_buf)
 {
 #define TEXT_FOR_ERROR(code,text) \
    if (errcode == code)           \
@@ -872,3 +704,4 @@ static char *w32_socket_strerr(int errcode, char *tmp_buf)
   tab-width: 3
   end:
 */
+

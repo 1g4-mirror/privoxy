@@ -1,6 +1,6 @@
-#ifndef W32LOG_H_INCLUDED
-#define W32LOG_H_INCLUDED
-#define W32LOG_H_VERSION "$Id: w32log.h,v 1.9 2002/03/24 12:03:47 jongfoster Exp $"
+#ifndef _W32LOG_H
+#define _W32LOG_H
+#define W32LOG_H_VERSION "$Id: w32log.h,v 1.4 2001/05/31 21:37:11 jongfoster Exp $"
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/w32log.h,v $
@@ -8,8 +8,8 @@
  * Purpose     :  Functions for creating and destroying the log window,
  *                ouputting strings, processing messages and so on.
  *
- * Copyright   :  Written by and Copyright (C) 2001-2002 members of
- *                the Privoxy team.  http://www.privoxy.org/
+ * Copyright   :  Written by and Copyright (C) 2001 the SourceForge
+ *                IJBSWA team.  http://ijbswa.sourceforge.net
  *
  *                Written by and Copyright (C) 1999 Adam Lock
  *                <locka@iol.ie>
@@ -34,25 +34,6 @@
  *
  * Revisions   :
  *    $Log: w32log.h,v $
- *    Revision 1.9  2002/03/24 12:03:47  jongfoster
- *    Name change
- *
- *    Revision 1.8  2001/07/30 22:08:36  jongfoster
- *    Tidying up #defines:
- *    - All feature #defines are now of the form FEATURE_xxx
- *    - Permanently turned off WIN_GUI_EDIT
- *    - Permanently turned on WEBDAV and SPLIT_PROXY_ARGS
- *
- *    Revision 1.7  2001/07/29 18:43:08  jongfoster
- *    Changing #ifdef _FILENAME_H to FILENAME_H_INCLUDED, to conform to
- *    ANSI C rules.
- *
- *    Revision 1.6  2001/07/13 14:04:59  oes
- *    Removed all #ifdef PCRS
- *
- *    Revision 1.5  2001/06/07 23:08:12  jongfoster
- *    Forward and ACL edit options removed.
- *
  *    Revision 1.4  2001/05/31 21:37:11  jongfoster
  *    GUI changes to rename "permissions file" to "actions file".
  *
@@ -130,12 +111,15 @@ extern int g_nFontSize;
 /* FIXME: this is a kludge */
 
 extern const char * g_actions_file;
+#ifdef PCRS
 extern const char * g_re_filterfile;
-#ifdef FEATURE_TRUST
+#endif
+#ifdef TRUST_FILES
 extern const char * g_trustfile;
-#endif /* def FEATURE_TRUST */
+#endif /* def TRUST_FILES */
 
 /* FIXME: end kludge */
+
 
 extern int LogPutString(const char *pszText);
 extern BOOL InitLogWindow(void);
@@ -151,7 +135,7 @@ extern const char w32log_h_rcs[];
 } /* extern "C" */
 #endif
 
-#endif /* ndef W32LOG_H_INCLUDED */
+#endif /* ndef _W32LOG_H */
 
 
 /*

@@ -1,6 +1,6 @@
-#ifndef LOADERS_H_INCLUDED
-#define LOADERS_H_INCLUDED
-#define LOADERS_H_VERSION "$Id: loaders.h,v 1.18 2002/03/24 13:25:43 swa Exp $"
+#ifndef _LOADERS_H
+#define _LOADERS_H
+#define LOADERS_H_VERSION "$Id: loaders.h,v 1.5 2001/05/31 21:28:49 jongfoster Exp $"
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/loaders.h,v $
@@ -11,7 +11,7 @@
  *                unload files that are no longer in use.
  *
  * Copyright   :  Written by and Copyright (C) 2001 the SourceForge
- *                Privoxy team. http://www.privoxy.org/
+ *                IJBSWA team.  http://ijbswa.sourceforge.net
  *
  *                Based on the Internet Junkbuster originally written
  *                by and Copyright (C) 1997 Anonymous Coders and 
@@ -37,70 +37,6 @@
  *
  * Revisions   :
  *    $Log: loaders.h,v $
- *    Revision 1.18  2002/03/24 13:25:43  swa
- *    name change related issues
- *
- *    Revision 1.17  2002/03/16 23:54:06  jongfoster
- *    Adding graceful termination feature, to help look for memory leaks.
- *    If you enable this (which, by design, has to be done by hand
- *    editing config.h) and then go to http://i.j.b/die, then the program
- *    will exit cleanly after the *next* request.  It should free all the
- *    memory that was used.
- *
- *    Revision 1.16  2002/03/07 03:46:17  oes
- *    Fixed compiler warnings
- *
- *    Revision 1.15  2002/01/22 23:46:18  jongfoster
- *    Moving edit_read_line() and simple_read_line() to loaders.c, and
- *    extending them to support reading MS-DOS, Mac and UNIX style files
- *    on all platforms.
- *
- *    Modifying read_config_line() (without changing it's prototype) to
- *    be a trivial wrapper for edit_read_line().  This means that we have
- *    one function to read a line and handle comments, which is common
- *    between the initialization code and the edit interface.
- *
- *    Revision 1.14  2002/01/17 21:03:08  jongfoster
- *    Moving all our URL and URL pattern parsing code to urlmatch.c.
- *
- *    Renaming free_url to free_url_spec, since it frees a struct url_spec.
- *
- *    Revision 1.13  2001/12/30 14:07:32  steudten
- *    - Add signal handling (unix)
- *    - Add SIGHUP handler (unix)
- *    - Add creation of pidfile (unix)
- *    - Add action 'top' in rc file (RH)
- *    - Add entry 'SIGNALS' to manpage
- *    - Add exit message to logfile (unix)
- *
- *    Revision 1.12  2001/11/07 00:02:13  steudten
- *    Add line number in error output for lineparsing for
- *    actionsfile and configfile.
- *    Special handling for CLF added.
- *
- *    Revision 1.11  2001/10/23 21:38:53  jongfoster
- *    Adding error-checking to create_url_spec()
- *
- *    Revision 1.10  2001/09/22 16:36:59  jongfoster
- *    Removing unused parameter fs from read_config_line()
- *
- *    Revision 1.9  2001/07/30 22:08:36  jongfoster
- *    Tidying up #defines:
- *    - All feature #defines are now of the form FEATURE_xxx
- *    - Permanently turned off WIN_GUI_EDIT
- *    - Permanently turned on WEBDAV and SPLIT_PROXY_ARGS
- *
- *    Revision 1.8  2001/07/29 18:58:15  jongfoster
- *    Removing nested #includes, adding forward declarations for needed
- *    structures, and changing the #define _FILENAME_H to FILENAME_H_INCLUDED.
- *
- *    Revision 1.7  2001/07/13 14:01:54  oes
- *    Removed all #ifdef PCRS
- *
- *    Revision 1.6  2001/06/07 23:14:38  jongfoster
- *    Removing ACL and forward file loaders - these files have
- *    been merged into the config file.
- *
  *    Revision 1.5  2001/05/31 21:28:49  jongfoster
  *    Removed all permissionsfile code - it's now called the actions
  *    file, and (almost) all the code is in actions.c
@@ -155,64 +91,30 @@
  *********************************************************************/
 
 
+#include "project.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Structures taken from project.h */
-struct client_state;
-struct file_list;
-struct configuration_spec;
-struct url_spec;
-
 extern void sweep(void);
-extern char *read_config_line(char *buf, size_t buflen, FILE *fp, unsigned long *linenum);
+extern char *read_config_line(char *buf, int buflen, FILE *fp, struct file_list *fs);
 extern int check_file_changed(const struct file_list * current,
                               const char * filename,
                               struct file_list ** newfl);
 
-extern jb_err edit_read_line(FILE *fp,
-                             char **raw_out,
-                             char **prefix_out,
-                             char **data_out,
-                             int *newline,
-                             unsigned long *line_number);
-
-extern jb_err simple_read_line(FILE *fp, char **dest, int *newline);
-
-/*
- * Various types of newlines that a file may contain.
- */
-#define NEWLINE_UNKNOWN 0  /* Newline convention in file is unknown */
-#define NEWLINE_UNIX    1  /* Newline convention in file is '\n'   (ASCII 10) */
-#define NEWLINE_DOS     2  /* Newline convention in file is '\r\n' (ASCII 13,10) */
-#define NEWLINE_MAC     3  /* Newline convention in file is '\r'   (ASCII 13) */
-
-/*
- * Types of newlines that a file may contain, as strings.  If you have an
- * extremely wierd compiler that does not have '\r' == CR == ASCII 13 and
- * '\n' == LF == ASCII 10), then fix CHAR_CR and CHAR_LF in loaders.c as
- * well as these definitions.
- */
-#define NEWLINE(style) ((style)==NEWLINE_DOS ? "\r\n" : \
-                        ((style)==NEWLINE_MAC ? "\r" : "\n"))
-
-
-extern short int MustReload;
 extern int load_actions_file(struct client_state *csp);
-extern int load_re_filterfile(struct client_state *csp);
-
-#ifdef FEATURE_TRUST
+  
+#ifdef TRUST_FILES
 extern int load_trustfile(struct client_state *csp);
-#endif /* def FEATURE_TRUST */
+#endif /* def TRUST_FILES */
 
-#ifdef FEATURE_GRACEFUL_TERMINATION
-#ifdef FEATURE_TRUST
-void unload_current_trust_file(void);
-#endif
-void unload_current_re_filterfile(void);
-#endif /* FEATURE_GRACEFUL_TERMINATION */
+#ifdef PCRS
+extern int load_re_filterfile(struct client_state *csp);
+#endif /* def PCRS */
 
+extern int create_url_spec(struct url_spec * url, char * buf);
+extern void free_url(struct url_spec *url);
 
 extern void add_loader(int (*loader)(struct client_state *), 
                        struct configuration_spec * config);
@@ -226,7 +128,7 @@ extern const char loaders_h_rcs[];
 } /* extern "C" */
 #endif
 
-#endif /* ndef LOADERS_H_INCLUDED */
+#endif /* ndef _LOADERS_H */
 
 /*
   Local Variables:

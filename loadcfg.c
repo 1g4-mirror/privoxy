@@ -1,21 +1,22 @@
-const char loadcfg_rcs[] = "$Id: loadcfg.c,v 1.39 2002/03/24 13:25:43 swa Exp $";
+/* vim:ts=3: */
+const char loadcfg_rcs[] = "$Id: loadcfg.c,v 1.16 2001/06/09 10:55:28 jongfoster Exp $";
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/loadcfg.c,v $
  *
  * Purpose     :  Loads settings from the configuration file into
- *                global variables.  This file contains both the
+ *                global variables.  This file contains both the 
  *                routine to load the configuration and the global
  *                variables it writes to.
  *
  * Copyright   :  Written by and Copyright (C) 2001 the SourceForge
- *                Privoxy team. http://www.privoxy.org/
+ *                IJBSWA team.  http://ijbswa.sourceforge.net
  *
  *                Based on the Internet Junkbuster originally written
- *                by and Copyright (C) 1997 Anonymous Coders and
+ *                by and Copyright (C) 1997 Anonymous Coders and 
  *                Junkbusters Corporation.  http://www.junkbusters.com
  *
- *                This program is free software; you can redistribute it
+ *                This program is free software; you can redistribute it 
  *                and/or modify it under the terms of the GNU General
  *                Public License as published by the Free Software
  *                Foundation; either version 2 of the License, or (at
@@ -35,110 +36,6 @@ const char loadcfg_rcs[] = "$Id: loadcfg.c,v 1.39 2002/03/24 13:25:43 swa Exp $"
  *
  * Revisions   :
  *    $Log: loadcfg.c,v $
- *    Revision 1.39  2002/03/24 13:25:43  swa
- *    name change related issues
- *
- *    Revision 1.38  2002/03/24 13:05:48  jongfoster
- *    Renaming re_filterfile to filterfile
- *
- *    Revision 1.37  2002/03/16 23:54:06  jongfoster
- *    Adding graceful termination feature, to help look for memory leaks.
- *    If you enable this (which, by design, has to be done by hand
- *    editing config.h) and then go to http://i.j.b/die, then the program
- *    will exit cleanly after the *next* request.  It should free all the
- *    memory that was used.
- *
- *    Revision 1.36  2002/03/13 00:27:05  jongfoster
- *    Killing warnings
- *
- *    Revision 1.35  2002/03/07 03:52:44  oes
- *    Set logging to tty for --no-daemon mode
- *
- *    Revision 1.34  2002/03/06 23:14:35  jongfoster
- *    Trivial cosmetic changes to make function comments easier to find.
- *
- *    Revision 1.33  2002/03/05 04:52:42  oes
- *    Deleted non-errlog debugging code
- *
- *    Revision 1.32  2002/03/04 18:24:53  oes
- *    Re-enabled output of unknown config directive hash
- *
- *    Revision 1.31  2002/03/03 15:07:20  oes
- *    Re-enabled automatic config reloading
- *
- *    Revision 1.30  2002/01/22 23:31:43  jongfoster
- *    Replacing strsav() with string_append()
- *
- *    Revision 1.29  2002/01/17 21:02:30  jongfoster
- *    Moving all our URL and URL pattern parsing code to urlmatch.c.
- *
- *    Renaming free_url to free_url_spec, since it frees a struct url_spec.
- *
- *    Revision 1.28  2001/12/30 14:07:32  steudten
- *    - Add signal handling (unix)
- *    - Add SIGHUP handler (unix)
- *    - Add creation of pidfile (unix)
- *    - Add action 'top' in rc file (RH)
- *    - Add entry 'SIGNALS' to manpage
- *    - Add exit message to logfile (unix)
- *
- *    Revision 1.27  2001/11/07 00:02:13  steudten
- *    Add line number in error output for lineparsing for
- *    actionsfile and configfile.
- *    Special handling for CLF added.
- *
- *    Revision 1.26  2001/11/05 21:41:43  steudten
- *    Add changes to be a real daemon just for unix os.
- *    (change cwd to /, detach from controlling tty, set
- *    process group and session leader to the own process.
- *    Add DBG() Macro.
- *    Add some fatal-error log message for failed malloc().
- *    Add '-d' if compiled with 'configure --with-debug' to
- *    enable debug output.
- *
- *    Revision 1.25  2001/10/25 03:40:48  david__schmidt
- *    Change in porting tactics: OS/2's EMX porting layer doesn't allow multiple
- *    threads to call select() simultaneously.  So, it's time to do a real, live,
- *    native OS/2 port.  See defines for __EMX__ (the porting layer) vs. __OS2__
- *    (native). Both versions will work, but using __OS2__ offers multi-threading.
- *
- *    Revision 1.24  2001/10/23 21:40:30  jongfoster
- *    Added support for enable-edit-actions and enable-remote-toggle config
- *    file options.
- *
- *    Revision 1.23  2001/10/07 15:36:00  oes
- *    Introduced new config option "buffer-limit"
- *
- *    Revision 1.22  2001/09/22 16:36:59  jongfoster
- *    Removing unused parameter fs from read_config_line()
- *
- *    Revision 1.21  2001/09/16 17:10:43  jongfoster
- *    Moving function savearg() here, since it was the only thing left in
- *    showargs.c.
- *
- *    Revision 1.20  2001/07/30 22:08:36  jongfoster
- *    Tidying up #defines:
- *    - All feature #defines are now of the form FEATURE_xxx
- *    - Permanently turned off WIN_GUI_EDIT
- *    - Permanently turned on WEBDAV and SPLIT_PROXY_ARGS
- *
- *    Revision 1.19  2001/07/15 17:45:16  jongfoster
- *    Removing some unused #includes
- *
- *    Revision 1.18  2001/07/13 14:01:14  oes
- *     - Removed all #ifdef PCRS
- *     - Removed vim-settings
- *
- *    Revision 1.17  2001/06/29 13:31:03  oes
- *    - Improved comments
- *    - Fixed (actionsfile) and sorted hashes
- *    - Introduced admin_address and proxy-info-url
- *      as config parameters
- *    - Renamed config->proxy_args_invocation (which didn't have
- *      the invocation but the options!) to config->proxy_args
- *    - Various adaptions
- *    - Removed logentry from cancelled commit
- *
  *    Revision 1.16  2001/06/09 10:55:28  jongfoster
  *    Changing BUFSIZ ==> BUFFER_SIZE
  *
@@ -285,11 +182,16 @@ const char loadcfg_rcs[] = "$Id: loadcfg.c,v 1.39 2002/03/24 13:25:43 swa Exp $"
 #include <fcntl.h>
 #include <errno.h>
 #include <ctype.h>
-#include <assert.h>
 
 #ifdef _WIN32
 
+# include <sys/timeb.h>
 # include <windows.h>
+# include <io.h>
+# include <process.h>
+# ifdef TOGGLE
+#  include <time.h>
+# endif /* def TOGGLE */
 
 # include "win32.h"
 # ifndef _WIN_CONSOLE
@@ -301,11 +203,9 @@ const char loadcfg_rcs[] = "$Id: loadcfg.c,v 1.39 2002/03/24 13:25:43 swa Exp $"
 
 #else /* ifndef _WIN32 */
 
-#ifndef __OS2__
 # include <unistd.h>
-# include <sys/wait.h>
-#endif
 # include <sys/time.h>
+# include <sys/wait.h>
 # include <sys/stat.h>
 # include <signal.h>
 
@@ -316,11 +216,14 @@ const char loadcfg_rcs[] = "$Id: loadcfg.c,v 1.39 2002/03/24 13:25:43 swa Exp $"
 #include "jcc.h"
 #include "filters.h"
 #include "loaders.h"
+#include "showargs.h"
+#include "parsers.h"
+#include "killpopup.h"
 #include "miscutil.h"
 #include "errlog.h"
+#include "jbsockets.h"
+#include "gateway.h"
 #include "ssplit.h"
-#include "encode.h"
-#include "urlmatch.h"
 
 const char loadcfg_h_rcs[] = LOADCFG_H_VERSION;
 
@@ -335,10 +238,10 @@ const char loadcfg_h_rcs[] = LOADCFG_H_VERSION;
 #define ijb_isupper(__X) isupper((int)(unsigned char)(__X))
 #define ijb_tolower(__X) tolower((int)(unsigned char)(__X))
 
-#ifdef FEATURE_TOGGLE
+#ifdef TOGGLE
 /* by haroon - indicates if ijb is enabled */
 int g_bToggleIJB        = 1;   /* JunkBusters is enabled by default. */
-#endif /* def FEATURE_TOGGLE */
+#endif
 
 /* The filename of the configfile */
 const char *configfile  = NULL;
@@ -367,13 +270,9 @@ static struct file_list *current_configfile = NULL;
 
 #define hash_actions_file              1196306641ul /* "actionsfile" */
 #define hash_admin_address             4112573064ul /* "admin-address" */
-#define hash_buffer_limit              1881726070ul /* "buffer-limit */
 #define hash_confdir                      1978389ul /* "confdir" */
 #define hash_debug                          78263ul /* "debug" */
 #define hash_deny_access               1227333715ul /* "deny-access" */
-#define hash_enable_edit_actions       2517097536ul /* "enable-edit-actions" */
-#define hash_enable_remote_toggle      2979744683ul /* "enable-remote-toggle" */
-#define hash_filterfile                 250887266ul /* "filterfile" */
 #define hash_forward                      2029845ul /* "forward" */
 #define hash_forward_socks4            3963965521ul /* "forward-socks4" */
 #define hash_forward_socks4a           2639958518ul /* "forward-socks4a" */
@@ -383,6 +282,7 @@ static struct file_list *current_configfile = NULL;
 #define hash_logfile                      2114766ul /* "logfile" */
 #define hash_permit_access             3587953268ul /* "permit-access" */
 #define hash_proxy_info_url            3903079059ul /* "proxy-info-url" */
+#define hash_re_filterfile             3877522444ul /* "re_filterfile" */
 #define hash_single_threaded           4250084780ul /* "single-threaded" */
 #define hash_suppress_blocklists       1948693308ul /* "suppress-blocklists" */
 #define hash_toggle                        447966ul /* "toggle" */
@@ -401,7 +301,6 @@ static struct file_list *current_configfile = NULL;
 #define hash_show_on_task_bar           215410365ul /* "show-on-task-bar" */
 
 
-static void savearg(char *command, char *argument, struct configuration_spec * config);
 
 /*********************************************************************
  *
@@ -419,7 +318,7 @@ void unload_configfile (void * data)
 {
    struct configuration_spec * config = (struct configuration_spec *)data;
    struct forward_spec *cur_fwd = config->forward;
-#ifdef FEATURE_ACL
+#ifdef ACL_FILES
    struct access_control_list *cur_acl = config->acl;
 
    while (cur_acl != NULL)
@@ -429,12 +328,12 @@ void unload_configfile (void * data)
       cur_acl = next_acl;
    }
    config->acl = NULL;
-#endif /* def FEATURE_ACL */
+#endif /* def ACL_FILES */
 
    while (cur_fwd != NULL)
    {
       struct forward_spec * next_fwd = cur_fwd->next;
-      free_url_spec(cur_fwd->url);
+      free_url(cur_fwd->url);
 
       freez(cur_fwd->gateway_host);
       freez(cur_fwd->forward_host);
@@ -442,57 +341,39 @@ void unload_configfile (void * data)
       cur_fwd = next_fwd;
    }
    config->forward = NULL;
-
-#ifdef FEATURE_COOKIE_JAR
+   
+#ifdef JAR_FILES
    if ( NULL != config->jar )
    {
       fclose( config->jar );
       config->jar = NULL;
    }
-#endif /* def FEATURE_COOKIE_JAR */
+#endif /* def JAR_FILES */
 
-   freez(config->confdir);
-   freez(config->logdir);
+   freez((char *)config->confdir);
+   freez((char *)config->logdir);
 
-   freez(config->haddr);
-   freez(config->logfile);
+   freez((char *)config->haddr);
+   freez((char *)config->logfile);
 
-   freez(config->actions_file);
-   freez(config->admin_address);
-   freez(config->proxy_info_url);
-   freez(config->proxy_args);
+   freez((char *)config->actions_file);
+   freez((char *)config->admin_address);
+   freez((char *)config->proxy_info_url);
+   freez((char *)config->proxy_args);
 
-#ifdef FEATURE_COOKIE_JAR
-   freez(config->jarfile);
-#endif /* def FEATURE_COOKIE_JAR */
+#ifdef JAR_FILES
+   freez((char *)config->jarfile);
+#endif /* def JAR_FILES */
 
-   freez(config->re_filterfile);
+#ifndef SPLIT_PROXY_ARGS
+   freez((char *)config->suppress_message);
+#endif /* ndef SPLIT_PROXY_ARGS */
+
+#ifdef PCRS
+   freez((char *)config->re_filterfile);
+#endif /* def PCRS */
 
 }
-
-
-#ifdef FEATURE_GRACEFUL_TERMINATION
-/*********************************************************************
- *
- * Function    :  unload_current_config_file
- *
- * Description :  Unloads current config file - reset to state at
- *                beginning of program.
- *
- * Parameters  :  None
- *
- * Returns     :  N/A
- *
- *********************************************************************/
-void unload_current_config_file(void)
-{
-   if (current_configfile)
-   {
-      current_configfile->unloader = unload_configfile;
-      current_configfile = NULL;
-   }
-}
-#endif
 
 
 /*********************************************************************
@@ -502,7 +383,7 @@ void unload_current_config_file(void)
  * Description :  Load the config file and all parameters.
  *
  * Parameters  :
- *          1  :  csp = Client state (the config member will be
+ *          1  :  csp = Client state (the config member will be 
  *                filled in by this function).
  *
  * Returns     :  0 => Ok, everything else is an error.
@@ -516,9 +397,8 @@ struct configuration_spec * load_config(void)
    struct configuration_spec * config = NULL;
    struct client_state * fake_csp;
    struct file_list *fs;
-   unsigned long linenum = 0;
 
-   if ( !check_file_changed(current_configfile, configfile, &fs))
+   if (!check_file_changed(current_configfile, configfile, &fs))
    {
       /* No need to load */
       return ((struct configuration_spec *)current_configfile->f);
@@ -531,9 +411,9 @@ struct configuration_spec * load_config(void)
 
    log_error(LOG_LEVEL_INFO, "loading configuration file '%s':", configfile);
 
-#ifdef FEATURE_TOGGLE
+#ifdef TOGGLE
    g_bToggleIJB      = 1;
-#endif /* def FEATURE_TOGGLE */
+#endif
 
    fs->f = config = (struct configuration_spec *)zalloc(sizeof(*config));
 
@@ -547,9 +427,9 @@ struct configuration_spec * load_config(void)
 
    /*
     * This is backwards from how it's usually done.
-    * Following the usual pattern, "fs" would be stored in a member
+    * Following the usual pattern, "fs" would be stored in a member 
     * variable in "csp", and then we'd access "config" from "fs->f",
-    * using a cast.  However, "config" is used so often that a
+    * using a cast.  However, "config" is used so often that a 
     * cast each time would be very ugly, and the extra indirection
     * would waste CPU cycles.  Therefore we store "config" in
     * "csp->config", and "fs" in "csp->config->config_file_list".
@@ -562,8 +442,6 @@ struct configuration_spec * load_config(void)
 
    config->multi_threaded    = 1;
    config->hport             = HADDR_PORT;
-   config->buffer_limit      = 4096 * 1024;
-   config->proxy_args        = strdup("");
 
    if ((configfp = fopen(configfile, "r")) == NULL)
    {
@@ -572,14 +450,14 @@ struct configuration_spec * load_config(void)
       /* Never get here - LOG_LEVEL_FATAL causes program exit */
    }
 
-   while (read_config_line(buf, sizeof(buf), configfp, &linenum) != NULL)
+   while (read_config_line(buf, sizeof(buf), configfp, fs) != NULL)
    {
       char cmd[BUFFER_SIZE];
       char arg[BUFFER_SIZE];
       char tmp[BUFFER_SIZE];
-#ifdef FEATURE_ACL
+#ifdef ACL_FILES
       struct access_control_list *cur_acl;
-#endif /* def FEATURE_ACL */
+#endif /* def ACL_FILES */
       struct forward_spec *cur_fwd;
       int vec_count;
       char *vec[3];
@@ -625,50 +503,43 @@ struct configuration_spec * load_config(void)
 
       switch( hash_string( cmd ) )
       {
-/* *************************************************************************
+/****************************************************************************
  * actionsfile actions-file-name
  * In confdir by default
- * *************************************************************************/
+ ****************************************************************************/
          case hash_actions_file :
-            freez(config->actions_file);
+            freez((char *)config->actions_file);
             config->actions_file = make_path(config->confdir, arg);
             continue;
 
-/* *************************************************************************
+/****************************************************************************
  * admin-address email-address
- * *************************************************************************/
+ ****************************************************************************/
          case hash_admin_address :
-            freez(config->admin_address);
+            freez((char *)config->admin_address);
             config->admin_address = strdup(arg);
-            continue;
+            continue;       
 
-/* *************************************************************************
- * buffer-limit n
- * *************************************************************************/
-         case hash_buffer_limit :
-            config->buffer_limit = (size_t) 1024 * atoi(arg);
-            continue;
-
-/* *************************************************************************
+/****************************************************************************
  * confdir directory-name
- * *************************************************************************/
+ ****************************************************************************/
          case hash_confdir :
-            freez(config->confdir);
-            config->confdir = make_path( NULL, arg);
-            continue;
+            freez((char *)config->confdir);
+            config->confdir = strdup(arg);
+            continue;            
 
-/* *************************************************************************
+/****************************************************************************
  * debug n
  * Specifies debug level, multiple values are ORed together.
- * *************************************************************************/
+ ****************************************************************************/
          case hash_debug :
             config->debug |= atoi(arg);
             continue;
 
-/* *************************************************************************
+/****************************************************************************
  * deny-access source-ip[/significant-bits] [dest-ip[/significant-bits]]
- * *************************************************************************/
-#ifdef FEATURE_ACL
+ ****************************************************************************/
+#ifdef ACL_FILES
          case hash_deny_access:
             vec_count = ssplit(arg, " \t", vec, SZ(vec), 1, 1);
 
@@ -676,7 +547,7 @@ struct configuration_spec * load_config(void)
             {
                log_error(LOG_LEVEL_ERROR, "Wrong number of parameters for "
                      "deny-access directive in configuration file.");
-               string_append(&config->proxy_args,
+               config->proxy_args = strsav( config->proxy_args,
                   "<br>\nWARNING: Wrong number of parameters for "
                   "deny-access directive in configuration file.<br><br>\n");
                continue;
@@ -697,12 +568,12 @@ struct configuration_spec * load_config(void)
             {
                log_error(LOG_LEVEL_ERROR, "Invalid source IP for deny-access "
                      "directive in configuration file: \"%s\"", vec[0]);
-               string_append(&config->proxy_args,
+               config->proxy_args = strsav( config->proxy_args,
                   "<br>\nWARNING: Invalid source IP for deny-access directive"
                   " in configuration file: \"");
-               string_append(&config->proxy_args,
+               config->proxy_args = strsav( config->proxy_args,
                   vec[0]);
-               string_append(&config->proxy_args,
+               config->proxy_args = strsav( config->proxy_args,
                   "\"<br><br>\n");
                freez(cur_acl);
                continue;
@@ -713,12 +584,12 @@ struct configuration_spec * load_config(void)
                {
                   log_error(LOG_LEVEL_ERROR, "Invalid destination IP for deny-access "
                         "directive in configuration file: \"%s\"", vec[0]);
-                  string_append(&config->proxy_args,
+                  config->proxy_args = strsav( config->proxy_args,
                      "<br>\nWARNING: Invalid destination IP for deny-access directive"
                      " in configuration file: \"");
-                  string_append(&config->proxy_args,
+                  config->proxy_args = strsav( config->proxy_args,
                      vec[0]);
-                  string_append(&config->proxy_args,
+                  config->proxy_args = strsav( config->proxy_args,
                      "\"<br><br>\n");
                   freez(cur_acl);
                   continue;
@@ -731,50 +602,18 @@ struct configuration_spec * load_config(void)
              * actions file, the last match wins.  However, the internal
              * implementations are different:  The actions file is stored
              * in the same order as the file, and scanned completely.
-             * With the ACL, we reverse the order as we load it, then
+             * With the ACL, we reverse the order as we load it, then 
              * when we scan it we stop as soon as we get a match.
              */
             cur_acl->next  = config->acl;
             config->acl = cur_acl;
 
             continue;
-#endif /* def FEATURE_ACL */
+#endif /* def ACL_FILES */
 
-/* *************************************************************************
- * enable-edit-actions 0|1
- * *************************************************************************/
-#ifdef FEATURE_CGI_EDIT_ACTIONS
-         case hash_enable_edit_actions:
-            if ((*arg != '\0') && (0 != atoi(arg)))
-            {
-               config->feature_flags |= RUNTIME_FEATURE_CGI_EDIT_ACTIONS;
-            }
-            else
-            {
-               config->feature_flags &= ~RUNTIME_FEATURE_CGI_EDIT_ACTIONS;
-            }
-            continue;
-#endif /* def FEATURE_CGI_EDIT_ACTIONS */
-
-/* *************************************************************************
- * enable-remote-toggle 0|1
- * *************************************************************************/
-#ifdef FEATURE_CGI_EDIT_ACTIONS
-         case hash_enable_remote_toggle:
-            if ((*arg != '\0') && (0 != atoi(arg)))
-            {
-               config->feature_flags |= RUNTIME_FEATURE_CGI_TOGGLE;
-            }
-            else
-            {
-               config->feature_flags &= ~RUNTIME_FEATURE_CGI_TOGGLE;
-            }
-            continue;
-#endif /* def FEATURE_CGI_EDIT_ACTIONS */
-
-/* *************************************************************************
+/****************************************************************************
  * forward url-pattern (.|http-proxy-host[:port])
- * *************************************************************************/
+ ****************************************************************************/
          case hash_forward:
             vec_count = ssplit(arg, " \t", vec, SZ(vec), 1, 1);
 
@@ -782,7 +621,7 @@ struct configuration_spec * load_config(void)
             {
                log_error(LOG_LEVEL_ERROR, "Wrong number of parameters for forward "
                      "directive in configuration file.");
-               string_append(&config->proxy_args,
+               config->proxy_args = strsav( config->proxy_args,
                   "<br>\nWARNING: Wrong number of parameters for "
                   "forward directive in configuration file.");
                continue;
@@ -804,7 +643,7 @@ struct configuration_spec * load_config(void)
             {
                log_error(LOG_LEVEL_ERROR, "Bad URL specifier for forward "
                      "directive in configuration file.");
-               string_append(&config->proxy_args,
+               config->proxy_args = strsav( config->proxy_args,
                   "<br>\nWARNING: Bad URL specifier for "
                   "forward directive in configuration file.");
                continue;
@@ -817,7 +656,7 @@ struct configuration_spec * load_config(void)
             {
                cur_fwd->forward_host = strdup(p);
 
-               if (NULL != (p = strchr(cur_fwd->forward_host, ':')))
+               if ((p = strchr(cur_fwd->forward_host, ':')))
                {
                   *p++ = '\0';
                   cur_fwd->forward_port = atoi(p);
@@ -835,9 +674,9 @@ struct configuration_spec * load_config(void)
 
             continue;
 
-/* *************************************************************************
+/****************************************************************************
  * forward-socks4 url-pattern socks-proxy[:port] (.|http-proxy[:port])
- * *************************************************************************/
+ ****************************************************************************/
          case hash_forward_socks4:
             vec_count = ssplit(arg, " \t", vec, SZ(vec), 1, 1);
 
@@ -845,7 +684,7 @@ struct configuration_spec * load_config(void)
             {
                log_error(LOG_LEVEL_ERROR, "Wrong number of parameters for "
                      "forward-socks4 directive in configuration file.");
-               string_append(&config->proxy_args,
+               config->proxy_args = strsav( config->proxy_args,
                   "<br>\nWARNING: Wrong number of parameters for "
                   "forward-socks4 directive in configuration file.");
                continue;
@@ -867,7 +706,7 @@ struct configuration_spec * load_config(void)
             {
                log_error(LOG_LEVEL_ERROR, "Bad URL specifier for forward-socks4 "
                      "directive in configuration file.");
-               string_append(&config->proxy_args,
+               config->proxy_args = strsav( config->proxy_args,
                   "<br>\nWARNING: Bad URL specifier for "
                   "forward-socks4 directive in configuration file.");
                continue;
@@ -880,7 +719,7 @@ struct configuration_spec * load_config(void)
             {
                cur_fwd->gateway_host = strdup(p);
 
-               if (NULL != (p = strchr(cur_fwd->gateway_host, ':')))
+               if ((p = strchr(cur_fwd->gateway_host, ':')))
                {
                   *p++ = '\0';
                   cur_fwd->gateway_port = atoi(p);
@@ -898,7 +737,7 @@ struct configuration_spec * load_config(void)
             {
                cur_fwd->forward_host = strdup(p);
 
-               if (NULL != (p = strchr(cur_fwd->forward_host, ':')))
+               if ((p = strchr(cur_fwd->forward_host, ':')))
                {
                   *p++ = '\0';
                   cur_fwd->forward_port = atoi(p);
@@ -913,12 +752,12 @@ struct configuration_spec * load_config(void)
             /* Add to list. */
             cur_fwd->next = config->forward;
             config->forward = cur_fwd;
-
+            
             continue;
 
-/* *************************************************************************
+/****************************************************************************
  * forward-socks4a url-pattern socks-proxy[:port] (.|http-proxy[:port])
- * *************************************************************************/
+ ****************************************************************************/
          case hash_forward_socks4a:
             vec_count = ssplit(arg, " \t", vec, SZ(vec), 1, 1);
 
@@ -926,7 +765,7 @@ struct configuration_spec * load_config(void)
             {
                log_error(LOG_LEVEL_ERROR, "Wrong number of parameters for "
                      "forward-socks4a directive in configuration file.");
-               string_append(&config->proxy_args,
+               config->proxy_args = strsav( config->proxy_args,
                   "<br>\nWARNING: Wrong number of parameters for "
                   "forward-socks4a directive in configuration file.");
                continue;
@@ -948,7 +787,7 @@ struct configuration_spec * load_config(void)
             {
                log_error(LOG_LEVEL_ERROR, "Bad URL specifier for forward-socks4a "
                      "directive in configuration file.");
-               string_append(&config->proxy_args,
+               config->proxy_args = strsav( config->proxy_args,
                   "<br>\nWARNING: Bad URL specifier for "
                   "forward-socks4a directive in configuration file.");
                continue;
@@ -959,7 +798,7 @@ struct configuration_spec * load_config(void)
 
             cur_fwd->gateway_host = strdup(p);
 
-            if (NULL != (p = strchr(cur_fwd->gateway_host, ':')))
+            if ((p = strchr(cur_fwd->gateway_host, ':')))
             {
                *p++ = '\0';
                cur_fwd->gateway_port = atoi(p);
@@ -976,7 +815,7 @@ struct configuration_spec * load_config(void)
             {
                cur_fwd->forward_host = strdup(p);
 
-               if (NULL != (p = strchr(cur_fwd->forward_host, ':')))
+               if ((p = strchr(cur_fwd->forward_host, ':')))
                {
                   *p++ = '\0';
                   cur_fwd->forward_port = atoi(p);
@@ -991,49 +830,49 @@ struct configuration_spec * load_config(void)
             /* Add to list. */
             cur_fwd->next = config->forward;
             config->forward = cur_fwd;
-
+            
             continue;
 
-/* *************************************************************************
+/****************************************************************************
  * jarfile jar-file-name
  * In logdir by default
- * *************************************************************************/
-#ifdef FEATURE_COOKIE_JAR
+ ****************************************************************************/
+#ifdef JAR_FILES
          case hash_jarfile :
-            freez(config->jarfile);
+            freez((char *)config->jarfile);
             config->jarfile = make_path(config->logdir, arg);
             continue;
-#endif /* def FEATURE_COOKIE_JAR */
+#endif /* def JAR_FILES */
 
-/* *************************************************************************
+/****************************************************************************
  * listen-address [ip][:port]
- * *************************************************************************/
+ ****************************************************************************/
          case hash_listen_address :
-            freez(config->haddr);
+            freez((char *)config->haddr);
             config->haddr = strdup(arg);
             continue;
 
-/* *************************************************************************
+/****************************************************************************
  * logdir directory-name
- * *************************************************************************/
+ ****************************************************************************/
          case hash_logdir :
-            freez(config->logdir);
-            config->logdir = make_path(NULL, arg);
-            continue;
+            freez((char *)config->logdir);
+            config->logdir = strdup(arg);
+            continue;            
 
-/* *************************************************************************
+/****************************************************************************
  * logfile log-file-name
  * In logdir by default
- * *************************************************************************/
+ ****************************************************************************/
          case hash_logfile :
-            freez(config->logfile);
-            config->logfile = no_daemon ? NULL : make_path(config->logdir, arg);
+            freez((char *)config->logfile);
+            config->logfile = make_path(config->logdir, arg);
             continue;
 
-/* *************************************************************************
+/****************************************************************************
  * permit-access source-ip[/significant-bits] [dest-ip[/significant-bits]]
- * *************************************************************************/
-#ifdef FEATURE_ACL
+ ****************************************************************************/
+#ifdef ACL_FILES
          case hash_permit_access:
             vec_count = ssplit(arg, " \t", vec, SZ(vec), 1, 1);
 
@@ -1041,7 +880,7 @@ struct configuration_spec * load_config(void)
             {
                log_error(LOG_LEVEL_ERROR, "Wrong number of parameters for "
                      "permit-access directive in configuration file.");
-               string_append(&config->proxy_args,
+               config->proxy_args = strsav( config->proxy_args,
                   "<br>\nWARNING: Wrong number of parameters for "
                   "permit-access directive in configuration file.<br><br>\n");
 
@@ -1063,12 +902,12 @@ struct configuration_spec * load_config(void)
             {
                log_error(LOG_LEVEL_ERROR, "Invalid source IP for permit-access "
                      "directive in configuration file: \"%s\"", vec[0]);
-               string_append(&config->proxy_args,
+               config->proxy_args = strsav( config->proxy_args,
                   "<br>\nWARNING: Invalid source IP for permit-access directive"
                   " in configuration file: \"");
-               string_append(&config->proxy_args,
+               config->proxy_args = strsav( config->proxy_args,
                   vec[0]);
-               string_append(&config->proxy_args,
+               config->proxy_args = strsav( config->proxy_args,
                   "\"<br><br>\n");
                freez(cur_acl);
                continue;
@@ -1080,12 +919,12 @@ struct configuration_spec * load_config(void)
                   log_error(LOG_LEVEL_ERROR, "Invalid destination IP for "
                         "permit-access directive in configuration file: \"%s\"",
                         vec[0]);
-                  string_append(&config->proxy_args,
+                  config->proxy_args = strsav( config->proxy_args,
                      "<br>\nWARNING: Invalid destination IP for permit-access directive"
                      " in configuration file: \"");
-                  string_append(&config->proxy_args,
+                  config->proxy_args = strsav( config->proxy_args,
                      vec[0]);
-                  string_append(&config->proxy_args,
+                  config->proxy_args = strsav( config->proxy_args,
                      "\"<br><br>\n");
                   freez(cur_acl);
                   continue;
@@ -1098,76 +937,97 @@ struct configuration_spec * load_config(void)
              * actions file, the last match wins.  However, the internal
              * implementations are different:  The actions file is stored
              * in the same order as the file, and scanned completely.
-             * With the ACL, we reverse the order as we load it, then
+             * With the ACL, we reverse the order as we load it, then 
              * when we scan it we stop as soon as we get a match.
              */
             cur_acl->next  = config->acl;
             config->acl = cur_acl;
 
             continue;
-#endif /* def FEATURE_ACL */
+#endif /* def ACL_FILES */
 
-/* *************************************************************************
+/****************************************************************************
  * proxy-info-url url
- * *************************************************************************/
+ ****************************************************************************/
          case hash_proxy_info_url :
-            freez(config->proxy_info_url);
+            freez((char *)config->proxy_info_url);
             config->proxy_info_url = strdup(arg);
             continue;
 
-/* *************************************************************************
+/****************************************************************************
  * re_filterfile file-name
  * In confdir by default.
- * *************************************************************************/
-         case hash_filterfile :
-            freez(config->re_filterfile);
+ ****************************************************************************/
+#ifdef PCRS
+         case hash_re_filterfile :
+            freez((char *)config->re_filterfile);
             config->re_filterfile = make_path(config->confdir, arg);
             continue;
+#endif /* def PCRS */
 
-/* *************************************************************************
+/****************************************************************************
  * single-threaded
- * *************************************************************************/
+ ****************************************************************************/
          case hash_single_threaded :
             config->multi_threaded = 0;
             continue;
 
-/* *************************************************************************
+/****************************************************************************
+ * FIXME: Document this FIXME2: Shouldn't we throw this out? --oes
+ ****************************************************************************/
+#ifndef SPLIT_PROXY_ARGS
+         case hash_suppress_blocklists :
+            if (arg[0] != '\0')
+            {
+               config->suppress_message = strdup(arg);
+            }
+            else
+            {
+               /* There will be NO reference in proxy-args. */
+               config->suppress_message = NULL;
+            }
+
+            config->suppress_blocklists = 1;
+            continue;
+#endif /* ndef SPLIT_PROXY_ARGS */
+
+/****************************************************************************
  * toggle (0|1)
- * *************************************************************************/
-#ifdef FEATURE_TOGGLE
+ ****************************************************************************/
+#ifdef TOGGLE
          case hash_toggle :
             g_bToggleIJB = atoi(arg);
             continue;
-#endif /* def FEATURE_TOGGLE */
+#endif /* def TOGGLE */
 
-/* *************************************************************************
+/****************************************************************************
  * trust-info-url url
- * *************************************************************************/
-#ifdef FEATURE_TRUST
+ ****************************************************************************/
+#ifdef TRUST_FILES
          case hash_trust_info_url :
             enlist(config->trust_info, arg);
             continue;
-#endif /* def FEATURE_TRUST */
+#endif /* def TRUST_FILES */
 
-/* *************************************************************************
+/****************************************************************************
  * trustfile filename
  * (In confdir by default.)
- * *************************************************************************/
-#ifdef FEATURE_TRUST
+ ****************************************************************************/
+#ifdef TRUST_FILES
          case hash_trustfile :
-            freez(config->trustfile);
+            freez((char *)config->trustfile);
             config->trustfile = make_path(config->confdir, arg);
             continue;
-#endif /* def FEATURE_TRUST */
+#endif /* def TRUST_FILES */
 
 
-/* *************************************************************************
+/****************************************************************************
  * Win32 Console options:
- * *************************************************************************/
+ ****************************************************************************/
 
-/* *************************************************************************
+/****************************************************************************
  * hide-console
- * *************************************************************************/
+ ****************************************************************************/
 #ifdef _WIN_CONSOLE
          case hash_hide_console :
             hideConsole = 1;
@@ -1175,70 +1035,70 @@ struct configuration_spec * load_config(void)
 #endif /*def _WIN_CONSOLE*/
 
 
-/* *************************************************************************
+/****************************************************************************
  * Win32 GUI options:
- * *************************************************************************/
+ ****************************************************************************/
 
 #if defined(_WIN32) && ! defined(_WIN_CONSOLE)
-/* *************************************************************************
+/****************************************************************************
  * activity-animation (0|1)
- * *************************************************************************/
+ ****************************************************************************/
          case hash_activity_animation :
             g_bShowActivityAnimation = atoi(arg);
             continue;
 
-/* *************************************************************************
+/****************************************************************************
  *  close-button-minimizes (0|1)
- * *************************************************************************/
+ ****************************************************************************/
          case hash_close_button_minimizes :
             g_bCloseHidesWindow = atoi(arg);
             continue;
 
-/* *************************************************************************
+/****************************************************************************
  * log-buffer-size (0|1)
- * *************************************************************************/
+ ****************************************************************************/
          case hash_log_buffer_size :
             g_bLimitBufferSize = atoi(arg);
             continue;
 
-/* *************************************************************************
+/****************************************************************************
  * log-font-name fontnane
- * *************************************************************************/
+ ****************************************************************************/
          case hash_log_font_name :
             strcpy( g_szFontFaceName, arg );
             continue;
 
-/* *************************************************************************
+/****************************************************************************
  * log-font-size n
- * *************************************************************************/
+ ****************************************************************************/
          case hash_log_font_size :
             g_nFontSize = atoi(arg);
             continue;
 
-/* *************************************************************************
+/****************************************************************************
  * log-highlight-messages (0|1)
- * *************************************************************************/
+ ****************************************************************************/
          case hash_log_highlight_messages :
             g_bHighlightMessages = atoi(arg);
             continue;
 
-/* *************************************************************************
+/****************************************************************************
  * log-max-lines n
- * *************************************************************************/
+ ****************************************************************************/
          case hash_log_max_lines :
             g_nMaxBufferLines = atoi(arg);
             continue;
 
-/* *************************************************************************
+/****************************************************************************
  * log-messages (0|1)
- * *************************************************************************/
+ ****************************************************************************/
          case hash_log_messages :
             g_bLogMessages = atoi(arg);
             continue;
 
-/* *************************************************************************
+/****************************************************************************
  * show-on-task-bar (0|1)
- * *************************************************************************/
+ ****************************************************************************/
          case hash_show_on_task_bar :
             g_bShowOnTaskBar = atoi(arg);
             continue;
@@ -1246,29 +1106,31 @@ struct configuration_spec * load_config(void)
 #endif /* defined(_WIN32) && ! defined(_WIN_CONSOLE) */
 
 
-/* *************************************************************************
- * Warnings about unsupported features
- * *************************************************************************/
-#ifndef FEATURE_ACL
+/****************************************************************************/
+/* Warnings about unsupported features                                      */
+/****************************************************************************/
+#ifndef ACL_FILES
          case hash_deny_access:
-#endif /* ndef FEATURE_ACL */
-#ifndef FEATURE_CGI_EDIT_ACTIONS
-         case hash_enable_edit_actions:
-         case hash_enable_remote_toggle:
-#endif /* def FEATURE_CGI_EDIT_ACTIONS */
-#ifndef FEATURE_COOKIE_JAR
+#endif /* ndef ACL_FILES */
+#ifndef JAR_FILES
          case hash_jarfile :
-#endif /* ndef FEATURE_COOKIE_JAR */
-#ifndef FEATURE_ACL
+#endif /* ndef JAR_FILES */
+#ifndef ACL_FILES
          case hash_permit_access:
-#endif /* ndef FEATURE_ACL */
-#ifndef FEATURE_TOGGLE
+#endif /* ndef ACL_FILES */
+#ifndef PCRS
+         case hash_re_filterfile :
+#endif /* ndef PCRS */
+#ifdef SPLIT_PROXY_ARGS
+         case hash_suppress_blocklists :
+#endif /* def SPLIT_PROXY_ARGS */
+#ifndef TOGGLE
          case hash_toggle :
-#endif /* ndef FEATURE_TOGGLE */
-#ifndef FEATURE_TRUST
+#endif /* ndef TOGGLE */
+#ifndef TRUST_FILES
          case hash_trustfile :
          case hash_trust_info_url :
-#endif /* ndef FEATURE_TRUST */
+#endif /* ndef TRUST_FILES */
 
 #ifndef _WIN_CONSOLE
          case hash_hide_console :
@@ -1289,31 +1151,26 @@ struct configuration_spec * load_config(void)
             /* log_error(LOG_LEVEL_INFO, "Unsupported directive \"%s\" ignored.", cmd); */
             continue;
 
-/* *************************************************************************/
+/****************************************************************************/
          default :
-/* *************************************************************************/
+/****************************************************************************/
             /*
              * I decided that I liked this better as a warning than an
              * error.  To change back to an error, just change log level
              * to LOG_LEVEL_FATAL.
              */
-            log_error(LOG_LEVEL_ERROR, "Unrecognized directive '%s' (%luul) in line %lu in "
-                  "configuration file (%s).",  buf, hash_string(cmd), linenum, configfile);
-            string_append(&config->proxy_args, "<br>\nWARNING: unrecognized directive : ");
-            string_append(&config->proxy_args, buf);
-            string_append(&config->proxy_args, "<br><br>\n");
+            log_error(LOG_LEVEL_ERROR, "Unrecognized directive (%luul) in "
+                  "configuration file: \"%s\"", hash_string( cmd ), buf);
+            config->proxy_args = strsav( config->proxy_args, "<br>\nWARNING: unrecognized directive : ");
+            config->proxy_args = strsav( config->proxy_args, buf);
+            config->proxy_args = strsav( config->proxy_args, "<br><br>\n");
             continue;
 
-/* *************************************************************************/
+/****************************************************************************/
       } /* end switch( hash_string(cmd) ) */
    } /* end while ( read_config_line(...) ) */
 
    fclose(configfp);
-
-   if (NULL == config->proxy_args)
-   {
-      log_error(LOG_LEVEL_FATAL, "Out of memory loading config - insufficient memory for config->proxy_args");
-   }
 
    init_error_log(Argv[0], config->logfile, config->debug);
 
@@ -1322,19 +1179,21 @@ struct configuration_spec * load_config(void)
       add_loader(load_actions_file, config);
    }
 
+#ifdef PCRS
    if (config->re_filterfile)
    {
       add_loader(load_re_filterfile, config);
    }
+#endif /* def PCRS */
 
-#ifdef FEATURE_TRUST
+#ifdef TRUST_FILES
    if (config->trustfile)
    {
       add_loader(load_trustfile, config);
    }
-#endif /* def FEATURE_TRUST */
+#endif
 
-#ifdef FEATURE_COOKIE_JAR
+#ifdef JAR_FILES
    if ( NULL != config->jarfile )
    {
       if ( NULL == (config->jar = fopen(config->jarfile, "a")) )
@@ -1344,7 +1203,7 @@ struct configuration_spec * load_config(void)
       }
       setbuf(config->jar, NULL);
    }
-#endif /* def FEATURE_COOKIE_JAR */
+#endif /* def JAR_FILES */
 
    if ( NULL == config->haddr )
    {
@@ -1353,7 +1212,7 @@ struct configuration_spec * load_config(void)
 
    if ( NULL != config->haddr )
    {
-      if (NULL != (p = strchr(config->haddr, ':')))
+      if ((p = strchr(config->haddr, ':')))
       {
          *p++ = '\0';
          if (*p)
@@ -1390,16 +1249,24 @@ struct configuration_spec * load_config(void)
    }
    freez(fake_csp);
 
+#ifndef SPLIT_PROXY_ARGS
+   if (!suppress_blocklists)
+   {
+      fs->proxy_args = strsav(fs->proxy_args, "</pre>");
+   }
+#endif /* ndef SPLIT_PROXY_ARGS */
+
 /* FIXME: this is a kludge for win32 */
 #if defined(_WIN32) && !defined (_WIN_CONSOLE)
 
    g_actions_file     = config->actions_file;
+#ifdef PCRS
    g_re_filterfile    = config->re_filterfile;
-
-#ifdef FEATURE_TRUST
+#endif
+#ifdef TRUST_FILES
    g_trustfile        = config->trustfile;
-#endif /* def FEATURE_TRUST */
-
+#endif
+   
 
 #endif /* defined(_WIN32) && !defined (_WIN_CONSOLE) */
 /* FIXME: end kludge */
@@ -1447,77 +1314,6 @@ struct configuration_spec * load_config(void)
    current_configfile = fs;
 
    return (config);
-}
-
-
-/*********************************************************************
- *
- * Function    :  savearg
- *
- * Description :  Called from `load_config'.  It saves each non-empty
- *                and non-comment line from config into
- *                config->proxy_args.  This is used to create the
- *                show-proxy-args page.  On error, frees
- *                config->proxy_args and sets it to NULL
- *
- * Parameters  :
- *          1  :  command = config setting that was found
- *          2  :  argument = the setting's argument (if any)
- *
- * Returns     :  N/A
- *
- *********************************************************************/
-static void savearg(char *command, char *argument, struct configuration_spec * config)
-{
-   char * buf;
-   char * s;
-
-   assert(command);
-   assert(*command);
-   assert(argument);
-
-   buf = strdup("");
-
-   s = html_encode(command);
-   if (NULL == s)
-   {
-      freez(buf);
-      freez(config->proxy_args);
-      return;
-   }
-   string_append(&buf, "<a href=\"" REDIRECT_URL "option#");
-   string_append(&buf, s);
-   string_append(&buf, "\">");
-   string_join  (&buf, s);
-   string_append(&buf, "</a> ");
-
-   if ( (NULL != argument) && ('\0' != *argument) )
-   {
-      s = html_encode(argument);
-      if (NULL == s)
-      {
-         freez(buf);
-         freez(config->proxy_args);
-         return;
-      }
-
-      if (strncmpic(argument, "http://", 7) == 0)
-      {
-         string_append(&buf, "<a href=\"");
-         string_append(&buf, s);
-         string_append(&buf, "\">");
-         string_join  (&buf, s);
-         string_append(&buf, "</a>");
-      }
-      else
-      {
-         string_join  (&buf, s);
-      }
-   }
-
-   string_append(&buf, "<br>\n");
-
-   string_join(&config->proxy_args, buf);
 }
 
 

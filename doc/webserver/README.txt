@@ -3,7 +3,6 @@ on the project's homepage
 
    ijbswa.sourceforge.net:/home/groups/i/ij/ijbswa/htdocs/
 
-which is indeed http://ijbswa.sourceforge.net 
-and http://www.privoxy.org/.
+which is indeed http://ijbswa.sourceforge.net.
 
--Stefan, April 2002
+-Stefan, June 2001

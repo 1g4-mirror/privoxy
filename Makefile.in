@@ -1,0 +1,352 @@
+# Note:  Makefile is built automatically from Makefile.in
+#
+# $Id: Makefile.in,v 1.12 2001/06/12 17:15:56 swa Exp $
+#
+# Written by and Copyright (C) 2001 the SourceForge
+# IJBSWA team.  http://ijbswa.sourceforge.net
+#
+# Based on the Internet Junkbuster originally written
+# by and Copyright (C) 1997 Anonymous Coders and 
+# Junkbusters Corporation.  http://www.junkbusters.com
+#
+# This program is free software; you can redistribute it 
+# and/or modify it under the terms of the GNU General
+# Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at
+# your option) any later version.
+#
+# This program is distributed in the hope that it will
+# be useful, but WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.  See the GNU General Public
+# License for more details.
+#
+# The GNU General Public License should be included with
+# this file.  If not, you can view it at
+# http://www.gnu.org/copyleft/gpl.html
+# or write to the Free Software Foundation, Inc., 59
+# Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+#
+# $Log: Makefile.in,v $
+# Revision 1.12  2001/06/12 17:15:56  swa
+# fixes, because a clean build on rh6.1 was impossible.
+# GZIP confuses make, %configure confuses rpm, etc.
+#
+# Revision 1.11  2001/06/11 11:26:35  sarantis
+# RPM version should be the same as ijbswa version.  The rpm release is
+# specified in the specfile.
+#
+# Revision 1.10  2001/06/07 17:27:45  swa
+# added suse build section
+#
+# Revision 1.9  2001/06/04 18:31:58  swa
+# files are now prefixed with either `confdir' or `logdir'.
+# `make redhat-dist' replaces both entries confdir and logdir
+# with redhat values
+#
+# Revision 1.8  2001/06/04 10:44:57  swa
+# `make redhatr-dist' now works. Except for the paths
+# in the config file.
+#
+# Revision 1.7  2001/06/03 17:09:09  swa
+# swa for oes: reversed my earlier change
+#
+# Revision 1.6  2001/06/03 17:07:27  swa
+# swa for oes
+#
+# Revision 1.5  2001/06/03 13:57:26  swa
+# compile cgi.c (for andreas' GUI)
+#
+# Revision 1.4  2001/05/31 21:18:45  jongfoster
+# Added files actions.[ch], actionlist.h, list.[ch] to Makefile
+#
+# Revision 1.3  2001/05/29 20:02:48  joergs
+# Changes for AmigaOS added.
+#
+# Revision 1.2  2001/05/17 22:23:23  oes
+#  - Added auto-generation of CRLFs for Win32 config files
+#  - Added comment-prefix to all Win32-only options in the config file
+#    and provided auto stripping of this prefix for the Win32 platform by make
+#
+# Revision 1.1.1.1  2001/05/15 13:59:00  oes
+# Initial import of version 2.9.3 source tree
+#
+#
+
+
+# define version (will be wired into the rpm.)
+VERSION_MAJOR = @VERSION_MAJOR@
+VERSION_MINOR = @VERSION_MINOR@
+VERSION_POINT = @VERSION_POINT@
+VERSION       = $(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_POINT)
+# will automatically be postfixed with -$(RPM_PACKAGEV) in the SPECfile
+RPM_VERSION   = $(VERSION)
+RPM_PACKAGEV  = 1
+
+# The version is currently specified in config.h, which is
+# written by "configure".
+#
+#VERSION_CFLAGS = -DVERSION_MAJOR=$(VERSION_MAJOR) \
+#                 -DVERSION_MINOR=$(VERSION_MINOR) \
+#                 -DVERSION_POINT=$(VERSION_POINT) \
+#                 -DVERSION="$(VERSION)"
+
+# Directories for "make install"
+DEST        = /etc/junkbuster
+SBIN_DEST   = @sbindir@
+MAN_DEST    = @mandir@
+
+# The flag "-mno-win32" can be used by Cygwin to emulate a un?x type install.
+# The flag "-mwindows -mno-cygwin" will cause Cygwin to use MingW32 for Win32 install.
+CYGWIN_FLAGS = @CYGWIN_FLAGS@
+
+# Need to define this in order to link PCRE statically under Win32
+# Also define under UNIX to use system PCRE headers.
+PCRE_WIN_FLAGS = @STATIC_PCRE_ONLY@-DSTATIC
+
+# Either/Or of these next two lines
+#DEBUG_CFLAGS = -g
+DEBUG_CFLAGS  = -O3
+
+# Solaris needs a special define:
+# FIXME: This is always commented out
+SOLARIS_FLAGS = @SOLARIS_ONLY@-D__EXTENSIONS__=1
+
+#  -DSTDC_HEADERS Now in config.h
+# Do we need  -DHAVE_STRING  ???
+CFLAGS = @CFLAGS@ @CPPFLAGS@ \
+         -D__MT__=1 -D__STDC__=1 $(SOLARIS_FLAGS) -DHAVE_STRING $(DEBUG_CFLAGS) \
+         -Ipcre $(CYGWIN_FLAGS) $(PCRE_WIN_FLAGS)
+
+PROGRAM = junkbuster@EXEEXT@
+CC      = gcc
+ECHO    = echo
+GZIP_PROG    = gzip
+INSTALL = cp -f
+LD      = gcc
+OBJEXT  = @OBJEXT@
+RM      = rm -f
+STRIP_PROG   = strip
+
+C_SRC  = actions.c encode.c errlog.c filters.c gateway.c jbsockets.c \
+         jcc.c killpopup.c list.c loadcfg.c loaders.c miscutil.c \
+         parsers.c showargs.c ssplit.c cgi.c
+         
+C_OBJS = $(C_SRC:.c=.$(OBJEXT))
+C_HDRS = $(C_SRC:.c=.h) project.h actionlist.h
+
+W32_SRC   = @WIN_ONLY@w32log.c w32rulesdlg.c w32taskbar.c win32.c
+W32_FILES = @WIN_ONLY@w32.res
+W32_OBJS  = @WIN_ONLY@$(W32_SRC:.c=.$(OBJEXT)) $(W32_FILES)
+W32_HDRS  = @WIN_ONLY@w32log.h w32res.h w32rulesdlg.h w32taskbar.h
+W32_LIB   = @WIN_ONLY@-lwsock32 -lcomctl32
+W32_INIS  = @WIN_ONLY@junkbstr.txt saclfile.txt sblock.txt scookie.txt  \
+            @WIN_ONLY@sforward.txt simage.txt spopup.txt strust.txt sregexp.txt
+
+PCRS_SRC     = @PCRS_ONLY@pcrs.c
+PCRS_OBJS    = $(PCRS_SRC:.c=.$(OBJEXT))
+PCRS_HDRS    = $(PCRS_SRC:.c=.h)
+
+PCRE_SRC     = @STATIC_PCRE_ONLY@pcre/get.c pcre/maketables.c pcre/study.c pcre/pcre.c
+PCRE_OBJS    = @STATIC_PCRE_ONLY@$(PCRE_SRC:.c=.$(OBJEXT))
+PCRE_HDRS    = @STATIC_PCRE_ONLY@pcre/config.h pcre/chartables.c pcre/internal.h pcre/pcre.h
+PCRE_LIB     = @LIBRARY_PCRE_ONLY@-lpcre
+
+# No REGEX:
+@NO_REGEX_ONLY@REGEX_SRC    =
+# Without PCRE:
+@GNU_REGEX_ONLY@REGEX_SRC    = gnu_regex.c
+# With PCRE:
+@PCRE_REGEX_ONLY@REGEX_SRC    = @STATIC_PCRE_ONLY@pcre/pcreposix.c
+
+REGEX_OBJS   = $(REGEX_SRC:.c=.$(OBJEXT))
+REGEX_HDRS   = $(REGEX_SRC:.c=.h)
+
+# Dependencies introduced by #include "project.h".
+PROJECT_H_DEPS = project.h $(REGEX_HDRS) $(PCRS_HDRS) @STATIC_PCRE_ONLY@pcre/pcre.h
+
+# Only need this on Solaris
+# FIXME: This is always commented out
+SOCKET_LIB   = @SOLARIS_ONLY@-lsocket -lnsl
+
+LIBS         = $(PCRE_LIB) $(W32_LIB) $(SOCKET_LIB)
+
+SRCS         = $(C_SRC)  $(W32_SRC)  $(PCRS_SRC)  $(PCRE_SRC)  $(REGEX_SRC)
+OBJS         = $(C_OBJS) $(W32_OBJS) $(PCRS_OBJS) $(PCRE_OBJS) $(REGEX_OBJS)
+HDRS         = $(C_HDRS) $(W32_HDRS) $(PCRS_HDRS) $(PCRE_OBJS) $(REGEX_HDRS)
+
+
+# -------------------------------------------------------------------------
+# Do not change anything below this line
+# And there should NOT be any targets above this line.
+# -------------------------------------------------------------------------
+LDFLAGS = $(DEBUG_CFLAGS) $(CYGWIN_FLAGS)
+
+
+all: $(PROGRAM)
+
+
+SUFFIX     = .txt:o
+.SUFFIXES  : .txt
+
+%.txt:
+	sed -e 's/$$/&/' < $< > $@
+
+inifiles: $(W32_INIS)
+
+junkbstr.txt: config
+	sed	-e 's!\(/etc/junkbuster\|.\)/blocklist!sblock.txt!' \
+			-e 's!\(/etc/junkbuster\|.\)/popup!spopup.txt!' \
+			-e 's!\(/etc/junkbuster\|.\)/cookiefile!scookie.txt!' \
+			-e 's!\(/etc/junkbuster\|.\)/forward!sforward.txt!' \
+			-e 's!\(/etc/junkbuster\|.\)/trust!strust.txt!' \
+			-e 's!\(/etc/junkbuster\|.\)/aclfile!sacl.txt!' \
+			-e 's!\(/var/log/junkbuster\|.\)/jarfile!jar.log!' \
+			-e 's!\(/var/log/junkbuster\|.\)/junkbuster\.log!junkbstr.log!' \
+			-e 's!\(/etc/junkbuster\|.\)/imagelist!simage.txt!' \
+			-e 's!\(/etc/junkbuster\|.\)/re_filterfile!sregexp.txt!' \
+			-e 's!$$!&!' \
+			-e 's!#Win32-only: !!' \
+	< $< > $@
+
+saclfile.txt: aclfile
+sblock.txt: blocklist
+scookie.txt: cookiefile
+sforward.txt: forward
+simage.txt: imagelist
+spopup.txt: popup
+strust.txt: trust
+sregexp.txt: re_filterfile
+
+
+# -------------------------------------------------------------------------
+# redhat distribution
+# -------------------------------------------------------------------------
+redhat-dist:
+	@make clobber
+# verify that i'm root needs to be done
+	rm -f ../ijbswa.tar.gz
+# verify all version strings, FLAGS, etc. in the spec file
+	cat junkbuster-rh.spec | sed 's/^Version:.*/Version: $(RPM_VERSION)/g' | sed 's/^Release:.*/Release: $(RPM_PACKAGEV)/g' > /tmp/abc && cp -f /tmp/abc junkbuster-rh.spec
+	tar --exclude "CVS" --exclude "junkbuster-suse.spec" -cvzf ../ijbswa.tar.gz .
+# verify all files in their correct location needs to be done
+	cd .. && rpm -ta ijbswa.tar.gz
+
+# -------------------------------------------------------------------------
+# suse distribution
+# -------------------------------------------------------------------------
+suse-dist:
+	@make clobber
+# verify that i'm root needs to be done
+	rm -f ../ijbswa.tar.gz
+# verify all version strings, FLAGS, etc. in the spec file
+	cat junkbuster-suse.spec | sed 's/^Version:.*/Version: $(RPM_VERSION)/g' | sed 's/^Release:.*/Release: $(RPM_PACKAGEV)/g' > /tmp/abc && cp -f /tmp/abc junkbuster-suse.spec
+	tar --exclude "CVS" --exclude "junkbuster-rh.spec" -cvzf ../ijbswa.tar.gz .
+# verify all files in their correct location needs to be done
+	cd .. && rpm -ta ijbswa.tar.gz
+
+# -------------------------------------------------------------------------
+#
+# -------------------------------------------------------------------------
+win-dist:
+	$(ECHO) Not implemented.
+
+# -------------------------------------------------------------------------
+#
+# -------------------------------------------------------------------------
+tarball-dist:
+	@make clean
+	make $(PROGRAM) 
+#	remove all objects and create the tarball with the binary
+	cd .. && $(RM) ijb/a.out ijb/core ijb/*.$(OBJEXT) && tar --exclude "ijb/CVS" -cvzf ../ijb-distribution-$(VERSION).tar.gz ijb/
+	chmod a+r ../../ijb-distribution-$(VERSION).tar.gz
+	@$(ECHO) Tarball with binary created.
+
+# -------------------------------------------------------------------------
+#
+# -------------------------------------------------------------------------
+
+actions.@OBJEXT@:   actions.c   actions.h   config.h $(PROJECT_H_DEPS) errlog.h jcc.h list.h loaders.h miscutil.h actionlist.h
+encode.@OBJEXT@:    encode.c    encode.h    config.h
+errlog.@OBJEXT@:    errlog.c    errlog.h    config.h $(PROJECT_H_DEPS) @WIN_ONLY@w32log.h
+filters.@OBJEXT@:   filters.c   filters.h   config.h $(PROJECT_H_DEPS) errlog.h encode.h gateway.h jbsockets.h jcc.h loadcfg.h parsers.h showargs.h ssplit.h @WIN_ONLY@win32.h cgi.h
+gateway.@OBJEXT@:   gateway.c   gateway.h   config.h $(PROJECT_H_DEPS) errlog.h jbsockets.h jcc.h loadcfg.h
+jbsockets.@OBJEXT@: jbsockets.c jbsockets.h config.h $(PROJECT_H_DEPS) filters.h
+jcc.@OBJEXT@:       jcc.c       jcc.h       config.h $(PROJECT_H_DEPS) errlog.h filters.h gateway.h jbsockets.h killpopup.h loadcfg.h loaders.h miscutil.h parsers.h showargs.h @WIN_ONLY@w32log.h win32.h cgi.h
+killpopup.@OBJEXT@: killpopup.c killpopup.h config.h $(PROJECT_H_DEPS) jcc.h loadcfg.h
+list.@OBJEXT@:      list.c      list.h      config.h $(PROJECT_H_DEPS) list.h miscutil.h
+loadcfg.@OBJEXT@:   loadcfg.c   loadcfg.h   config.h $(PROJECT_H_DEPS) errlog.h filters.h gateway.h jbsockets.h jcc.h killpopup.h loaders.h miscutil.h parsers.h showargs.h @WIN_ONLY@w32log.h win32.h
+loaders.@OBJEXT@:   loaders.c   loaders.h   config.h $(PROJECT_H_DEPS) errlog.h encode.h filters.h gateway.h jcc.h loadcfg.h miscutil.h parsers.h ssplit.h
+miscutil.@OBJEXT@:  miscutil.c  miscutil.h  config.h
+parsers.@OBJEXT@:   parsers.c   parsers.h   config.h $(PROJECT_H_DEPS) errlog.h encode.h filters.h jbsockets.h jcc.h loadcfg.h loaders.h miscutil.h showargs.h ssplit.h
+showargs.@OBJEXT@:  showargs.c  showargs.h  config.h $(PROJECT_H_DEPS) errlog.h encode.h gateway.h jcc.h loadcfg.h miscutil.h parsers.h
+ssplit.@OBJEXT@:    ssplit.c    ssplit.h    config.h miscutil.h
+cgi.@OBJEXT@:       cgi.c       cgi.h       config.h $(PROJECT_H_DEPS) list.h pcrs.h encode.h ssplit.h jcc.h filters.h actions.h errlog.h miscutil.h
+
+# GNU regex
+gnu_regex.@OBJEXT@: gnu_regex.c gnu_regex.h config.h
+
+# PCRS
+pcrs.@OBJEXT@: pcrs.c pcre/pcre.h pcrs.h
+
+# PCRE
+pcre/get.@OBJEXT@:        pcre/get.c        pcre/config.h pcre/internal.h pcre/pcre.h
+pcre/maketables.@OBJEXT@: pcre/maketables.c pcre/config.h pcre/internal.h pcre/pcre.h
+pcre/pcre.@OBJEXT@:       pcre/pcre.c       pcre/config.h pcre/internal.h pcre/pcre.h pcre/chartables.c 
+pcre/pcreposix.@OBJEXT@:  pcre/pcreposix.c  pcre/config.h pcre/internal.h pcre/pcre.h pcre/pcreposix.h
+pcre/study.@OBJEXT@:      pcre/study.c      pcre/config.h pcre/internal.h pcre/pcre.h
+
+# An auxiliary program makes the PCRE default character table source
+
+pcre/chartables.c:   pcre/dftables
+		pcre/dftables >pcre/chartables.c
+
+pcre/dftables:       pcre/dftables.c pcre/maketables.c pcre/pcre.h pcre/internal.h pcre/config.h
+		$(CC) -o pcre/dftables $(CFLAGS) pcre/dftables.c
+
+# Win32
+w32log.@OBJEXT@: w32log.c errlog.h config.h jcc.h loadcfg.h miscutil.h pcre/pcre.h pcre/pcreposix.h pcrs.h project.h w32log.h w32rulesdlg.h w32taskbar.h win32.h
+w32rulesdlg.@OBJEXT@: w32rulesdlg.c config.h w32rulesdlg.h win32.h
+w32taskbar.@OBJEXT@: w32taskbar.c config.h w32log.h w32taskbar.h
+win32.@OBJEXT@: win32.c config.h jcc.h loadcfg.h pcre/pcre.h pcre/pcreposix.h pcrs.h project.h w32log.h win32.h
+
+w32.res: w32.rc w32res.h icons/denyrule.ico icons/ico00001.ico icons/ico00002.ico icons/ico00003.ico icons/ico00004.ico icons/ico00005.ico icons/ico00006.ico icons/ico00007.ico icons/ico00008.ico icons/icon1.ico icons/idle.ico icons/junkbust.ico config.h
+	windres -D__MINGW32__=0.2 -O coff -i $< -o $@
+
+## AmigaOS, GCC 2.95.1 (or lower, 2.95.3 does NOT work!)
+#ifeq ($(shell $(CC) $(CFLAGS) -dumpmachine), m68k-amigaos)
+#OBJS += amiga.o
+#CFLAGS += -D__AMIGAVERSION__=\"$(VERSION_MAJOR).$(VERSION_MINOR)$(VERSION_POINT)\" -D__AMIGADATE__=\"`date +%d.%m.%Y`\" -W -Wall -m68020 -Os -noixemul -fbaserel -msmall-code
+#LDFLAGS += -m68020 -noixemul -fbaserel
+#LIBS = -lm /gg/lib/libb/libm020/libnix/swapstack.o
+#amiga.o: amiga.c amiga.h config.h
+#endif
+#
+
+$(PROGRAM): $(OBJS) $(W32_FILES)
+	$(LD) $(LDFLAGS) -o $(PROGRAM) $(OBJS) $(LIBS)
+
+clean:
+	$(RM) a.out core $(OBJS) $(W32_FILES) $(W32_INIS)
+
+clobber: clean
+	$(RM) $(PROGRAM) *.pdb *.lib *.exp TAGS junkbuster.log
+
+tags: $(SRCS) $(HDRS)
+	etags $(SRCS) $(HDRS)
+
+install: all
+	$(STRIP_PROG) $(PROGRAM)
+	$(INSTALL) $(PROGRAM) $(SBIN_DEST)
+	$(INSTALL) README README.TOO README.WIN README.re_filter README.cygwin $(DEST)
+	$(INSTALL) aclfile blocklist config cookiefile forward imagelist \
+		popup re_filterfile trust $(DEST)
+	# FIXME: On SuSE, these are not found.  Where do they go?
+	$(ECHO) junkbuster.logrotate junkbuster.monthly junkbuster.weekly
+	$(GZIP_PROG) -c junkbuster.1 > $(MAN_DEST)/junkbuster.1.gz
+	$(INSTALL) junkbuster.init /sbin/init.d/junkbuster
+
+
+## Local Variables:
+## tab-width: 3
+## end:

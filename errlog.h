@@ -1,6 +1,6 @@
-#ifndef ERRLOG_H_INCLUDED
-#define ERRLOG_H_INCLUDED
-#define ERRLOG_H_VERSION "$Id: errlog.h,v 1.12 2002/03/24 13:25:43 swa Exp $"
+#ifndef _ERRLOG_H
+#define _ERRLOG_H
+#define ERRLOG_H_VERSION "$Id: errlog.h,v 1.4 2001/05/25 21:56:06 jongfoster Exp $"
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/errlog.h,v $
@@ -9,7 +9,7 @@
  *                printf-like fashion.
  *
  * Copyright   :  Written by and Copyright (C) 2001 the SourceForge
- *                Privoxy team. http://www.privoxy.org/
+ *                IJBSWA team.  http://ijbswa.sourceforge.net
  *
  *                Based on the Internet Junkbuster originally written
  *                by and Copyright (C) 1997 Anonymous Coders and 
@@ -35,36 +35,6 @@
  *
  * Revisions   :
  *    $Log: errlog.h,v $
- *    Revision 1.12  2002/03/24 13:25:43  swa
- *    name change related issues
- *
- *    Revision 1.11  2002/03/06 23:02:57  jongfoster
- *    Removing tabs
- *
- *    Revision 1.10  2001/09/13 20:08:06  jongfoster
- *    Adding support for LOG_LEVEL_CGI
- *
- *    Revision 1.9  2001/07/30 22:08:36  jongfoster
- *    Tidying up #defines:
- *    - All feature #defines are now of the form FEATURE_xxx
- *    - Permanently turned off WIN_GUI_EDIT
- *    - Permanently turned on WEBDAV and SPLIT_PROXY_ARGS
- *
- *    Revision 1.8  2001/07/29 18:43:08  jongfoster
- *    Changing #ifdef _FILENAME_H to FILENAME_H_INCLUDED, to conform to
- *    ANSI C rules.
- *
- *    Revision 1.7  2001/07/19 19:02:53  haroon
- *    Added define for LOG_LEVEL_POPUPS
- *
- *    Revision 1.6  2001/07/13 13:59:22  oes
- *     - Added LOG_LEVEL_DEANIMATE
- *     - Changed LOG_LEVEL_CLF
- *     - Removed all #ifdef PCRS
- *
- *    Revision 1.5  2001/05/26 17:25:14  jongfoster
- *    Added support for CLF (Common Log Format) and fixed LOG_LEVEL_LOG
- *
  *    Revision 1.4  2001/05/25 21:56:06  jongfoster
  *    Added FIXME comment to (broken) LOG_LEVEL_LOG
  *
@@ -135,21 +105,17 @@ extern "C" {
 #define LOG_LEVEL_IO         0x0004
 #define LOG_LEVEL_HEADER     0x0008
 #define LOG_LEVEL_LOG        0x0010
-#ifdef FEATURE_FORCE_LOAD
+#ifdef FORCE_LOAD
 #define LOG_LEVEL_FORCE      0x0020
-#endif /* def FEATURE_FORCE_LOAD */
+#endif /* def FORCE_LOAD */
+#ifdef PCRS
 #define LOG_LEVEL_RE_FILTER  0x0040
-#ifdef FEATURE_FAST_REDIRECTS
+#endif /* def PCRS */
+#ifdef FAST_REDIRECTS
 #define LOG_LEVEL_REDIRECTS  0x0080
-#endif /* def FEATURE_FAST_REDIRECTS */
-#define LOG_LEVEL_DEANIMATE  0x0100
+#endif /* def FAST_REDIRECTS */
 
-#define LOG_LEVEL_CLF        0x0200 /* Common Log File format */
-#ifdef FEATURE_KILL_POPUPS
-#define LOG_LEVEL_POPUPS     0x0400 /* Kill Popups */
-#endif /* def FEATURE_KILL_POPUPS */
-
-#define LOG_LEVEL_CGI   0x0800 /* CGI / templates */
+#define LOG_LEVEL_CLF        0x0100 /* Common Log File format */
 
 /* Following are always on: */
 #define LOG_LEVEL_INFO    0x1000
@@ -167,7 +133,7 @@ extern const char errlog_h_rcs[];
 } /* extern "C" */
 #endif
 
-#endif /* ndef ERRLOG_H_INCLUDED */
+#endif /* ndef _ERRLOG_H */
 
 /*
   Local Variables:
