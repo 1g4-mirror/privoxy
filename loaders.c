@@ -1,7 +1,7 @@
-const char loaders_rcs[] = "$Id: loaders.c,v 1.49 2002/04/19 16:53:25 jongfoster Exp $";
+const char loaders_rcs[] = "$Id: loaders.c,v 1.50 2002/04/24 02:12:16 oes Exp $";
 /*********************************************************************
  *
- * File        :  $Source: /cvsroot/ijbswa/current/loaders.c,v $
+ * File        :  $Source: /cvsroot/ijbswa/current/Attic/loaders.c,v $
  *
  * Purpose     :  Functions to load and unload the various
  *                configuration files.  Also contains code to manage
@@ -35,6 +35,9 @@ const char loaders_rcs[] = "$Id: loaders.c,v 1.49 2002/04/19 16:53:25 jongfoster
  *
  * Revisions   :
  *    $Log: loaders.c,v $
+ *    Revision 1.50  2002/04/24 02:12:16  oes
+ *    Jon's multiple AF patch: Sweep now takes care of all AFs
+ *
  *    Revision 1.49  2002/04/19 16:53:25  jongfoster
  *    Optimize away a function call by using an equivalent macro
  *
@@ -1236,7 +1239,7 @@ int load_re_filterfile(struct client_state *csp)
    char  buf[BUFFER_SIZE];
    int error;
    unsigned long linenum = 0;
-   pcrs_job *dummy;
+   pcrs_job *dummy, *lastjob = NULL;
 
    /*
     * No need to reload if unchanged
@@ -1323,14 +1326,21 @@ int load_re_filterfile(struct client_state *csp)
 
          if ((dummy = pcrs_compile_command(buf, &error)) == NULL)
          {
-            log_error(LOG_LEVEL_RE_FILTER,
+            log_error(LOG_LEVEL_ERROR,
                       "Adding re_filter job %s to filter %s failed with error %d.", buf, bl->name, error);
             continue;
          }
          else
          {
-            dummy->next = bl->joblist;
-            bl->joblist = dummy;
+            if (bl->joblist == NULL)
+            {
+               bl->joblist = dummy;
+            }
+            else
+            {
+               lastjob->next = dummy;
+            }
+            lastjob = dummy;
             log_error(LOG_LEVEL_RE_FILTER, "Adding re_filter job %s to filter %s succeeded.", buf, bl->name);
          }
       }
