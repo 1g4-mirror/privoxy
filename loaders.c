@@ -1,7 +1,7 @@
-const char loaders_rcs[] = "$Id: loaders.c,v 1.50.2.1 2002/07/26 15:19:24 oes Exp $";
+const char loaders_rcs[] = "$Id: loaders.c,v 1.50.2.2 2002/11/20 14:38:15 oes Exp $";
 /*********************************************************************
  *
- * File        :  $Source: /cvsroot/ijbswa/current/Attic/loaders.c,v $
+ * File        :  $Source: /cvsroot/ijbswa//current/Attic/loaders.c,v $
  *
  * Purpose     :  Functions to load and unload the various
  *                configuration files.  Also contains code to manage
@@ -35,6 +35,11 @@ const char loaders_rcs[] = "$Id: loaders.c,v 1.50.2.1 2002/07/26 15:19:24 oes Ex
  *
  * Revisions   :
  *    $Log: loaders.c,v $
+ *    Revision 1.50.2.2  2002/11/20 14:38:15  oes
+ *    Fixed delayed/incomplete freeing of client resources and
+ *    simplified loop structure in sweep.
+ *    Thanks to Oliver Stoeneberg for the hint.
+ *
  *    Revision 1.50.2.1  2002/07/26 15:19:24  oes
  *    - PCRS jobs now chained in order of appearance. Previous
  *      reverse chaining was counter-intuitive.
@@ -395,6 +400,8 @@ void sweep(void)
             csp->tlist->active = 1;
          }
 #endif /* def FEATURE_TRUST */
+         
+         csp = csp->next;
 
       }
       else 
