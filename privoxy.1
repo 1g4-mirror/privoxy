@@ -3,7 +3,7 @@
 .\" <http://shell.ipoline.com/~elmert/comp/docbook2X/> 
 .\" Please send any bug reports, improvements, comments, patches, 
 .\" etc. to Steve Cheng <steve@ggi-project.org>.
-.TH "PRIVOXY" "1" "19 March 2003" "Privoxy 3.0.1" ""
+.TH "PRIVOXY" "1" "26 August 2002" "Privoxy 3.0.0" ""
 .SH NAME
 privoxy \- Privacy Enhancing Proxy
 .SH SYNOPSIS
@@ -41,14 +41,6 @@ After (optionally) writing the PID file, assume the user ID of
 \fIgroup\fR was not given, the default group of
 \fIuser\fR. Exit if the privileges are not
 sufficient to do so.
-.TP
-\fB--chroot\fR
-Before changing to the user ID given in the --user option, chroot to
-that user's home directory, i.e. make the kernel pretend to the
-\fBPrivoxy\fR process that the directory tree starts
-there. If set up carefully, this can limit the impact of possible
-vulnerabilities in \fBPrivoxy\fR to the files contained in
-that hierarchy. 
 .PP
 If the \fIconfigfile\fR is not specified on  the  command  line,
 \fBPrivoxy\fR  will  look for a file named
@@ -283,30 +275,24 @@ the \fBPrivoxy\fR developer manual.
 .SH "DEVELOPMENT TEAM"
 
 .nf
- Andreas Oesterhelt (lead developer)
- Hal Burgiss (docs)
- David Schmidt (OS/2, Mac OSX ports)
-
- Johny Agotnes 
+ Jon Foster
+ Andreas Oesterhelt
+ Stefan Waldherr
+ Thomas Steudten
+ Rodney Stromlund
  Rodrigo Barbosa (RPM specfiles)
  Moritz Barsnick
- Mattes Dolak 
- Jon Foster
+ Hal Burgiss (docs)
  Karsten Hopp (Red Hat)
  Alexander Lazic
- Daniel Leite
  Gábor Lipták
- Andrew Lock (Win32)
- Guy Laroche
+ Guy
  Haroon Rafique
  Roland Rosenfeld (Debian)
  Georg Sauthoff (Gentoo)
- Thomas Steudten
+ David Schmidt (OS/2, Mac OSX ports)
  Joerg Strohmayer (Amiga)
- Rodney Stromlund
- Sviatoslav Sviridov
  Sarantis Paskalis
- Stefan Waldherr
 .fi
 .SH "COPYRIGHT AND LICENSE"
 .SS "COPYRIGHT"
