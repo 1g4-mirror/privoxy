@@ -1,4 +1,4 @@
-const char errlog_rcs[] = "$Id: errlog.c,v 1.40.2.1 2002/09/25 12:47:42 oes Exp $";
+const char errlog_rcs[] = "$Id: errlog.c,v 1.40.2.2 2002/09/28 00:30:57 david__schmidt Exp $";
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/Attic/errlog.c,v $
@@ -33,6 +33,11 @@ const char errlog_rcs[] = "$Id: errlog.c,v 1.40.2.1 2002/09/25 12:47:42 oes Exp 
  *
  * Revisions   :
  *    $Log: errlog.c,v $
+ *    Revision 1.40.2.2  2002/09/28 00:30:57  david__schmidt
+ *    Update error logging to give sane values for thread IDs on Mach kernels.
+ *    It's still a hack, but at least it looks farily normal.  We print the
+ *    absolute value of the first 4 bytes of the pthread_t modded with 1000.
+ *
  *    Revision 1.40.2.1  2002/09/25 12:47:42  oes
  *    Make log_error safe against NULL string arguments
  *
@@ -459,6 +464,10 @@ void log_error(int loglevel, char *fmt, ...)
        time (&now);
 #ifdef HAVE_LOCALTIME_R
        tm_now = *localtime_r(&now, &tm_now);
+#elif OSX_DARWIN
+       pthread_mutex_lock(&localtime_mutex);
+       tm_now = *localtime (&now); 
+       pthread_mutex_unlock(&localtime_mutex);
 #else
        tm_now = *localtime (&now); 
 #endif
@@ -722,11 +731,19 @@ void log_error(int loglevel, char *fmt, ...)
                time (&now); 
 #ifdef HAVE_GMTIME_R
                gmt = *gmtime_r(&now, &gmt);
+#elif OSX_DARWIN
+               pthread_mutex_lock(&gmtime_mutex);
+               gmt = *gmtime(&now);
+               pthread_mutex_unlock(&gmtime_mutex);
 #else
                gmt = *gmtime(&now);
 #endif
 #ifdef HAVE_LOCALTIME_R
                tm_now = localtime_r(&now, &dummy);
+#elif OSX_DARWIN
+               pthread_mutex_lock(&localtime_mutex);
+               tm_now = localtime (&now); 
+               pthread_mutex_unlock(&localtime_mutex);
 #else
                tm_now = localtime (&now); 
 #endif

@@ -1,4 +1,4 @@
-const char parsers_rcs[] = "$Id: parsers.c,v 1.56.2.2 2002/09/25 14:59:53 oes Exp $";
+const char parsers_rcs[] = "$Id: parsers.c,v 1.56.2.3 2002/11/10 04:20:02 hal9 Exp $";
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/Attic/parsers.c,v $
@@ -40,6 +40,9 @@ const char parsers_rcs[] = "$Id: parsers.c,v 1.56.2.2 2002/09/25 14:59:53 oes Ex
  *
  * Revisions   :
  *    $Log: parsers.c,v $
+ *    Revision 1.56.2.3  2002/11/10 04:20:02  hal9
+ *    Fix typo: supressed -> suppressed
+ *
  *    Revision 1.56.2.2  2002/09/25 14:59:53  oes
  *    Improved cookie logging
  *
@@ -416,6 +419,11 @@ const char parsers_rcs[] = "$Id: parsers.c,v 1.56.2.2 2002/09/25 14:59:53 oes Ex
 #include <unistd.h>
 #endif
 
+#ifdef OSX_DARWIN
+#include <pthread.h>
+#include "jcc.h"
+/* jcc.h is for mutex semapores only */
+#endif /* def OSX_DARWIN */
 #include "project.h"
 #include "list.h"
 #include "parsers.h"
@@ -1775,6 +1783,10 @@ jb_err server_set_cookie(struct client_state *csp, char **header)
       time (&now); 
 #ifdef HAVE_LOCALTIME_R
       tm_now = *localtime_r(&now, &tm_now);
+#elif OSX_DARWIN
+      pthread_mutex_lock(&localtime_mutex);
+      tm_now = *localtime (&now); 
+      pthread_mutex_unlock(&localtime_mutex);
 #else
       tm_now = *localtime (&now); 
 #endif
