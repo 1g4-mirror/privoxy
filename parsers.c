@@ -1,4 +1,4 @@
-const char parsers_rcs[] = "$Id: parsers.c,v 1.56.2.4 2003/03/07 03:41:05 david__schmidt Exp $";
+const char parsers_rcs[] = "$Id: parsers.c,v 1.56.2.5 2003/04/14 12:08:16 oes Exp $";
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/Attic/parsers.c,v $
@@ -40,6 +40,9 @@ const char parsers_rcs[] = "$Id: parsers.c,v 1.56.2.4 2003/03/07 03:41:05 david_
  *
  * Revisions   :
  *    $Log: parsers.c,v $
+ *    Revision 1.56.2.5  2003/04/14 12:08:16  oes
+ *    Added temporary workaround for bug in PHP < 4.2.3
+ *
  *    Revision 1.56.2.4  2003/03/07 03:41:05  david__schmidt
  *    Wrapping all *_r functions (the non-_r versions of them) with mutex semaphores for OSX.  Hopefully this will take care of all of those pesky crash reports.
  *
@@ -491,7 +494,7 @@ const add_header_func_ptr add_client_headers[] = {
    client_cookie_adder,
    client_x_forwarded_adder,
    client_xtra_adder,
-   client_accept_encoding_adder,
+   /* Temporarily disabled:    client_accept_encoding_adder, */
    connection_close_adder,
    NULL
 };
