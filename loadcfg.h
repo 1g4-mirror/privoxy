@@ -1,9 +1,9 @@
 #ifndef LOADCFG_H_INCLUDED
 #define LOADCFG_H_INCLUDED
-#define LOADCFG_H_VERSION "$Id: loadcfg.h,v 1.10 2002/03/24 13:25:43 swa Exp $"
+#define LOADCFG_H_VERSION "$Id: loadcfg.h,v 1.11 2002/03/26 22:29:55 swa Exp $"
 /*********************************************************************
  *
- * File        :  $Source: /cvsroot/ijbswa/current/loadcfg.h,v $
+ * File        :  $Source: /cvsroot/ijbswa/current/Attic/loadcfg.h,v $
  *
  * Purpose     :  Loads settings from the configuration file into
  *                global variables.  This file contains both the 
@@ -37,6 +37,9 @@
  *
  * Revisions   :
  *    $Log: loadcfg.h,v $
+ *    Revision 1.11  2002/03/26 22:29:55  swa
+ *    we have a new homepage!
+ *
  *    Revision 1.10  2002/03/24 13:25:43  swa
  *    name change related issues
  *
@@ -149,8 +152,8 @@ struct configuration_spec;
 /* Global variables */
 
 #ifdef FEATURE_TOGGLE
-/* indicates if ijb is enabled */
-extern int g_bToggleIJB;
+/* Privoxy's toggle state */
+extern int global_toggle_state;
 #endif /* def FEATURE_TOGGLE */
 
 extern const char *configfile;

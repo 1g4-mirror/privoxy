@@ -1,4 +1,4 @@
-const char w32log_rcs[] = "$Id: w32log.c,v 1.25.2.2 2002/09/25 15:23:10 oes Exp $";
+const char w32log_rcs[] = "$Id: w32log.c,v 1.25.2.3 2002/11/20 14:39:05 oes Exp $";
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/Attic/w32log.c,v $
@@ -32,6 +32,9 @@ const char w32log_rcs[] = "$Id: w32log.c,v 1.25.2.2 2002/09/25 15:23:10 oes Exp 
  *
  * Revisions   :
  *    $Log: w32log.c,v $
+ *    Revision 1.25.2.3  2002/11/20 14:39:05  oes
+ *    Fixed compiler warning
+ *
  *    Revision 1.25.2.2  2002/09/25 15:23:10  oes
  *    Uncheck the "Show Privoxy Window" taskbar menu item when window gets minimized. Fixes bug #606804
  *
@@ -1105,8 +1108,8 @@ void OnLogCommand(int nCommand)
 #ifdef FEATURE_TOGGLE
       /* by haroon - change toggle to its opposite value */
       case ID_TOGGLE_ENABLED:
-         g_bToggleIJB = !g_bToggleIJB;
-         if (g_bToggleIJB)
+         global_toggle_state = !global_toggle_state;
+         if (global_toggle_state)
          {
             log_error(LOG_LEVEL_INFO, "Now toggled ON.");
          }
@@ -1197,7 +1200,7 @@ void OnLogInitMenu(HMENU hmenu)
    CheckMenuItem(hmenu, ID_VIEW_ACTIVITYANIMATION, MF_BYCOMMAND | (g_bShowActivityAnimation ? MF_CHECKED : MF_UNCHECKED));
 #ifdef FEATURE_TOGGLE
    /* by haroon - menu item for Enable toggle on/off */
-   CheckMenuItem(hmenu, ID_TOGGLE_ENABLED, MF_BYCOMMAND | (g_bToggleIJB ? MF_CHECKED : MF_UNCHECKED));
+   CheckMenuItem(hmenu, ID_TOGGLE_ENABLED, MF_BYCOMMAND | (global_toggle_state ? MF_CHECKED : MF_UNCHECKED));
 #endif /* def FEATURE_TOGGLE */
    CheckMenuItem(hmenu, ID_TOGGLE_SHOWWINDOW, MF_BYCOMMAND | (g_bShowLogWindow ? MF_CHECKED : MF_UNCHECKED));
 
