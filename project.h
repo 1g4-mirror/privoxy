@@ -1,10 +1,10 @@
 #ifndef PROJECT_H_INCLUDED
 #define PROJECT_H_INCLUDED
 /** Version string. */
-#define PROJECT_H_VERSION "$Id: project.h,v 1.71 2002/05/12 21:39:36 jongfoster Exp $"
+#define PROJECT_H_VERSION "$Id: project.h,v 1.72 2002/05/14 21:35:49 oes Exp $"
 /*********************************************************************
  *
- * File        :  $Source: /cvsroot/ijbswa/current/project.h,v $
+ * File        :  $Source: /cvsroot/ijbswa/current/Attic/project.h,v $
  *
  * Purpose     :  Defines data structures which are widely used in the
  *                project.  Does not define any variables or functions
@@ -37,6 +37,10 @@
  *
  * Revisions   :
  *    $Log: project.h,v $
+ *    Revision 1.72  2002/05/14 21:35:49  oes
+ *    Split HELP_LINK_PREFIX into ACTIONS_HELP_PREFIX and CONFIG_HELP_PREFIX
+ *    because of split in user-manual
+ *
  *    Revision 1.71  2002/05/12 21:39:36  jongfoster
  *    - Adding Doxygen-style comments to structures and #defines.
  *
@@ -448,6 +452,8 @@
 
 /* Need time_t for file_list */
 #include <time.h>
+/* Needed for pcre choice */
+#include "config.h"
 
 /*
  * Include appropriate regular expression libraries.
@@ -458,7 +464,11 @@
 #ifdef STATIC_PCRE
 #  include "pcre.h"
 #else
-#  include <pcre.h>
+#  ifdef PCRE_H_IN_SUBDIR
+#    include <pcre/pcre.h>
+#  else
+#    include <pcre.h>
+#  endif
 #endif
 
 #ifdef STATIC_PCRS
@@ -470,7 +480,11 @@
 #ifdef STATIC_PCRE
 #  include "pcreposix.h"
 #else
-#  include <pcreposix.h>
+#  ifdef PCRE_H_IN_SUBDIR
+#    include <pcre/pcreposix.h>
+#  else
+#    include <pcreposix.h>
+#  endif
 #endif
 
 #ifdef AMIGA
