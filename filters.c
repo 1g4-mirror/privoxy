@@ -1,4 +1,4 @@
-const char filters_rcs[] = "$Id: filters.c,v 1.58.2.5 2003/11/11 13:10:31 oes Exp $";
+const char filters_rcs[] = "$Id: filters.c,v 1.58.2.4 2003/02/28 12:52:45 oes Exp $";
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/Attic/filters.c,v $
@@ -38,9 +38,6 @@ const char filters_rcs[] = "$Id: filters.c,v 1.58.2.5 2003/11/11 13:10:31 oes Ex
  *
  * Revisions   :
  *    $Log: filters.c,v $
- *    Revision 1.58.2.5  2003/11/11 13:10:31  oes
- *    Fixed bug #839859: "See why" link URL now gets url-encoded.
- *
  *    Revision 1.58.2.4  2003/02/28 12:52:45  oes
  *    Fixed a typo
  *
@@ -701,6 +698,9 @@ int match_portlist(const char *portlist, int port)
  *********************************************************************/
 struct http_response *block_url(struct client_state *csp)
 {
+#ifdef FEATURE_IMAGE_BLOCKING
+   char *p;
+#endif /* def FEATURE_IMAGE_BLOCKING */
    struct http_response *rsp;
 
    /*
@@ -727,7 +727,6 @@ struct http_response *block_url(struct client_state *csp)
    if (((csp->action->flags & ACTION_IMAGE_BLOCKER) != 0)
         && is_imageurl(csp))
    {
-	  char *p;
       /* determine HOW images should be blocked */
       p = csp->action->string[ACTION_STRING_IMAGE_BLOCKER];
 
@@ -818,7 +817,6 @@ struct http_response *block_url(struct client_state *csp)
    {
       jb_err err;
       struct map * exports;
-      char *p;
 
       /*
        * Workaround for stupid Netscape bug which prevents

@@ -1,14 +1,21 @@
-/var/log/privoxy/logfile /var/log/privoxy/jarfile {
+/var/log/privoxy/logfile {
 	create 0640 privoxy adm
 	missingok
 	weekly
 	rotate 7
 	compress
-	sharedscripts
 	postrotate
-		if [ -f /var/run/privoxy.pid ]
-		then
-			kill -HUP `cat /var/run/privoxy.pid` > /dev/null
-		fi
+		touch /etc/privoxy/config
+	endscript
+}
+
+/var/log/privoxy/jarfile {
+	create 0640 privoxy adm
+	missingok
+	weekly
+	rotate 7
+	compress
+	postrotate
+		touch /etc/privoxy/config
 	endscript
 }
