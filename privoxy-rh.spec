@@ -1,4 +1,4 @@
-# $Id: privoxy-rh.spec,v 1.33.2.11 2002/07/25 09:47:57 kick_ Exp $
+# $Id: privoxy-rh.spec,v 1.33.2.9 2002/07/05 17:16:19 morcego Exp $
 #
 # Written by and Copyright (C) 2001 the SourceForge
 # Privoxy team. http://www.privoxy.org/
@@ -37,8 +37,8 @@ Name: privoxy
 # ATTENTION
 # Version and release should be updated acordingly on configure.in and
 # configure. Otherwise, the package can be build with the wrong value
-Version: 2.9.16
-Release: 1
+Version: 2.9.15
+Release: 8
 Summary: Privoxy - privacy enhancing proxy
 License: GPL
 Source0: http://www.waldherr.org/%{name}/%{name}-%{version}.tar.gz
@@ -206,14 +206,12 @@ fi
 
 %post
 # for upgrade from 2.0.x
-[ -f %{_localstatedir}/log/%{oldname}/logfile ] && {
-  mv -f %{_localstatedir}/log/%{oldname}/logfile %{_localstatedir}/log/%{name}/logfile ||: ;
-  chown -R %{name}:%{name} %{_localstatedir}/log/%{name} 2>/dev/null ||: ;
-}
-[ -f %{_localstatedir}/log/%{name}/%{name} ] && {
-  mv -f %{_localstatedir}/log/%{name}/%{name} %{_localstatedir}/log/%{name}/logfile ||: ;
-  chown -R %{name}:%{name} %{_sysconfdir}/%{name} 2>/dev/null ||: ;
-}
+[ -f %{_localstatedir}/log/%{oldname}/logfile ] &&\
+ mv -f %{_localstatedir}/log/%{oldname}/logfile %{_localstatedir}/log/%{name}/logfile || /bin/true
+[ -f %{_localstatedir}/log/%{name}/%{name} ] &&\
+ mv -f %{_localstatedir}/log/%{name}/%{name} %{_localstatedir}/log/%{name}/logfile || /bin/true
+chown -R %{name}:%{name} %{_localstatedir}/log/%{name} 2>/dev/null
+chown -R %{name}:%{name} %{_sysconfdir}/%{name} 2>/dev/null
 /sbin/chkconfig --add privoxy
 if [ "$1" = "1" ]; then
 	/sbin/service %{name} condrestart > /dev/null 2>&1
@@ -317,9 +315,6 @@ fi
 %{_mandir}/man1/%{name}.*
 
 %changelog
-* Sat Jul 27 2002 Hal Burgiss <hal@foobox.net>
-- Reset version and release for 2.9.16.
-
 * Fri Jul 12 2002 Karsten Hopp <karsten@redhat.de>
 - don't use ghost files for rcX.d/*, using chkconfig is the 
   correct way to do this job (#68619)
@@ -719,12 +714,6 @@ fi
 	additional "-r @" flag.
 
 # $Log: privoxy-rh.spec,v $
-# Revision 1.33.2.11  2002/07/25 09:47:57  kick_
-# this caused some errors during a fresh installation. It's unnecessary to call an extra program (/bin/true) to set the error code to 0
-#
-# Revision 1.33.2.10  2002/07/12 09:14:26  kick_
-# don't use ghost files for rcX.d/*, chkconfig is available to do this job. Enable translation of error messge
-#
 # Revision 1.33.2.9  2002/07/05 17:16:19  morcego
 # - Changing delete order for groups and users (users should be first)
 #

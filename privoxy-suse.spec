@@ -1,4 +1,4 @@
-# $Id: privoxy-suse.spec,v 1.20.2.2 2002/05/28 02:39:38 hal9 Exp $
+# $Id: privoxy-suse.spec,v 1.20.2.1 2002/05/26 17:20:23 hal9 Exp $
 #
 # Written by and Copyright (C) 2001 the SourceForge
 # Privoxy team. http://www.privoxy.org/
@@ -36,7 +36,7 @@ Summary:      Privoxy - privacy enhancing proxy
 Vendor:       Privoxy.Org
 Name:         privoxy-suse
 Distribution: defineme
-Version: 2.9.16
+Version: 2.9.15
 Release: 1
 # Needs makefile change: Source: http://prdownloads.sourceforge.net/ijbswa/privoxy-%{version}-%{status}-src.tar.gz
 Source: http://prdownloads.sourceforge.net/ijbswa/privoxy-%{version}.tar.gz
@@ -217,9 +217,6 @@ id privoxy > /dev/null 2>&1 && /usr/sbin/userdel privoxy || /bin/true
 # -----------------------------------------------------------------------------
 #
 %changelog
-* Sat Jul 27 2002 Hal Burgiss <hal@foobox.net>
-- Reset version and release for 2.9.16.
-
 * Mon May 27 2002 Hal Burgiss <hal@foobox.net>
 + privoxy-2.9.15-1
 - Index.html is now privoxy-index.html for doc usage.
@@ -332,9 +329,6 @@ id privoxy > /dev/null 2>&1 && /usr/sbin/userdel privoxy || /bin/true
 - new package: version 2.0
 
 # $Log: privoxy-suse.spec,v $
-# Revision 1.20.2.2  2002/05/28 02:39:38  hal9
-# Replace index.html with privoxy-index.html for docs.
-#
 # Revision 1.20.2.1  2002/05/26 17:20:23  hal9
 # Add images to doc dirs.
 #
