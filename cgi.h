@@ -1,9 +1,9 @@
 #ifndef CGI_H_INCLUDED
 #define CGI_H_INCLUDED
-#define CGI_H_VERSION "$Id: cgi.h,v 1.28 2002/04/26 12:54:03 oes Exp $"
+#define CGI_H_VERSION "$Id: cgi.h,v 1.29 2002/05/19 11:33:21 jongfoster Exp $"
 /*********************************************************************
  *
- * File        :  $Source: /cvsroot/ijbswa/current/cgi.h,v $
+ * File        :  $Source: /cvsroot/ijbswa/current/Attic/cgi.h,v $
  *
  * Purpose     :  Declares functions to intercept request, generate
  *                html or gif answers, and to compose HTTP resonses.
@@ -38,6 +38,18 @@
  *
  * Revisions   :
  *    $Log: cgi.h,v $
+ *    Revision 1.29  2002/05/19 11:33:21  jongfoster
+ *    If a CGI error was not handled, and propogated back to
+ *    dispatch_known_cgi(), then it was assumed to be "out of memory".
+ *    This gave a very misleading error message.
+ *
+ *    Now other errors will cause a simple message giving the error
+ *    number and asking the user to report a bug.
+ *
+ *    Bug report:
+ *    http://sourceforge.net/tracker/index.php?func=detail
+ *    &aid=557905&group_id=11118&atid=111118
+ *
  *    Revision 1.28  2002/04/26 12:54:03  oes
  *    New function add_help_link
  *
@@ -193,6 +205,8 @@ extern jb_err template_fill_for_cgi(struct client_state *csp,
 
 extern void cgi_init_error_messages(void);
 extern struct http_response *cgi_error_memory(void);
+extern jb_err cgi_redirect (struct http_response * rsp, const char *target);
+
 extern jb_err cgi_error_no_template(struct client_state *csp,
                                     struct http_response *rsp,
                                     const char *template_name);
