@@ -1,7 +1,7 @@
-const char errlog_rcs[] = "$Id: errlog.c,v 1.40 2002/05/22 01:27:27 david__schmidt Exp $";
+const char errlog_rcs[] = "$Id: errlog.c,v 1.40.2.1 2002/09/25 12:47:42 oes Exp $";
 /*********************************************************************
  *
- * File        :  $Source: /cvsroot/ijbswa//current/Attic/errlog.c,v $
+ * File        :  $Source: /cvsroot/ijbswa/current/Attic/errlog.c,v $
  *
  * Purpose     :  Log errors to a designated destination in an elegant,
  *                printf-like fashion.
@@ -33,6 +33,9 @@ const char errlog_rcs[] = "$Id: errlog.c,v 1.40 2002/05/22 01:27:27 david__schmi
  *
  * Revisions   :
  *    $Log: errlog.c,v $
+ *    Revision 1.40.2.1  2002/09/25 12:47:42  oes
+ *    Make log_error safe against NULL string arguments
+ *
  *    Revision 1.40  2002/05/22 01:27:27  david__schmidt
  *
  *    Add os2_socket_strerr mirroring w32_socket_strerr.
@@ -420,6 +423,15 @@ void log_error(int loglevel, char *fmt, ...)
    /* FIXME get current thread id */
 #ifdef FEATURE_PTHREAD
    this_thread = (long)pthread_self();
+#ifdef __MACH__
+   /*
+    * Mac OSX (and perhaps other Mach instances) doesn't have a debuggable
+    * value at the first 4 bytes of pthread_self()'s return value, a pthread_t.
+    * pthread_t is supposed to be opaque... but it's fairly random, though, so
+    * we make it mostly presentable.
+    */
+   this_thread = abs(this_thread % 1000);
+#endif /* def __MACH__ */
 #elif defined(_WIN32)
    this_thread = GetCurrentThreadId();
 #elif defined(__OS2__)
