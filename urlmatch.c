@@ -1,7 +1,7 @@
-const char urlmatch_rcs[] = "$Id: urlmatch.c,v 1.9 2002/04/04 00:36:36 gliptak Exp $";
+const char urlmatch_rcs[] = "$Id: urlmatch.c,v 1.10 2002/05/12 21:40:37 jongfoster Exp $";
 /*********************************************************************
  *
- * File        :  $Source: /cvsroot/ijbswa/current/urlmatch.c,v $
+ * File        :  $Source: /cvsroot/ijbswa/current/Attic/urlmatch.c,v $
  *
  * Purpose     :  Declares functions to match URLs against URL
  *                patterns.
@@ -33,6 +33,9 @@ const char urlmatch_rcs[] = "$Id: urlmatch.c,v 1.9 2002/04/04 00:36:36 gliptak E
  *
  * Revisions   :
  *    $Log: urlmatch.c,v $
+ *    Revision 1.10  2002/05/12 21:40:37  jongfoster
+ *    - Removing some unused code
+ *
  *    Revision 1.9  2002/04/04 00:36:36  gliptak
  *    always use pcre for matching
  *
@@ -415,6 +418,24 @@ jb_err parse_http_request(const char *req,
          || (0 == strcmpic(v[0], "mkcol"))
          || (0 == strcmpic(v[0], "lock"))
          || (0 == strcmpic(v[0], "unlock"))
+
+         /* Or a Microsoft webDAV extension for Exchange 2000.  See: */
+         /*   http://lists.w3.org/Archives/Public/w3c-dist-auth/2002JanMar/0001.html */
+         /*   http://msdn.microsoft.com/library/en-us/wss/wss/_webdav_methods.asp */ 
+         || (0 == strcmpic(v[0], "bcopy"))
+         || (0 == strcmpic(v[0], "bmove"))
+         || (0 == strcmpic(v[0], "bdelete"))
+         || (0 == strcmpic(v[0], "bpropfind"))
+         || (0 == strcmpic(v[0], "bproppatch"))
+
+         /* Or another Microsoft webDAV extension for Exchange 2000.  See: */
+         /*   http://systems.cs.colorado.edu/grunwald/MobileComputing/Papers/draft-cohen-gena-p-base-00.txt */
+         /*   http://lists.w3.org/Archives/Public/w3c-dist-auth/2002JanMar/0001.html */
+         /*   http://msdn.microsoft.com/library/en-us/wss/wss/_webdav_methods.asp */ 
+         || (0 == strcmpic(v[0], "subscribe"))
+         || (0 == strcmpic(v[0], "unsubscribe"))
+         || (0 == strcmpic(v[0], "notify"))
+         || (0 == strcmpic(v[0], "poll"))
          )
    {
       /* Normal */
