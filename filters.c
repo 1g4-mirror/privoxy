@@ -1,4 +1,4 @@
-const char filters_rcs[] = "$Id: filters.c,v 1.58.2.3 2002/09/25 14:51:51 oes Exp $";
+const char filters_rcs[] = "$Id: filters.c,v 1.58.2.4 2003/02/28 12:52:45 oes Exp $";
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/Attic/filters.c,v $
@@ -38,6 +38,9 @@ const char filters_rcs[] = "$Id: filters.c,v 1.58.2.3 2002/09/25 14:51:51 oes Ex
  *
  * Revisions   :
  *    $Log: filters.c,v $
+ *    Revision 1.58.2.4  2003/02/28 12:52:45  oes
+ *    Fixed a typo
+ *
  *    Revision 1.58.2.3  2002/09/25 14:51:51  oes
  *    Added basic support for OPTIONS and TRACE HTTP methods:
  *    New function direct_response which handles OPTIONS and
@@ -858,6 +861,7 @@ struct http_response *block_url(struct client_state *csp)
       if (!err) err = map(exports, "protocol", 1, csp->http->ssl ? "https://" : "http://", 1);
       if (!err) err = map(exports, "hostport", 1, html_encode(csp->http->hostport), 0);
       if (!err) err = map(exports, "path", 1, html_encode(csp->http->path), 0);
+      if (!err) err = map(exports, "path-ue", 1, url_encode(csp->http->path), 0);
 
       if (err)
       {
