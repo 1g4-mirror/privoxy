@@ -1,7 +1,7 @@
-const char filters_rcs[] = "$Id: filters.c,v 1.58.2.1 2002/07/26 15:18:53 oes Exp $";
+const char filters_rcs[] = "$Id: filters.c,v 1.58.2.2 2002/08/01 17:18:28 oes Exp $";
 /*********************************************************************
  *
- * File        :  $Source: /cvsroot/ijbswa/current/Attic/filters.c,v $
+ * File        :  $Source: /cvsroot/ijbswa//current/Attic/filters.c,v $
  *
  * Purpose     :  Declares functions to parse/crunch headers and pages.
  *                Functions declared include:
@@ -38,6 +38,9 @@ const char filters_rcs[] = "$Id: filters.c,v 1.58.2.1 2002/07/26 15:18:53 oes Ex
  *
  * Revisions   :
  *    $Log: filters.c,v $
+ *    Revision 1.58.2.2  2002/08/01 17:18:28  oes
+ *    Fixed BR 537651 / SR 579724 (MSIE image detect improper for IE/Mac)
+ *
  *    Revision 1.58.2.1  2002/07/26 15:18:53  oes
  *    - Bugfix: Executing a filters without jobs no longer results in
  *      turing off *all* filters.
@@ -1603,6 +1606,63 @@ const struct forward_spec * forward_url(struct http_request *http,
    }
 
    return fwd_default;
+}
+
+
+/*********************************************************************
+ *
+ * Function    :  direct_response 
+ *
+ * Description :  Check if Max-Forwards == 0 for an OPTIONS or TRACE
+ *                request and if so, return a HTTP 501 to the client.
+ *
+ *                FIXME: I have a stupid name and I should handle the
+ *                requests properly. Still, what we do here is rfc-
+ *                compliant, whereas ignoring or forwarding are not.
+ *
+ * Parameters  :  
+ *          1  :  csp = Current client state (buffers, headers, etc...)
+ *
+ * Returns     :  http_response if , NULL if nonmatch or handler fail
+ *
+ *********************************************************************/
+struct http_response *direct_response(struct client_state *csp)
+{
+   struct http_response *rsp;
+   struct list_entry *p;
+
+   if ((0 == strcmpic(csp->http->gpc, "trace"))
+      || (0 == strcmpic(csp->http->gpc, "options")))
+   {
+      for (p = csp->headers->first; (p != NULL) ; p = p->next)
+      {
+         if (!strncmp("Max-Forwards:", p->str, 13)
+             && (*(p->str+13) != '\0') && (atoi(p->str+13) == 0))
+         {
+            /* FIXME: We could handle at least TRACE here,
+               but that would require a verbatim copy of
+               the request which we don't have anymore */
+
+            log_error(LOG_LEVEL_HEADER, "Found Max-Forwards:0 in OPTIONS or TRACE request -- Returning 501");
+
+            /* Get mem for response or fail*/
+            if (NULL == (rsp = alloc_http_response()))
+            {
+               return cgi_error_memory();
+            }
+            
+            if (NULL == (rsp->status = strdup("501 Not Implemented")))
+            {
+               free_http_response(rsp);
+               return cgi_error_memory();
+            }
+
+            rsp->is_static = 1;
+            return(finish_http_response(rsp));
+         }
+      }
+   }
+   return NULL;
 }
 
 

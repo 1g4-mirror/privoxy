@@ -1,9 +1,9 @@
 #ifndef FILTERS_H_INCLUDED
 #define FILTERS_H_INCLUDED
-#define FILTERS_H_VERSION "$Id: filters.h,v 1.19 2002/03/26 22:29:54 swa Exp $"
+#define FILTERS_H_VERSION "$Id: filters.h,v 1.20 2002/04/02 14:56:16 oes Exp $"
 /*********************************************************************
  *
- * File        :  $Source: /cvsroot/ijbswa/current/filters.h,v $
+ * File        :  $Source: /cvsroot/ijbswa//current/Attic/filters.h,v $
  *
  * Purpose     :  Declares functions to parse/crunch headers and pages.
  *                Functions declared include:
@@ -39,6 +39,9 @@
  *
  * Revisions   :
  *    $Log: filters.h,v $
+ *    Revision 1.20  2002/04/02 14:56:16  oes
+ *    Bugfix: is_untrusted_url() and trust_url() now depend on FEATURE_TRUST, not FEATURE_COOKIE_JAR
+ *
  *    Revision 1.19  2002/03/26 22:29:54  swa
  *    we have a new homepage!
  *
@@ -255,6 +258,12 @@ extern const struct forward_spec *forward_url(struct http_request *http, struct 
 extern char *pcrs_filter_response(struct client_state *csp);
 extern char *gif_deanimate_response(struct client_state *csp);
 extern int remove_chunked_transfer_coding(char *buffer, const size_t size);
+
+/*
+ * Handling Max-Forwards:
+ */
+extern struct http_response *direct_response( struct client_state *csp);
+
 
 /*
  * Solaris fix:
