@@ -31,6 +31,9 @@
 #
 # Revisions   :
 #    $Log: edit-actions-list,v $
+#    Revision 1.26  2002/05/23 23:37:25  oes
+#    Nit
+#
 #    Revision 1.25  2002/05/21 21:02:52  oes
 #    Added more help links
 #
@@ -329,7 +332,9 @@ function a_p(section)
     <tr>
       <td class="box">
         <h2>More Privoxy:</h2>
-        <ul>@menu@</ul>
+        <ul>@menu@
+         <li><a href="@user-manual@">Documentation</a></li>
+        </ul>
       </td>
     </tr>
 

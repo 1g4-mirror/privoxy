@@ -31,6 +31,10 @@
 #
 # Revisions   :
 #    $Log: edit-actions-add-url-form,v $
+#    Revision 1.14  2002/05/21 19:10:30  oes
+#     - Added jump target and button style to "cancel" link
+#     - Fixed title
+#
 #    Revision 1.13  2002/04/10 13:32:53  oes
 #    Made templates modular
 #
@@ -167,7 +171,9 @@
     <tr>
       <td class="box">
         <h2>More Privoxy:</h2>
-        <ul>@menu@</ul>
+        <ul>@menu@
+         <li><a href="@user-manual@">Documentation</a></li>
+        </ul>
       </td>
     </tr>
 
