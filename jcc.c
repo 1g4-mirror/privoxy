@@ -1,7 +1,7 @@
-const char jcc_rcs[] = "$Id: jcc.c,v 1.92 2002/05/08 16:00:46 oes Exp $";
+const char jcc_rcs[] = "$Id: jcc.c,v 1.92.2.1 2002/09/25 14:52:24 oes Exp $";
 /*********************************************************************
  *
- * File        :  $Source: /cvsroot/ijbswa//current/Attic/jcc.c,v $
+ * File        :  $Source: /cvsroot/ijbswa/current/Attic/jcc.c,v $
  *
  * Purpose     :  Main file.  Contains main() method, main loop, and
  *                the main connection-handling function.
@@ -33,6 +33,13 @@ const char jcc_rcs[] = "$Id: jcc.c,v 1.92 2002/05/08 16:00:46 oes Exp $";
  *
  * Revisions   :
  *    $Log: jcc.c,v $
+ *    Revision 1.92.2.1  2002/09/25 14:52:24  oes
+ *    Added basic support for OPTIONS and TRACE HTTP methods:
+ *     - New interceptor direct_response() added in chat().
+ *     - sed() moved to earlier in the process, so that the
+ *       Host: header is evaluated before actions and forwarding
+ *       are decided on.
+ *
  *    Revision 1.92  2002/05/08 16:00:46  oes
  *    Chat's buffer handling:
  *     - Fixed bug with unchecked out-of-mem conditions
@@ -1827,6 +1834,7 @@ int main(int argc, const char *argv[])
 
 
    files->next = NULL;
+   clients->next = NULL;
 
 #ifdef AMIGA
    InitAmiga();
