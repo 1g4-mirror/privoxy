@@ -1,4 +1,4 @@
-const char parsers_rcs[] = "$Id: parsers.c,v 1.56.2.5 2003/04/14 12:08:16 oes Exp $";
+const char parsers_rcs[] = "$Id: parsers.c,v 1.56.2.6 2003/04/14 21:28:30 oes Exp $";
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/Attic/parsers.c,v $
@@ -40,6 +40,9 @@ const char parsers_rcs[] = "$Id: parsers.c,v 1.56.2.5 2003/04/14 12:08:16 oes Ex
  *
  * Revisions   :
  *    $Log: parsers.c,v $
+ *    Revision 1.56.2.6  2003/04/14 21:28:30  oes
+ *    Completing the previous change
+ *
  *    Revision 1.56.2.5  2003/04/14 12:08:16  oes
  *    Added temporary workaround for bug in PHP < 4.2.3
  *
@@ -1422,6 +1425,9 @@ jb_err client_max_forwards(struct client_state *csp, char **header)
  *                port information, parse and evaluate the Host
  *                header field.
  *
+ *                Also, kill ill-formed HOST: headers as sent by
+ *                Apple's iTunes software when used with a proxy.
+ *
  * Parameters  :
  *          1  :  csp = Current client state (buffers, headers, etc...)
  *          2  :  header = On input, pointer to header to modify.
@@ -1436,6 +1442,18 @@ jb_err client_max_forwards(struct client_state *csp, char **header)
 jb_err client_host(struct client_state *csp, char **header)
 {
    char *p, *q;
+
+   /*
+    * If the header field name is all upper-case, chances are that it's
+    * an ill-formed one from iTunes. BTW, killing innocent headers here is
+    * not a problem -- they are regenerated later.
+    */
+   if ((*header)[1] == 'O')
+   {
+      log_error(LOG_LEVEL_HEADER, "Killed all-caps Host header line: %s", *header);
+      freez(*header);
+      return JB_ERR_OK;
+   }
 
    if (!csp->http->hostport || (*csp->http->hostport == '*') ||  
        *csp->http->hostport == ' ' || *csp->http->hostport == '\0')
