@@ -1,8 +1,8 @@
 ######################################################################
 # 
-#  File        :  $Source: /cvsroot/ijbswa/current/Attic/default.action.master,v $
+#  File        :  $Source: /cvsroot/ijbswa//current/Attic/default.action.master,v $
 # 
-#  $Id: default.action.master,v 1.1.2.5 2002/08/11 13:50:16 oes Exp $
+#  $Id: default.action.master,v 1.1.2.6 2002/08/13 07:57:39 oes Exp $
 #
 #  Purpose     :  Default actions file, see
 #                 http://www.privoxy.org/faq/questions.html#CONFIGFILES
@@ -460,7 +460,7 @@ allow-ads   = -block -filter{banners-by-size} -filter{banners-by-link}
 #############################################################################
 {+handle-as-image}
 #############################################################################
-/.*\.(gif|jpe?g|png|bmp|ico)$
+/.*\.(gif|jpe?g|png|bmp|ico)($|\?)
 
 #############################################################################
 # Generic block patterns (the most effective!):
