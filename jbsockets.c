@@ -1,7 +1,7 @@
-const char jbsockets_rcs[] = "$Id: jbsockets.c,v 1.35 2002/04/26 15:50:04 joergs Exp $";
+const char jbsockets_rcs[] = "$Id: jbsockets.c,v 1.35.2.1 2002/05/26 23:41:27 joergs Exp $";
 /*********************************************************************
  *
- * File        :  $Source: /cvsroot/ijbswa/current/jbsockets.c,v $
+ * File        :  $Source: /cvsroot/ijbswa/current/Attic/jbsockets.c,v $
  *
  * Purpose     :  Contains wrappers for system-specific sockets code,
  *                so that the rest of Junkbuster can be more
@@ -35,6 +35,9 @@ const char jbsockets_rcs[] = "$Id: jbsockets.c,v 1.35 2002/04/26 15:50:04 joergs
  *
  * Revisions   :
  *    $Log: jbsockets.c,v $
+ *    Revision 1.35.2.1  2002/05/26 23:41:27  joergs
+ *    AmigaOS: Fixed wrong type of len in write_socket()
+ *
  *    Revision 1.35  2002/04/26 15:50:04  joergs
  *    AmigaOS: No socklen_t, added AMIGA to the systems using int instead.
  *
@@ -596,6 +599,7 @@ int bind_port(const char *hostnam, int portnum, jb_socket *pfd)
    {
       close_socket (fd);
 #ifdef _WIN32
+      errno = WSAGetLastError();
       if (errno == WSAEADDRINUSE)
 #else
       if (errno == EADDRINUSE)
