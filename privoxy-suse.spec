@@ -1,4 +1,4 @@
-# $Id: privoxy-suse.spec,v 1.19 2002/05/03 17:14:36 morcego Exp $
+# $Id: privoxy-suse.spec,v 1.20 2002/05/25 02:08:23 hal9 Exp $
 #
 # Written by and Copyright (C) 2001 the SourceForge
 # Privoxy team. http://www.privoxy.org/
@@ -201,6 +201,8 @@ id privoxy > /dev/null 2>&1 && /usr/sbin/userdel privoxy || /bin/true
 %doc doc/webserver/p_web.css
 %doc doc/webserver/index.html
 %doc doc/webserver/images
+%doc doc/webserver/man-page
+
 #%doc privoxy.weekly privoxy.monthly AUTHORS
 %dir %{privoxyconf}
 %config %{privoxyconf}/*
@@ -215,6 +217,10 @@ id privoxy > /dev/null 2>&1 && /usr/sbin/userdel privoxy || /bin/true
 # -----------------------------------------------------------------------------
 #
 %changelog
+* Sat May 25 2002 Hal Burgiss <hal@foobox.net>
++ privoxy-2.9.15-1
+- Add html man page so index.html does not 404.
+
 * Fri May 24 2002 Hal Burgiss <hal@foobox.net>
 + privoxy-2.9.15-1
 - Add doc/images directory.
@@ -319,6 +325,10 @@ id privoxy > /dev/null 2>&1 && /usr/sbin/userdel privoxy || /bin/true
 - new package: version 2.0
 
 # $Log: privoxy-suse.spec,v $
+# Revision 1.20  2002/05/25 02:08:23  hal9
+# Add doc/images directory.
+# Redhat: alphabetized list of templates (and I think added one in the process)
+#
 # Revision 1.19  2002/05/03 17:14:36  morcego
 # *.spec: Version bump to 2.9.15
 # -rh.spec: noreplace for %%{privoxyconf}/config
