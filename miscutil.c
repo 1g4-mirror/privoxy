@@ -1,4 +1,4 @@
-const char miscutil_rcs[] = "$Id: miscutil.c,v 1.37.2.1 2002/09/25 12:58:51 oes Exp $";
+const char miscutil_rcs[] = "$Id: miscutil.c,v 1.37.2.2 2002/11/12 14:28:18 oes Exp $";
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/Attic/miscutil.c,v $
@@ -36,6 +36,9 @@ const char miscutil_rcs[] = "$Id: miscutil.c,v 1.37.2.1 2002/09/25 12:58:51 oes 
  *
  * Revisions   :
  *    $Log: miscutil.c,v $
+ *    Revision 1.37.2.2  2002/11/12 14:28:18  oes
+ *    Proper backtracking in simplematch; fixes bug #632888
+ *
  *    Revision 1.37.2.1  2002/09/25 12:58:51  oes
  *    Made strcmpic and strncmpic safe against NULL arguments
  *    (which are now treated as empty strings).
@@ -819,8 +822,9 @@ int simplematch(char *pattern, char *text)
       /* 
        * Char match, or char range match? 
        */
-      if ((*pat == *txt)  
-      || ((*pat == ']') && (charmap[*txt / 8] & (1 << (*txt % 8)))) )
+      if ( (*pat == *txt)
+      ||   (*pat == '?')
+      ||   ((*pat == ']') && (charmap[*txt / 8] & (1 << (*txt % 8)))) )
       {
          /* 
           * Sucess: Go ahead
