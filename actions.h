@@ -1,6 +1,6 @@
-#ifndef ACTIONS_H_INCLUDED
-#define ACTIONS_H_INCLUDED
-#define ACTIONS_H_VERSION "$Id: actions.h,v 1.8 2002/03/24 13:25:43 swa Exp $"
+#ifndef _ACTIONS_H
+#define _ACTIONS_H
+#define ACTIONS_H_VERSION "$Id: actions.h,v ??? $"
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/actions.h,v $
@@ -9,7 +9,7 @@
  *                Functions declared include: FIXME
  *
  * Copyright   :  Written by and Copyright (C) 2001 the SourceForge
- *                Privoxy team. http://www.privoxy.org/
+ *                IJBSWA team.  http://ijbswa.sourceforge.net
  *
  *                Based on the Internet Junkbuster originally written
  *                by and Copyright (C) 1997 Anonymous Coders and 
@@ -35,46 +35,6 @@
  *
  * Revisions   :
  *    $Log: actions.h,v $
- *    Revision 1.8  2002/03/24 13:25:43  swa
- *    name change related issues
- *
- *    Revision 1.7  2002/03/16 23:54:06  jongfoster
- *    Adding graceful termination feature, to help look for memory leaks.
- *    If you enable this (which, by design, has to be done by hand
- *    editing config.h) and then go to http://i.j.b/die, then the program
- *    will exit cleanly after the *next* request.  It should free all the
- *    memory that was used.
- *
- *    Revision 1.6  2001/10/23 21:30:30  jongfoster
- *    Adding error-checking to selected functions.
- *
- *    Revision 1.5  2001/10/14 21:58:22  jongfoster
- *    Adding support for the CGI-based editor:
- *    - Exported get_actions()
- *    - Added new function free_alias_list()
- *    - Added support for {{settings}} and {{description}} blocks
- *      in the actions file.  They are currently ignored.
- *    - Added restriction to only one {{alias}} block which must appear
- *      first in the file, to simplify the editor's rewriting rules.
- *    - Note that load_actions_file() is no longer used by the CGI-based
- *      editor, but some of the other routines in this file are.
- *
- *    Revision 1.4  2001/09/16 15:47:37  jongfoster
- *    First version of CGI-based edit interface.  This is very much a
- *    work-in-progress, and you can't actually use it to edit anything
- *    yet.  You must #define FEATURE_CGI_EDIT_ACTIONS for these changes
- *    to have any effect.
- *
- *    Revision 1.3  2001/09/14 00:17:32  jongfoster
- *    Tidying up memory allocation. New function init_action().
- *
- *    Revision 1.2  2001/07/29 19:01:11  jongfoster
- *    Changed _FILENAME_H to FILENAME_H_INCLUDED.
- *    Added forward declarations for needed structures.
- *
- *    Revision 1.1  2001/05/31 21:16:46  jongfoster
- *    Moved functions to process the action list into this new file.
- *
  *
  *********************************************************************/
 
@@ -84,50 +44,22 @@ extern "C" {
 #endif
 
 
-struct action_spec;
-struct current_action_spec;
-struct client_state;
-
-
-
-/* This structure is used to hold user-defined aliases */
-struct action_alias
-{
-   const char * name;
-   struct action_spec action[1];
-   struct action_alias * next;
-};
-
-
-extern jb_err get_actions (char *line, 
-                           struct action_alias * alias_list,
-                           struct action_spec *cur_action);
-extern void free_alias_list(struct action_alias *alias_list);
-
-extern void init_action(struct action_spec *dest);
-extern void free_action(struct action_spec *src);
-extern jb_err merge_actions (struct action_spec *dest, 
-                             const struct action_spec *src);
-extern jb_err copy_action (struct action_spec *dest, 
+extern void merge_actions (struct action_spec *dest, 
                            const struct action_spec *src);
+extern void copy_action (struct action_spec *dest, 
+                         const struct action_spec *src);
+extern void free_action (struct action_spec *src);
 extern char * actions_to_text     (struct action_spec *action);
-#ifdef FEATURE_CGI_EDIT_ACTIONS
-extern char * actions_to_html     (struct action_spec *action);
-#endif /* def FEATURE_CGI_EDIT_ACTIONS */
 
 extern void init_current_action     (struct current_action_spec *dest);
-extern void free_current_action     (struct current_action_spec *src);
-extern jb_err merge_current_action  (struct current_action_spec *dest, 
+extern void merge_current_action    (struct current_action_spec *dest, 
                                      const struct action_spec *src);
+extern void free_current_action     (struct current_action_spec *src);
 extern char * current_action_to_text(struct current_action_spec *action);
 
-extern jb_err get_action_token(char **line, char **name, char **value);
+extern int get_action_token(char **line, char **name, char **value);
 extern void unload_actions_file(void *file_data);
 extern int load_actions_file(struct client_state *csp);
-
-#ifdef FEATURE_GRACEFUL_TERMINATION
-void unload_current_actions_file(void);
-#endif
 
 
 /* Revision control strings from this header and associated .c file */
@@ -138,7 +70,7 @@ extern const char actions_h_rcs[];
 } /* extern "C" */
 #endif
 
-#endif /* ndef ACTIONS_H_INCLUDED */
+#endif /* ndef _ERRLOG_H */
 
 /*
   Local Variables:

@@ -1,16 +1,16 @@
-#ifndef CYGWIN_H_INCLUDED
-#define CYGWIN_H_INCLUDED
-#define CYGWIN_H_VERSION "$Id: cygwin.h,v 1.3 2002/03/24 13:25:43 swa Exp $"
+#ifndef _CYGWIN_H
+#define _CYGWIN_H
+#define CYGWIN_H_VERSION "$Id: cygwin.h,v 1.1 2001/05/13 21:57:06 administrator Exp $"
 /*********************************************************************
  *
- * File        :  $Source: /cvsroot/ijbswa/current/cygwin.h,v $
+ * File        :  $Source: /home/administrator/cvs/ijb/cygwin.h,v $
  *
  * Purpose     :  The windows.h file seems to be a *tad* different, so I
  *                will bridge the gaps here.  Perhaps I should convert the
  *                latest SDK too?  Shudder, I think not.
  *
  * Copyright   :  Written by and Copyright (C) 2001 the SourceForge
- *                Privoxy team. http://www.privoxy.org/
+ *                IJBSWA team.  http://ijbswa.sourceforge.net
  *
  *                Based on the Internet Junkbuster originally written
  *                by and Copyright (C) 1997 Anonymous Coders and 
@@ -36,16 +36,6 @@
  *
  * Revisions   :
  *    $Log: cygwin.h,v $
- *    Revision 1.3  2002/03/24 13:25:43  swa
- *    name change related issues
- *
- *    Revision 1.2  2001/07/29 18:43:08  jongfoster
- *    Changing #ifdef _FILENAME_H to FILENAME_H_INCLUDED, to conform to
- *    ANSI C rules.
- *
- *    Revision 1.1.1.1  2001/05/15 13:58:51  oes
- *    Initial import of version 2.9.3 source tree
- *
  *
  *********************************************************************/
 
@@ -63,7 +53,7 @@
  */
 
 #endif /* def __MINGW32__ */
-#endif /* ndef CYGWIN_H_INCLUDED */
+#endif /* ndef _CYGWIN_H */
 
 
 /*

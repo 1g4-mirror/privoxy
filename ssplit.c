@@ -1,4 +1,4 @@
-const char ssplit_rcs[] = "$Id: ssplit.c,v 1.5 2002/03/24 13:25:43 swa Exp $";
+const char ssplit_rcs[] = "$Id: ssplit.c,v 1.2 2001/05/17 23:01:01 oes Exp $";
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/ssplit.c,v $
@@ -6,7 +6,7 @@ const char ssplit_rcs[] = "$Id: ssplit.c,v 1.5 2002/03/24 13:25:43 swa Exp $";
  * Purpose     :  A function to split a string at specified deliminters.
  *
  * Copyright   :  Written by and Copyright (C) 2001 the SourceForge
- *                Privoxy team. http://www.privoxy.org/
+ *                IJBSWA team.  http://ijbswa.sourceforge.net
  *
  *                Based on the Internet Junkbuster originally written
  *                by and Copyright (C) 1997 Anonymous Coders and 
@@ -32,18 +32,6 @@ const char ssplit_rcs[] = "$Id: ssplit.c,v 1.5 2002/03/24 13:25:43 swa Exp $";
  *
  * Revisions   :
  *    $Log: ssplit.c,v $
- *    Revision 1.5  2002/03/24 13:25:43  swa
- *    name change related issues
- *
- *    Revision 1.4  2001/11/13 00:16:38  jongfoster
- *    Replacing references to malloc.h with the standard stdlib.h
- *    (See ANSI or K&R 2nd Ed)
- *
- *    Revision 1.3  2001/05/29 08:54:25  jongfoster
- *    Rewrote the innards of ssplit() to be easier to understand,
- *    faster, and to use less memory.  Didn't change the interface
- *    except to give the parameters meaningful names.
- *
  *    Revision 1.2  2001/05/17 23:01:01  oes
  *     - Cleaned CRLF's from the sources and related files
  *
@@ -58,6 +46,10 @@ const char ssplit_rcs[] = "$Id: ssplit.c,v 1.5 2002/03/24 13:25:43 swa Exp $";
 
 #include <string.h>
 #include <stdlib.h>
+
+#ifdef _WIN32
+#include <malloc.h>
+#endif
 
 #include "ssplit.h"
 #include "miscutil.h"

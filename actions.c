@@ -1,4 +1,4 @@
-const char actions_rcs[] = "$Id: actions.c,v 1.25 2002/03/24 13:25:43 swa Exp $";
+const char actions_rcs[] = "$Id: actions.c,v 1.7 2001/06/09 10:55:28 jongfoster Exp $";
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/actions.c,v $
@@ -7,13 +7,13 @@ const char actions_rcs[] = "$Id: actions.c,v 1.25 2002/03/24 13:25:43 swa Exp $"
  *                Functions declared include: FIXME
  *
  * Copyright   :  Written by and Copyright (C) 2001 the SourceForge
- *                Privoxy team. http://www.privoxy.org/
+ *                IJBSWA team.  http://ijbswa.sourceforge.net
  *
  *                Based on the Internet Junkbuster originally written
- *                by and Copyright (C) 1997 Anonymous Coders and
+ *                by and Copyright (C) 1997 Anonymous Coders and 
  *                Junkbusters Corporation.  http://www.junkbusters.com
  *
- *                This program is free software; you can redistribute it
+ *                This program is free software; you can redistribute it 
  *                and/or modify it under the terms of the GNU General
  *                Public License as published by the Free Software
  *                Foundation; either version 2 of the License, or (at
@@ -33,88 +33,6 @@ const char actions_rcs[] = "$Id: actions.c,v 1.25 2002/03/24 13:25:43 swa Exp $"
  *
  * Revisions   :
  *    $Log: actions.c,v $
- *    Revision 1.25  2002/03/24 13:25:43  swa
- *    name change related issues
- *
- *    Revision 1.24  2002/03/16 23:54:06  jongfoster
- *    Adding graceful termination feature, to help look for memory leaks.
- *    If you enable this (which, by design, has to be done by hand
- *    editing config.h) and then go to http://i.j.b/die, then the program
- *    will exit cleanly after the *next* request.  It should free all the
- *    memory that was used.
- *
- *    Revision 1.23  2002/03/07 03:46:16  oes
- *    Fixed compiler warnings
- *
- *    Revision 1.22  2002/01/21 00:27:02  jongfoster
- *    Allowing free_action(NULL).
- *    Moving the functions that #include actionlist.h to the end of the file,
- *    because the Visual C++ 97 debugger gets extremely confused if you try
- *    to debug any code that comes after them in the file.
- *
- *    Revision 1.21  2002/01/17 20:54:44  jongfoster
- *    Renaming free_url to free_url_spec, since it frees a struct url_spec.
- *
- *    Revision 1.20  2001/11/22 21:56:49  jongfoster
- *    Making action_spec->flags into an unsigned long rather than just an
- *    unsigned int.
- *    Fixing a bug in the display of -add-header and -wafer
- *
- *    Revision 1.19  2001/11/13 00:14:07  jongfoster
- *    Fixing stupid bug now I've figured out what || means.
- *    (It always returns 0 or 1, not one of it's paramaters.)
- *
- *    Revision 1.18  2001/11/07 00:06:06  steudten
- *    Add line number in error output for lineparsing for
- *    actionsfile.
- *
- *    Revision 1.17  2001/10/25 03:40:47  david__schmidt
- *    Change in porting tactics: OS/2's EMX porting layer doesn't allow multiple
- *    threads to call select() simultaneously.  So, it's time to do a real, live,
- *    native OS/2 port.  See defines for __EMX__ (the porting layer) vs. __OS2__
- *    (native). Both versions will work, but using __OS2__ offers multi-threading.
- *
- *    Revision 1.16  2001/10/23 21:30:30  jongfoster
- *    Adding error-checking to selected functions.
- *
- *    Revision 1.15  2001/10/14 21:58:22  jongfoster
- *    Adding support for the CGI-based editor:
- *    - Exported get_actions()
- *    - Added new function free_alias_list()
- *    - Added support for {{settings}} and {{description}} blocks
- *      in the actions file.  They are currently ignored.
- *    - Added restriction to only one {{alias}} block which must appear
- *      first in the file, to simplify the editor's rewriting rules.
- *    - Note that load_actions_file() is no longer used by the CGI-based
- *      editor, but some of the other routines in this file are.
- *
- *    Revision 1.14  2001/09/22 16:36:59  jongfoster
- *    Removing unused parameter fs from read_config_line()
- *
- *    Revision 1.13  2001/09/16 15:47:37  jongfoster
- *    First version of CGI-based edit interface.  This is very much a
- *    work-in-progress, and you can't actually use it to edit anything
- *    yet.  You must #define FEATURE_CGI_EDIT_ACTIONS for these changes
- *    to have any effect.
- *
- *    Revision 1.12  2001/09/16 13:21:27  jongfoster
- *    Changes to use new list functions.
- *
- *    Revision 1.11  2001/09/14 00:17:32  jongfoster
- *    Tidying up memory allocation. New function init_action().
- *
- *    Revision 1.10  2001/09/10 10:14:34  oes
- *    Removing unused variable
- *
- *    Revision 1.9  2001/07/30 22:08:36  jongfoster
- *    Tidying up #defines:
- *    - All feature #defines are now of the form FEATURE_xxx
- *    - Permanently turned off WIN_GUI_EDIT
- *    - Permanently turned on WEBDAV and SPLIT_PROXY_ARGS
- *
- *    Revision 1.8  2001/06/29 13:19:52  oes
- *    Removed logentry from cancelled commit
- *
  *    Revision 1.7  2001/06/09 10:55:28  jongfoster
  *    Changing BUFSIZ ==> BUFFER_SIZE
  *
@@ -146,8 +64,6 @@ const char actions_rcs[] = "$Id: actions.c,v 1.25 2002/03/24 13:25:43 swa Exp $"
 
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
-#include <stdlib.h>
 
 #include "project.h"
 #include "jcc.h"
@@ -156,13 +72,26 @@ const char actions_rcs[] = "$Id: actions.c,v 1.25 2002/03/24 13:25:43 swa Exp $"
 #include "miscutil.h"
 #include "errlog.h"
 #include "loaders.h"
-#ifdef FEATURE_CGI_EDIT_ACTIONS
-#include "encode.h"
-#endif /* def FEATURE_CGI_EDIT_ACTIONS */
-#include "urlmatch.h"
 
 const char actions_h_rcs[] = ACTIONS_H_VERSION;
 
+
+/* Turn off everything except forwarding */
+/* This structure is used to hold user-defined aliases */
+struct action_alias
+{
+   const char * name;
+   struct action_spec action[1];
+   struct action_alias * next;
+};
+
+
+/*
+ * Must declare this in this file for the above structure.
+ */
+static int get_actions (char *line, 
+                        struct action_alias * alias_list,
+                        struct action_spec *cur_action);
 
 /*
  * We need the main list of options.
@@ -178,10 +107,10 @@ const char actions_h_rcs[] = ACTIONS_H_VERSION;
 #define AV_ADD_STRING 1 /* +stropt{string} */
 #define AV_REM_STRING 2 /* -stropt */
 #define AV_ADD_MULTI  3 /* +multiopt{string} +multiopt{string2} */
-#define AV_REM_MULTI  4 /* -multiopt{string} -multiopt          */
+#define AV_REM_MULTI  4 /* -multiopt{string} -multiopt{*}       */
 
 /*
- * We need a structure to hold the name, flag changes,
+ * We need a structure to hold the name, flag changes, 
  * type, and string index.
  */
 struct action_name
@@ -237,14 +166,13 @@ static const struct action_name action_names[] =
  *          1  :  cur_action = Current actions, to modify.
  *          2  :  new_action = Action to add.
  *
- * Returns     :  JB_ERR_OK or JB_ERR_MEMORY
+ * Returns     :  N/A
  *
  *********************************************************************/
-jb_err merge_actions (struct action_spec *dest,
-                      const struct action_spec *src)
+void merge_actions (struct action_spec *dest, 
+                    const struct action_spec *src)
 {
    int i;
-   jb_err err;
 
    dest->mask &= src->mask;
    dest->add  &= src->mask;
@@ -257,10 +185,6 @@ jb_err merge_actions (struct action_spec *dest,
       {
          freez(dest->string[i]);
          dest->string[i] = strdup(str);
-         if (NULL == dest->string[i])
-         {
-            return JB_ERR_MEMORY;
-         }
       }
    }
 
@@ -269,10 +193,10 @@ jb_err merge_actions (struct action_spec *dest,
       if (src->multi_remove_all[i])
       {
          /* Remove everything from dest */
-         list_remove_all(dest->multi_remove[i]);
+         destroy_list(dest->multi_remove[i]);
+         destroy_list(dest->multi_add[i]);
          dest->multi_remove_all[i] = 1;
-
-         err = list_duplicate(dest->multi_add[i], src->multi_add[i]);
+         list_duplicate(dest->multi_add[i], src->multi_add[i]);
       }
       else if (dest->multi_remove_all[i])
       {
@@ -281,23 +205,16 @@ jb_err merge_actions (struct action_spec *dest,
           * about what we add.
           */
          list_remove_list(dest->multi_add[i], src->multi_remove[i]);
-         err = list_append_list_unique(dest->multi_add[i], src->multi_add[i]);
+         list_append_list_unique(dest->multi_add[i], src->multi_add[i]);
       }
       else
       {
          /* No "remove all"s to worry about. */
          list_remove_list(dest->multi_add[i], src->multi_remove[i]);
-         err = list_append_list_unique(dest->multi_remove[i], src->multi_remove[i]);
-         if (!err) err = list_append_list_unique(dest->multi_add[i], src->multi_add[i]);
-      }
-
-      if (err)
-      {
-         return err;
+         list_append_list_unique(dest->multi_remove[i], src->multi_remove[i]);
+         list_append_list_unique(dest->multi_add[i], src->multi_add[i]);
       }
    }
-
-   return JB_ERR_OK;
 }
 
 
@@ -307,8 +224,6 @@ jb_err merge_actions (struct action_spec *dest,
  *
  * Description :  Copy an action_specs.
  *                Similar to "cur_action = new_action".
- *                Note that dest better not contain valid data
- *                - it's overwritten, not freed.
  *
  * Parameters  :
  *          1  :  dest = Destination of copy.
@@ -317,13 +232,10 @@ jb_err merge_actions (struct action_spec *dest,
  * Returns     :  N/A
  *
  *********************************************************************/
-jb_err copy_action (struct action_spec *dest,
-                    const struct action_spec *src)
+void copy_action (struct action_spec *dest, 
+                  const struct action_spec *src)
 {
    int i;
-   jb_err err = JB_ERR_OK;
-
-   memset(dest, '\0', sizeof(*dest));
 
    dest->mask = src->mask;
    dest->add  = src->add;
@@ -331,32 +243,15 @@ jb_err copy_action (struct action_spec *dest,
    for (i = 0; i < ACTION_STRING_COUNT; i++)
    {
       char * str = src->string[i];
-      if (str)
-      {
-         str = strdup(str);
-         if (!str)
-         {
-            return JB_ERR_MEMORY;
-         }
-         dest->string[i] = str;
-      }
+      dest->string[i] = (str ? strdup(str) : NULL);
    }
 
    for (i = 0; i < ACTION_MULTI_COUNT; i++)
    {
       dest->multi_remove_all[i] = src->multi_remove_all[i];
-      err = list_duplicate(dest->multi_remove[i], src->multi_remove[i]);
-      if (err)
-      {
-         return err;
-      }
-      err = list_duplicate(dest->multi_add[i],    src->multi_add[i]);
-      if (err)
-      {
-         return err;
-      }
+      list_duplicate(dest->multi_remove[i], src->multi_remove[i]);
+      list_duplicate(dest->multi_add[i],    src->multi_add[i]);
    }
-   return err;
 }
 
 
@@ -364,9 +259,7 @@ jb_err copy_action (struct action_spec *dest,
  *
  * Function    :  free_action
  *
- * Description :  Destroy an action_spec.  Frees memory used by it,
- *                except for the memory used by the struct action_spec
- *                itself.
+ * Description :  Free an action_specs.
  *
  * Parameters  :
  *          1  :  src = Source to free.
@@ -377,11 +270,6 @@ jb_err copy_action (struct action_spec *dest,
 void free_action (struct action_spec *src)
 {
    int i;
-
-   if (src == NULL)
-   {
-      return;
-   }
 
    for (i = 0; i < ACTION_STRING_COUNT; i++)
    {
@@ -418,14 +306,14 @@ void free_action (struct action_spec *src)
  *                       we found an action.
  *          2  :  name = [out] Start of action name, null
  *                       terminated.  NULL on EOL
- *          3  :  value = [out] Start of action value, null
+ *          3  :  value = [out] Start of action value, null 
  *                        terminated.  NULL if none or EOL.
  *
- * Returns     :  JB_ERR_OK => Ok
- *                JB_ERR_PARSE => Mismatched {} (line was trashed anyway)
+ * Returns     :  0 => Ok
+ *                nonzero => Mismatched {} (line was trashed anyway)
  *
  *********************************************************************/
-jb_err get_action_token(char **line, char **name, char **value)
+int get_action_token(char **line, char **name, char **value)
 {
    char * str = *line;
    char ch;
@@ -449,19 +337,19 @@ jb_err get_action_token(char **line, char **name, char **value)
    if (*str == '{')
    {
       /* null name, just value is prohibited */
-      return JB_ERR_PARSE;
+      return 1;
    }
 
    *name = str;
 
    /* parse option */
-   while (((ch = *str) != '\0') &&
+   while (((ch = *str) != '\0') && 
           (ch != ' ') && (ch != '\t') && (ch != '{'))
    {
       if (ch == '}')
       {
-         /* error, '}' without '{' */
-         return JB_ERR_PARSE;
+         /* error */
+         return 1;
       }
       str++;
    }
@@ -480,7 +368,7 @@ jb_err get_action_token(char **line, char **name, char **value)
          /* More to parse next time. */
          *line = str + 1;
       }
-      return JB_ERR_OK;
+      return 0;
    }
 
    str++;
@@ -491,7 +379,7 @@ jb_err get_action_token(char **line, char **name, char **value)
    {
       /* error */
       *value = NULL;
-      return JB_ERR_PARSE;
+      return 1;
    }
 
    /* got value */
@@ -500,7 +388,7 @@ jb_err get_action_token(char **line, char **name, char **value)
 
    chomp(*value);
 
-   return JB_ERR_OK;
+   return 0;
 }
 
 
@@ -517,17 +405,15 @@ jb_err get_action_token(char **line, char **name, char **value)
  *          3  :  cur_action = Where to store the action.  Caller
  *                             allocates memory.
  *
- * Returns     :  JB_ERR_OK => Ok
- *                JB_ERR_PARSE => Parse error (line was trashed anyway)
- *                nonzero => Out of memory (line was trashed anyway)
+ * Returns     :  0 => Ok
+ *                nonzero => Error (line was trashed anyway)
  *
  *********************************************************************/
-jb_err get_actions(char *line,
-                   struct action_alias * alias_list,
-                   struct action_spec *cur_action)
+static int get_actions(char *line,
+                       struct action_alias * alias_list,
+                       struct action_spec *cur_action)
 {
-   jb_err err;
-   init_action(cur_action);
+   memset(cur_action, '\0', sizeof(*cur_action));
    cur_action->mask = ACTION_MASK_ALL;
 
    while (line)
@@ -535,16 +421,15 @@ jb_err get_actions(char *line,
       char * option = NULL;
       char * value = NULL;
 
-      err = get_action_token(&line, &option, &value);
-      if (err)
+      if (get_action_token(&line, &option, &value))
       {
-         return err;
+         return 1;
       }
 
       if (option)
       {
          /* handle option in 'option' */
-
+      
          /* Check for standard action name */
          const struct action_name * action = action_names;
 
@@ -570,15 +455,11 @@ jb_err get_actions(char *line,
 
                   if ((value == NULL) || (*value == '\0'))
                   {
-                     return JB_ERR_PARSE;
+                     return 1;
                   }
                   /* FIXME: should validate option string here */
                   freez (cur_action->string[action->index]);
                   cur_action->string[action->index] = strdup(value);
-                  if (NULL == cur_action->string[action->index])
-                  {
-                     return JB_ERR_MEMORY;
-                  }
                   break;
                }
             case AV_REM_STRING:
@@ -592,28 +473,24 @@ jb_err get_actions(char *line,
                {
                   /* append multi string. */
 
-                  struct list * remove_p = cur_action->multi_remove[action->index];
-                  struct list * add_p    = cur_action->multi_add[action->index];
+                  struct list * remove = cur_action->multi_remove[action->index];
+                  struct list * add    = cur_action->multi_add[action->index];
 
                   if ((value == NULL) || (*value == '\0'))
                   {
-                     return JB_ERR_PARSE;
+                     return 1;
                   }
 
-                  list_remove_item(remove_p, value);
-                  err = enlist_unique(add_p, value, 0);
-                  if (err)
-                  {
-                     return err;
-                  }
+                  list_remove_item(remove, value);
+                  enlist_unique(add, value, 0);
                   break;
                }
             case AV_REM_MULTI:
                {
                   /* remove multi string. */
 
-                  struct list * remove_p = cur_action->multi_remove[action->index];
-                  struct list * add_p    = cur_action->multi_add[action->index];
+                  struct list * remove = cur_action->multi_remove[action->index];
+                  struct list * add    = cur_action->multi_add[action->index];
 
                   if ( (value == NULL) || (*value == '\0')
                      || ((*value == '*') && (value[1] == '\0')) )
@@ -623,8 +500,8 @@ jb_err get_actions(char *line,
                       *
                       * Remove *ALL*.
                       */
-                     list_remove_all(remove_p);
-                     list_remove_all(add_p);
+                     destroy_list(remove);
+                     destroy_list(add);
                      cur_action->multi_remove_all[action->index] = 1;
                   }
                   else
@@ -634,27 +511,22 @@ jb_err get_actions(char *line,
                      if ( !cur_action->multi_remove_all[action->index] )
                      {
                         /* there isn't a catch-all in the remove list already */
-                        err = enlist_unique(remove_p, value, 0);
-                        if (err)
-                        {
-                           return err;
-                        }
+                        enlist_unique(remove, value, 0);
                      }
-                     list_remove_item(add_p, value);
+                     list_remove_item(add, value);
                   }
                   break;
                }
             default:
                /* Shouldn't get here unless there's memory corruption. */
-               assert(0);
-               return JB_ERR_PARSE;
+               return 1;
             }
          }
          else
          {
             /* try user aliases. */
             const struct action_alias * alias = alias_list;
-
+            
             while ( (alias != NULL) && (0 != strcmpic(alias->name, option)) )
             {
                alias = alias->next;
@@ -667,13 +539,168 @@ jb_err get_actions(char *line,
             else
             {
                /* Bad action name */
-               return JB_ERR_PARSE;
+               return 1;
             }
          }
       }
    }
 
-   return JB_ERR_OK;
+   return 0;
+}
+
+
+/*********************************************************************
+ *
+ * Function    :  actions_to_text
+ *
+ * Description :  Converts a actionsfile entry from numeric form
+ *                ("mask" and "add") to text.
+ *
+ * Parameters  :
+ *          1  :  mask = As from struct url_actions
+ *          2  :  add  = As from struct url_actions
+ *
+ * Returns     :  A string.  Caller must free it.
+ *
+ *********************************************************************/
+char * actions_to_text(struct action_spec *action)
+{
+   unsigned mask = action->mask;
+   unsigned add  = action->add;
+   char * result = strdup("");
+   struct list * lst;
+
+   /* sanity - prevents "-feature +feature" */
+   mask |= add;
+
+
+#define DEFINE_ACTION_BOOL(__name, __bit)   \
+   if (!(mask & __bit))                     \
+   {                                        \
+      result = strsav(result, " -" __name); \
+   }                                        \
+   else if (add & __bit)                    \
+   {                                        \
+      result = strsav(result, " +" __name); \
+   }
+
+#define DEFINE_ACTION_STRING(__name, __bit, __index) \
+   if (!(mask & __bit))                     \
+   {                                        \
+      result = strsav(result, " -" __name); \
+   }                                        \
+   else if (add & __bit)                    \
+   {                                        \
+      result = strsav(result, " +" __name "{"); \
+      result = strsav(result, action->string[__index]); \
+      result = strsav(result, "}"); \
+   }
+
+#define DEFINE_ACTION_MULTI(__name, __index)         \
+   if (action->multi_remove_all[__index])            \
+   {                                                 \
+      result = strsav(result, " -" __name "{*}");    \
+   }                                                 \
+   else                                              \
+   {                                                 \
+      lst = action->multi_remove[__index]->next;     \
+      while (lst)                                    \
+      {                                              \
+         result = strsav(result, " -" __name "{");   \
+         result = strsav(result, lst->str);          \
+         result = strsav(result, "}");               \
+         lst = lst->next;                            \
+      }                                              \
+   }                                                 \
+   lst = action->multi_add[__index]->next;           \
+   while (lst)                                       \
+   {                                                 \
+      result = strsav(result, " +" __name "{");      \
+      result = strsav(result, lst->str);             \
+      result = strsav(result, "}");                  \
+      lst = lst->next;                               \
+   }
+
+#define DEFINE_ACTION_ALIAS 0 /* No aliases for output */
+
+#include "actionlist.h"
+
+#undef DEFINE_ACTION_MULTI
+#undef DEFINE_ACTION_STRING
+#undef DEFINE_ACTION_BOOL
+#undef DEFINE_ACTION_ALIAS
+
+   return result;
+}
+
+
+/*********************************************************************
+ *
+ * Function    :  current_actions_to_text
+ *
+ * Description :  Converts a actionsfile entry to text.
+ *
+ * Parameters  :
+ *          1  :  action = Action
+ *
+ * Returns     :  A string.  Caller must free it.
+ *
+ *********************************************************************/
+char * current_action_to_text(struct current_action_spec *action)
+{
+   unsigned flags  = action->flags;
+   char * result = strdup("");
+   struct list * lst;
+
+#define DEFINE_ACTION_BOOL(__name, __bit)   \
+   if (flags & __bit)                       \
+   {                                        \
+      result = strsav(result, " +" __name); \
+   }                                        \
+   else                                     \
+   {                                        \
+      result = strsav(result, " -" __name); \
+   }
+
+#define DEFINE_ACTION_STRING(__name, __bit, __index)    \
+   if (flags & __bit)                                   \
+   {                                                    \
+      result = strsav(result, " +" __name "{");         \
+      result = strsav(result, action->string[__index]); \
+      result = strsav(result, "}");                     \
+   }                                                    \
+   else                                                 \
+   {                                                    \
+      result = strsav(result, " -" __name);             \
+   }
+
+#define DEFINE_ACTION_MULTI(__name, __index)            \
+   lst = action->multi[__index]->next;                  \
+   if (lst == NULL)                                     \
+   {                                                    \
+      result = strsav(result, " -" __name);             \
+   }                                                    \
+   else                                                 \
+   {                                                    \
+      while (lst)                                       \
+      {                                                 \
+         result = strsav(result, " +" __name "{");      \
+         result = strsav(result, lst->str);             \
+         result = strsav(result, "}");                  \
+         lst = lst->next;                               \
+      }                                                 \
+   }
+
+#define DEFINE_ACTION_ALIAS 0 /* No aliases for output */
+
+#include "actionlist.h"
+
+#undef DEFINE_ACTION_MULTI
+#undef DEFINE_ACTION_STRING
+#undef DEFINE_ACTION_BOOL
+#undef DEFINE_ACTION_ALIAS
+
+   return result;
 }
 
 
@@ -692,26 +719,7 @@ jb_err get_actions(char *line,
 void init_current_action (struct current_action_spec *dest)
 {
    memset(dest, '\0', sizeof(*dest));
-
    dest->flags = ACTION_MOST_COMPATIBLE;
-}
-
-
-/*********************************************************************
- *
- * Function    :  init_action
- *
- * Description :  Zero out an action.
- *
- * Parameters  :
- *          1  :  dest = An uninitialized action_spec.
- *
- * Returns     :  N/A
- *
- *********************************************************************/
-void init_action (struct action_spec *dest)
-{
-   memset(dest, '\0', sizeof(*dest));
 }
 
 
@@ -725,7 +733,7 @@ void init_action (struct action_spec *dest)
  *                is that this one doesn't allocate memory for
  *                strings (so "src" better be in memory for at least
  *                as long as "dest" is, and you'd better free
- *                "dest" using "free_current_action").
+ *                "dest" using "current_free_action").
  *                Also, there is no  mask or remove lists in dest.
  *                (If we're applying it to a URL, we don't need them)
  *
@@ -733,15 +741,13 @@ void init_action (struct action_spec *dest)
  *          1  :  dest = Current actions, to modify.
  *          2  :  src = Action to add.
  *
- * Returns  0  :  no error
- *        !=0  :  error, probably JB_ERR_MEMORY.
+ * Returns     :  N/A
  *
  *********************************************************************/
-jb_err merge_current_action (struct current_action_spec *dest,
-                             const struct action_spec *src)
+void merge_current_action (struct current_action_spec *dest, 
+                           const struct action_spec *src)
 {
    int i;
-   jb_err err = JB_ERR_OK;
 
    dest->flags  &= src->mask;
    dest->flags  |= src->add;
@@ -751,13 +757,8 @@ jb_err merge_current_action (struct current_action_spec *dest,
       char * str = src->string[i];
       if (str)
       {
-         str = strdup(str);
-         if (!str)
-         {
-            return JB_ERR_MEMORY;
-         }
          freez(dest->string[i]);
-         dest->string[i] = str;
+         dest->string[i] = strdup(str);
       }
    }
 
@@ -765,24 +766,16 @@ jb_err merge_current_action (struct current_action_spec *dest,
    {
       if (src->multi_remove_all[i])
       {
-         /* Remove everything from dest, then add src->multi_add */
-         err = list_duplicate(dest->multi[i], src->multi_add[i]);
-         if (err)
-         {
-            return err;
-         }
+         /* Remove everything from dest */
+         destroy_list(dest->multi[i]);
+         list_duplicate(dest->multi[i], src->multi_add[i]);
       }
       else
       {
          list_remove_list(dest->multi[i], src->multi_remove[i]);
-         err = list_append_list_unique(dest->multi[i], src->multi_add[i]);
-         if (err)
-         {
-            return err;
-         }
+         list_append_list_unique(dest->multi[i], src->multi_add[i]);
       }
    }
-   return err;
 }
 
 
@@ -790,8 +783,7 @@ jb_err merge_current_action (struct current_action_spec *dest,
  *
  * Function    :  free_current_action
  *
- * Description :  Free memory used by a current_action_spec.
- *                Does not free the current_action_spec itself.
+ * Description :  Free a current_action_spec.
  *
  * Parameters  :
  *          1  :  src = Source to free.
@@ -817,33 +809,6 @@ void free_current_action (struct current_action_spec *src)
 }
 
 
-static struct file_list *current_actions_file  = NULL;
-
-
-#ifdef FEATURE_GRACEFUL_TERMINATION
-/*********************************************************************
- *
- * Function    :  unload_current_actions_file
- *
- * Description :  Unloads current actions file - reset to state at
- *                beginning of program.
- *
- * Parameters  :  None
- *
- * Returns     :  N/A
- *
- *********************************************************************/
-void unload_current_actions_file(void)
-{
-   if (current_actions_file)
-   {
-      current_actions_file->unloader = unload_actions_file;
-      current_actions_file = NULL;
-   }
-}
-#endif /* FEATURE_GRACEFUL_TERMINATION */
-
-
 /*********************************************************************
  *
  * Function    :  unload_actions_file
@@ -864,38 +829,11 @@ void unload_actions_file(void *file_data)
    while (cur != NULL)
    {
       next = cur->next;
-      free_url_spec(cur->url);
-      free_action(cur->action);
+      free_url(cur->url);
       freez(cur);
       cur = next;
    }
 
-}
-
-
-/*********************************************************************
- *
- * Function    :  free_alias_list
- *
- * Description :  Free memory used by a list of aliases.
- *
- * Parameters  :
- *          1  :  alias_list = Linked list to free.
- *
- * Returns     :  N/A
- *
- *********************************************************************/
-void free_alias_list(struct action_alias *alias_list)
-{
-   while (alias_list != NULL)
-   {
-      struct action_alias * next = alias_list->next;
-      alias_list->next = NULL;
-      freez(alias_list->name);
-      free_action(alias_list->action);
-      free(alias_list);
-      alias_list = next;
-   }
 }
 
 
@@ -914,29 +852,22 @@ void free_alias_list(struct action_alias *alias_list)
  *********************************************************************/
 int load_actions_file(struct client_state *csp)
 {
-
-   /*
-    * Parser mode.
-    * Note: Keep these in the order they occur in the file, they are
-    * sometimes tested with <=
-    */
-#define MODE_START_OF_FILE 1
-#define MODE_SETTINGS      2
-#define MODE_DESCRIPTION   3
-#define MODE_ALIAS         4
-#define MODE_ACTIONS       5
-
-   int mode = MODE_START_OF_FILE;
+   static struct file_list *current_actions_file  = NULL;
 
    FILE *fp;
+
    struct url_actions *last_perm;
    struct url_actions *perm;
    char  buf[BUFFER_SIZE];
    struct file_list *fs;
-   struct action_spec * cur_action = NULL;
-   int cur_action_used = 0;
+#define MODE_START_OF_FILE 1
+#define MODE_ACTIONS       2
+#define MODE_ALIAS         3
+   int mode = MODE_START_OF_FILE;
+   struct action_spec cur_action[1];
    struct action_alias * alias_list = NULL;
-   unsigned long linenum = 0;
+
+   memset(cur_action, '\0', sizeof(*cur_action));
 
    if (!check_file_changed(current_actions_file, csp->config->actions_file, &fs))
    {
@@ -969,7 +900,7 @@ int load_actions_file(struct client_state *csp)
       return 1; /* never get here */
    }
 
-   while (read_config_line(buf, sizeof(buf), fp, &linenum) != NULL)
+   while (read_config_line(buf, sizeof(buf), fp, fs) != NULL)
    {
       if (*buf == '{')
       {
@@ -984,9 +915,9 @@ int load_actions_file(struct client_state *csp)
             {
                /* too short */
                fclose(fp);
-               log_error(LOG_LEVEL_FATAL,
-                  "can't load actions file '%s': invalid line (%lu): %s", 
-                  csp->config->actions_file, linenum, buf);
+               log_error(LOG_LEVEL_FATAL, 
+                  "can't load actions file '%s': invalid line: %s",
+                  csp->config->actions_file, buf);
                return 1; /* never get here */
             }
 
@@ -998,87 +929,25 @@ int load_actions_file(struct client_state *csp)
             {
                /* too short */
                fclose(fp);
-               log_error(LOG_LEVEL_FATAL,
-                  "can't load actions file '%s': invalid line (%lu): {{ }}",
-                  csp->config->actions_file, linenum);
+               log_error(LOG_LEVEL_FATAL, 
+                  "can't load actions file '%s': invalid line: {{ }}",
+                  csp->config->actions_file);
                return 1; /* never get here */
             }
 
-            /*
-             * An actionsfile can optionally contain the following blocks.
-             * They *MUST* be in this order, to simplify processing:
-             *
-             * {{settings}}
-             * name=value...
-             *
-             * {{description}}
-             * ...free text, format TBD, but no line may start with a '{'...
-             *
-             * {{alias}}
-             * name=actions...
-             *
-             * The actual actions must be *after* these special blocks.
-             * None of these special blocks may be repeated.
-             *
-             */
-            if (0 == strcmpic(start, "settings"))
-            {
-               /* it's a {{settings}} block */
-               if (mode >= MODE_SETTINGS)
-               {
-                  /* {{settings}} must be first thing in file and must only
-                   * appear once.
-                   */
-                  fclose(fp);
-                  log_error(LOG_LEVEL_FATAL,
-                     "can't load actions file '%s': line %lu: {{settings}} must only appear once, and it must be before anything else.",
-                     csp->config->actions_file, linenum);
-               }
-               mode = MODE_SETTINGS;
-            }
-            else if (0 == strcmpic(start, "description"))
-            {
-               /* it's a {{description}} block */
-               if (mode >= MODE_DESCRIPTION)
-               {
-                  /* {{description}} is a singleton and only {{settings}} may proceed it
-                   */
-                  fclose(fp);
-                  log_error(LOG_LEVEL_FATAL,
-                     "can't load actions file '%s': line %lu: {{description}} must only appear once, and only a {{settings}} block may be above it.",
-                     csp->config->actions_file, linenum);
-               }
-               mode = MODE_DESCRIPTION;
-            }
-            else if (0 == strcmpic(start, "alias"))
+            if (0 == strcmpic(start, "alias"))
             {
                /* it's an {{alias}} block */
-               if (mode >= MODE_ALIAS)
-               {
-                  /* {{alias}} must be first thing in file, possibly after
-                   * {{settings}} and {{description}}
-                   *
-                   * {{alias}} must only appear once.
-                   *
-                   * Note that these are new restrictions introduced in
-                   * v2.9.10 in order to make actionsfile editing simpler.
-                   * (Otherwise, reordering actionsfile entries without
-                   * completely rewriting the file becomes non-trivial)
-                   */
-                  fclose(fp);
-                  log_error(LOG_LEVEL_FATAL,
-                     "can't load actions file '%s': line %lu: {{alias}} must only appear once, and it must be before all actions.",
-                     csp->config->actions_file, linenum);
-               }
+
                mode = MODE_ALIAS;
             }
             else
             {
                /* invalid {{something}} block */
                fclose(fp);
-               log_error(LOG_LEVEL_FATAL,
-                  "can't load actions file '%s': invalid line (%lu): {{%s}}",
-                  csp->config->actions_file, linenum, start);
+               log_error(LOG_LEVEL_FATAL, 
+                  "can't load actions file '%s': invalid line: {{%s}}",
+                  csp->config->actions_file, start);
                return 1; /* never get here */
             }
          }
@@ -1093,26 +962,7 @@ int load_actions_file(struct client_state *csp)
             mode    = MODE_ACTIONS;
 
             /* free old action */
-            if (cur_action)
-            {
-               if (!cur_action_used)
-               {
-                  free_action(cur_action);
-                  free(cur_action);
-               }
-               cur_action = NULL;
-            }
-            cur_action_used = 0;
-            cur_action = (struct action_spec *)zalloc(sizeof(*cur_action));
-            if (cur_action == NULL)
-            {
-               fclose(fp);
-               log_error(LOG_LEVEL_FATAL,
-                  "can't load actions file '%s': out of memory",
-                  csp->config->actions_file);
-               return 1; /* never get here */
-            }
-            init_action(cur_action);
+            free_action(cur_action);
 
             /* trim { */
             strcpy(actions_buf, buf + 1);
@@ -1121,11 +971,11 @@ int load_actions_file(struct client_state *csp)
             end = actions_buf + strlen(actions_buf) - 1;
             if (*end != '}')
             {
-               /* No closing } */
+               /* too short */
                fclose(fp);
-               log_error(LOG_LEVEL_FATAL,
-                  "can't load actions file '%s': invalid line (%lu): %s",
-                  csp->config->actions_file, linenum, buf);
+               log_error(LOG_LEVEL_FATAL, 
+                  "can't load actions file '%s': invalid line: %s",
+                  csp->config->actions_file, buf);
                return 1; /* never get here */
             }
             *end = '\0';
@@ -1133,48 +983,42 @@ int load_actions_file(struct client_state *csp)
             /* trim any whitespace immediately inside {} */
             chomp(actions_buf);
 
+            if (*actions_buf == '\0')
+            {
+               /* too short */
+               fclose(fp);
+               log_error(LOG_LEVEL_FATAL, 
+                  "can't load actions file '%s': invalid line: %s",
+                  csp->config->actions_file, buf);
+               return 1; /* never get here */
+            }
+
             if (get_actions(actions_buf, alias_list, cur_action))
             {
                /* error */
                fclose(fp);
-               log_error(LOG_LEVEL_FATAL,
-                  "can't load actions file '%s': invalid line (%lu): %s",
-                  csp->config->actions_file, linenum, buf);
+               log_error(LOG_LEVEL_FATAL, 
+                  "can't load actions file '%s': invalid line: %s",
+                  csp->config->actions_file, buf);
                return 1; /* never get here */
             }
          }
       }
-      else if (mode == MODE_SETTINGS)
-      {
-         /*
-          * Part of the {{settings}} block.
-          * Ignore for now, but we may want to read & check permissions
-          * when we go multi-user.
-          */
-      }
-      else if (mode == MODE_DESCRIPTION)
-      {
-         /*
-          * Part of the {{description}} block.
-          * Ignore for now.
-          */
-      }
       else if (mode == MODE_ALIAS)
       {
-         /*
-          * define an alias
-          */
+         /* define an alias */
          char  actions_buf[BUFFER_SIZE];
          struct action_alias * new_alias;
+         int more = 1;
 
          char * start = strchr(buf, '=');
          char * end = start;
 
          if ((start == NULL) || (start == buf))
          {
-            log_error(LOG_LEVEL_FATAL,
-               "can't load actions file '%s': invalid alias line (%lu): %s",
-               csp->config->actions_file, linenum, buf);
+            log_error(LOG_LEVEL_FATAL, 
+               "can't load actions file '%s': invalid alias line: %s",
+               csp->config->actions_file, buf);
             return 1; /* never get here */
          }
 
@@ -1207,9 +1051,9 @@ int load_actions_file(struct client_state *csp)
          }
          if (*start == '\0')
          {
-            log_error(LOG_LEVEL_FATAL,
-               "can't load actions file '%s': invalid alias line (%lu): %s",
-               csp->config->actions_file, linenum, buf);
+            log_error(LOG_LEVEL_FATAL, 
+               "can't load actions file '%s': invalid alias line: %s",
+               csp->config->actions_file, buf);
             return 1; /* never get here */
          }
 
@@ -1221,12 +1065,12 @@ int load_actions_file(struct client_state *csp)
          {
             /* error */
             fclose(fp);
-            log_error(LOG_LEVEL_FATAL,
-               "can't load actions file '%s': invalid alias line (%lu): %s = %s",
-               csp->config->actions_file, linenum, buf, start);
+            log_error(LOG_LEVEL_FATAL, 
+               "can't load actions file '%s': invalid alias line: %s = %s",
+               csp->config->actions_file, buf, start);
             return 1; /* never get here */
          }
-
+         
          /* add to list */
          new_alias->next = alias_list;
          alias_list = new_alias;
@@ -1252,9 +1096,9 @@ int load_actions_file(struct client_state *csp)
          if (create_url_spec(perm->url, buf))
          {
             fclose(fp);
-            log_error(LOG_LEVEL_FATAL,
-               "can't load actions file '%s': line %lu: cannot create URL pattern from: %s",
-               csp->config->actions_file, linenum, buf);
+            log_error(LOG_LEVEL_FATAL, 
+               "can't load actions file '%s': cannot create URL pattern from: %s",
+               csp->config->actions_file, buf);
             return 1; /* never get here */
          }
 
@@ -1266,16 +1110,16 @@ int load_actions_file(struct client_state *csp)
       {
          /* oops - please have a {} line as 1st line in file. */
          fclose(fp);
-         log_error(LOG_LEVEL_FATAL,
-            "can't load actions file '%s': first needed line (%lu) is invalid: %s",
-            csp->config->actions_file, linenum, buf);
+         log_error(LOG_LEVEL_FATAL, 
+            "can't load actions file '%s': first line is invalid: %s",
+            csp->config->actions_file, buf);
          return 1; /* never get here */
       }
       else
       {
          /* How did we get here? This is impossible! */
          fclose(fp);
-         log_error(LOG_LEVEL_FATAL,
+         log_error(LOG_LEVEL_FATAL, 
             "can't load actions file '%s': INTERNAL ERROR - mode = %d",
             csp->config->actions_file, mode);
          return 1; /* never get here */
@@ -1283,10 +1127,24 @@ int load_actions_file(struct client_state *csp)
    }
 
    fclose(fp);
-
+   
    free_action(cur_action);
 
-   free_alias_list(alias_list);
+   while (alias_list != NULL)
+   {
+      struct action_alias * next = alias_list->next;
+      freez((char *)alias_list->name);
+      free_action(alias_list->action);
+      free(alias_list);
+      alias_list = next;
+   }
+
+#ifndef SPLIT_PROXY_ARGS
+   if (!suppress_blocklists)
+   {
+      fs->proxy_args = strsav(fs->proxy_args, "</pre>");
+   }
+#endif /* ndef SPLIT_PROXY_ARGS */
 
    /* the old one is now obsolete */
    if (current_actions_file)
@@ -1305,291 +1163,4 @@ int load_actions_file(struct client_state *csp)
 
    return(0);
 
-}
-
-
-/*********************************************************************
- *
- * Function    :  actions_to_text
- *
- * Description :  Converts a actionsfile entry from numeric form
- *                ("mask" and "add") to text.
- *
- * Parameters  :
- *          1  :  mask = As from struct url_actions
- *          2  :  add  = As from struct url_actions
- *
- * Returns     :  A string.  Caller must free it.
- *                NULL on out-of-memory error.
- *
- *********************************************************************/
-char * actions_to_text(struct action_spec *action)
-{
-   unsigned mask = action->mask;
-   unsigned add  = action->add;
-   char * result = strdup("");
-   struct list_entry * lst;
-
-   /* sanity - prevents "-feature +feature" */
-   mask |= add;
-
-
-#define DEFINE_ACTION_BOOL(__name, __bit)    \
-   if (!(mask & __bit))                      \
-   {                                         \
-      string_append(&result, " -" __name);   \
-   }                                         \
-   else if (add & __bit)                     \
-   {                                         \
-      string_append(&result, " +" __name);   \
-   }
-
-#define DEFINE_ACTION_STRING(__name, __bit, __index)   \
-   if (!(mask & __bit))                                \
-   {                                                   \
-      string_append(&result, " -" __name);             \
-   }                                                   \
-   else if (add & __bit)                               \
-   {                                                   \
-      string_append(&result, " +" __name "{");         \
-      string_append(&result, action->string[__index]); \
-      string_append(&result, "}");                     \
-   }
-
-#define DEFINE_ACTION_MULTI(__name, __index)         \
-   if (action->multi_remove_all[__index])            \
-   {                                                 \
-      string_append(&result, " -" __name);           \
-   }                                                 \
-   else                                              \
-   {                                                 \
-      lst = action->multi_remove[__index]->first;    \
-      while (lst)                                    \
-      {                                              \
-         string_append(&result, " -" __name "{");    \
-         string_append(&result, lst->str);           \
-         string_append(&result, "}");                \
-         lst = lst->next;                            \
-      }                                              \
-   }                                                 \
-   lst = action->multi_add[__index]->first;          \
-   while (lst)                                       \
-   {                                                 \
-      string_append(&result, " +" __name "{");       \
-      string_append(&result, lst->str);              \
-      string_append(&result, "}");                   \
-      lst = lst->next;                               \
-   }
-
-#define DEFINE_ACTION_ALIAS 0 /* No aliases for output */
-
-#include "actionlist.h"
-
-#undef DEFINE_ACTION_MULTI
-#undef DEFINE_ACTION_STRING
-#undef DEFINE_ACTION_BOOL
-#undef DEFINE_ACTION_ALIAS
-
-   return result;
-}
-
-
-#ifdef FEATURE_CGI_EDIT_ACTIONS
-/*********************************************************************
- *
- * Function    :  actions_to_html
- *
- * Description :  Converts a actionsfile entry from numeric form
- *                ("mask" and "add") to a <br>-seperated HTML string.
- *
- * Parameters  :
- *          1  :  mask = As from struct url_actions
- *          2  :  add  = As from struct url_actions
- *
- * Returns     :  A string.  Caller must free it.
- *                NULL on out-of-memory error.
- *
- *********************************************************************/
-char * actions_to_html(struct action_spec *action)
-{
-   unsigned mask = action->mask;
-   unsigned add  = action->add;
-   char * result = strdup("");
-   char * enc_str;
-   struct list_entry * lst;
-
-   /* sanity - prevents "-feature +feature" */
-   mask |= add;
-
-
-#define DEFINE_ACTION_BOOL(__name, __bit)       \
-   if (!(mask & __bit))                         \
-   {                                            \
-      string_append(&result, "\n<br>-" __name); \
-   }                                            \
-   else if (add & __bit)                        \
-   {                                            \
-      string_append(&result, "\n<br>+" __name); \
-   }
-
-#define DEFINE_ACTION_STRING(__name, __bit, __index) \
-   if (!(mask & __bit))                              \
-   {                                                 \
-      string_append(&result, "\n<br>-" __name);      \
-   }                                                 \
-   else if (add & __bit)                             \
-   {                                                 \
-      string_append(&result, "\n<br>+" __name "{");  \
-      if (NULL == result)                            \
-      {                                              \
-         return NULL;                                \
-      }                                              \
-      enc_str = html_encode(action->string[__index]);\
-      if (NULL == enc_str)                           \
-      {                                              \
-         free(result);                               \
-         return NULL;                                \
-      }                                              \
-      string_append(&result, enc_str);               \
-      free(enc_str);                                 \
-      string_append(&result, "}");                   \
-   }
-
-#define DEFINE_ACTION_MULTI(__name, __index)          \
-   if (action->multi_remove_all[__index])             \
-   {                                                  \
-      string_append(&result, "\n<br>-" __name);       \
-   }                                                  \
-   else                                               \
-   {                                                  \
-      lst = action->multi_remove[__index]->first;     \
-      while (lst)                                     \
-      {                                               \
-         string_append(&result, "\n<br>-" __name "{");\
-         if (NULL == result)                          \
-         {                                            \
-            return NULL;                              \
-         }                                            \
-         enc_str = html_encode(lst->str);             \
-         if (NULL == enc_str)                         \
-         {                                            \
-            free(result);                             \
-            return NULL;                              \
-         }                                            \
-         string_append(&result, enc_str);             \
-         free(enc_str);                               \
-         string_append(&result, "}");                 \
-         lst = lst->next;                             \
-      }                                               \
-   }                                                  \
-   lst = action->multi_add[__index]->first;           \
-   while (lst)                                        \
-   {                                                  \
-      string_append(&result, "\n<br>+" __name "{");   \
-      if (NULL == result)                             \
-      {                                               \
-         return NULL;                                 \
-      }                                               \
-      enc_str = html_encode(lst->str);                \
-      if (NULL == enc_str)                            \
-      {                                               \
-         free(result);                                \
-         return NULL;                                 \
-      }                                               \
-      string_append(&result, enc_str);                \
-      free(enc_str);                                  \
-      string_append(&result, "}");                    \
-      lst = lst->next;                                \
-   }
-
-#define DEFINE_ACTION_ALIAS 0 /* No aliases for output */
-
-#include "actionlist.h"
-
-#undef DEFINE_ACTION_MULTI
-#undef DEFINE_ACTION_STRING
-#undef DEFINE_ACTION_BOOL
-#undef DEFINE_ACTION_ALIAS
-
-   /* trim leading <br> */
-   if (result && *result)
-   {
-      char * s = result;
-      result = strdup(result + 5);
-      free(s);
-   }
-
-   return result;
-}
-#endif /* def FEATURE_CGI_EDIT_ACTIONS */
-
-
-/*********************************************************************
- *
- * Function    :  current_actions_to_text
- *
- * Description :  Converts a actionsfile entry to text.
- *
- * Parameters  :
- *          1  :  action = Action
- *
- * Returns     :  A string.  Caller must free it.
- *                NULL on out-of-memory error.
- *
- *********************************************************************/
-char * current_action_to_text(struct current_action_spec *action)
-{
-   unsigned long flags  = action->flags;
-   char * result = strdup("");
-   struct list_entry * lst;
-
-#define DEFINE_ACTION_BOOL(__name, __bit)  \
-   if (flags & __bit)                      \
-   {                                       \
-      string_append(&result, " +" __name); \
-   }                                       \
-   else                                    \
-   {                                       \
-      string_append(&result, " -" __name); \
-   }
-
-#define DEFINE_ACTION_STRING(__name, __bit, __index)   \
-   if (flags & __bit)                                  \
-   {                                                   \
-      string_append(&result, " +" __name "{");         \
-      string_append(&result, action->string[__index]); \
-      string_append(&result, "}");                     \
-   }                                                   \
-   else                                                \
-   {                                                   \
-      string_append(&result, " -" __name);             \
-   }
-
-#define DEFINE_ACTION_MULTI(__name, __index)           \
-   lst = action->multi[__index]->first;                \
-   if (lst == NULL)                                    \
-   {                                                   \
-      string_append(&result, " -" __name);             \
-   }                                                   \
-   else                                                \
-   {                                                   \
-      while (lst)                                      \
-      {                                                \
-         string_append(&result, " +" __name "{");      \
-         string_append(&result, lst->str);             \
-         string_append(&result, "}");                  \
-         lst = lst->next;                              \
-      }                                                \
-   }
-
-#define DEFINE_ACTION_ALIAS 0 /* No aliases for output */
-
-#include "actionlist.h"
-
-#undef DEFINE_ACTION_MULTI
-#undef DEFINE_ACTION_STRING
-#undef DEFINE_ACTION_BOOL
-#undef DEFINE_ACTION_ALIAS
-
-   return result;
 }

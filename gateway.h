@@ -1,6 +1,6 @@
-#ifndef GATEWAY_H_INCLUDED
-#define GATEWAY_H_INCLUDED
-#define GATEWAY_H_VERSION "$Id: gateway.h,v 1.6 2002/03/25 22:12:45 oes Exp $"
+#ifndef _GATEWAY_H
+#define _GATEWAY_H
+#define GATEWAY_H_VERSION "$Id: gateway.h,v 1.1.1.1 2001/05/15 13:58:54 oes Exp $"
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/gateway.h,v $
@@ -10,7 +10,7 @@
  *                proxy).  Also contains the list of gateway types.
  *
  * Copyright   :  Written by and Copyright (C) 2001 the SourceForge
- *                Privoxy team. http://www.privoxy.org/
+ *                IJBSWA team.  http://ijbswa.sourceforge.net
  *
  *                Based on the Internet Junkbuster originally written
  *                by and Copyright (C) 1997 Anonymous Coders and 
@@ -36,48 +36,6 @@
  *
  * Revisions   :
  *    $Log: gateway.h,v $
- *    Revision 1.6  2002/03/25 22:12:45  oes
- *    Added fix for undefined INADDR_NONE on Solaris by Bart Schelstraete
- *
- *    Revision 1.5  2002/03/24 13:25:43  swa
- *    name change related issues
- *
- *    Revision 1.4  2002/03/09 20:03:52  jongfoster
- *    - Making various functions return int rather than size_t.
- *      (Undoing a recent change).  Since size_t is unsigned on
- *      Windows, functions like read_socket that return -1 on
- *      error cannot return a size_t.
- *
- *      THIS WAS A MAJOR BUG - it caused frequent, unpredictable
- *      crashes, and also frequently caused JB to jump to 100%
- *      CPU and stay there.  (Because it thought it had just
- *      read ((unsigned)-1) == 4Gb of data...)
- *
- *    - The signature of write_socket has changed, it now simply
- *      returns success=0/failure=nonzero.
- *
- *    - Trying to get rid of a few warnings --with-debug on
- *      Windows, I've introduced a new type "jb_socket".  This is
- *      used for the socket file descriptors.  On Windows, this
- *      is SOCKET (a typedef for unsigned).  Everywhere else, it's
- *      an int.  The error value can't be -1 any more, so it's
- *      now JB_INVALID_SOCKET (which is -1 on UNIX, and in
- *      Windows it maps to the #define INVALID_SOCKET.)
- *
- *    - The signature of bind_port has changed.
- *
- *    Revision 1.3  2001/07/29 18:58:15  jongfoster
- *    Removing nested #includes, adding forward declarations for needed
- *    structures, and changing the #define _FILENAME_H to FILENAME_H_INCLUDED.
- *
- *    Revision 1.2  2001/06/07 23:12:14  jongfoster
- *    Removing gateways[] list - no longer used.
- *    Replacing function pointer in struct gateway with a directly
- *    called function forwarded_connect(), which can do the common
- *    task of deciding whether to connect to the web server or HTTP
- *    proxy.
- *    Replacing struct gateway with struct forward_spec
- *
  *    Revision 1.1.1.1  2001/05/15 13:58:54  oes
  *    Initial import of version 2.9.3 source tree
  *
@@ -85,28 +43,17 @@
  *********************************************************************/
 
 
+#include "project.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct forward_spec;
-struct http_request;
-struct client_state;
+extern int forwarded_connect(const struct forward_spec * fwd, 
+                             struct http_request *http, 
+                             struct client_state *csp);
 
-extern jb_socket forwarded_connect(const struct forward_spec * fwd, 
-                                   struct http_request *http, 
-                                   struct client_state *csp);
-
-/*
- * Solaris fix
- */
-#ifndef INADDR_NONE
-#define INADDR_NONE -1
-#endif
-
-/*
- * Revision control strings from this header and associated .c file
- */
+/* Revision control strings from this header and associated .c file */
 extern const char gateway_rcs[];
 extern const char gateway_h_rcs[];
 
@@ -114,7 +61,7 @@ extern const char gateway_h_rcs[];
 } /* extern "C" */
 #endif
 
-#endif /* ndef GATEWAY_H_INCLUDED */
+#endif /* ndef _GATEWAY_H */
 
 /*
   Local Variables:

@@ -1,4 +1,4 @@
-const char w32taskbar_rcs[] = "$Id: w32taskbar.c,v 1.5 2002/03/24 12:03:47 jongfoster Exp $";
+const char w32taskbar_rcs[] = "$Id: w32taskbar.c,v 1.2 2001/05/20 15:07:54 jongfoster Exp $";
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/w32taskbar.c,v $
@@ -6,8 +6,8 @@ const char w32taskbar_rcs[] = "$Id: w32taskbar.c,v 1.5 2002/03/24 12:03:47 jongf
  * Purpose     :  Functions for creating, setting and destroying the
  *                workspace tray icon
  *
- * Copyright   :  Written by and Copyright (C) 2001-2002 members of
- *                the Privoxy team.  http://www.privoxy.org/
+ * Copyright   :  Written by and Copyright (C) 2001 the SourceForge
+ *                IJBSWA team.  http://ijbswa.sourceforge.net
  *
  *                Written by and Copyright (C) 1999 Adam Lock
  *                <locka@iol.ie>
@@ -32,15 +32,6 @@ const char w32taskbar_rcs[] = "$Id: w32taskbar.c,v 1.5 2002/03/24 12:03:47 jongf
  *
  * Revisions   :
  *    $Log: w32taskbar.c,v $
- *    Revision 1.5  2002/03/24 12:03:47  jongfoster
- *    Name change
- *
- *    Revision 1.4  2001/11/16 00:46:31  jongfoster
- *    Fixing compiler warnings
- *
- *    Revision 1.3  2001/05/22 18:56:28  oes
- *    CRLF -> LF
- *
  *    Revision 1.2  2001/05/20 15:07:54  jongfoster
  *    File is now ignored if _WIN_CONSOLE is defined.
  *
@@ -77,8 +68,7 @@ static LRESULT CALLBACK TrayProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
  *
  * Function    :  CreateTrayWindow
  *
- * Description :  Creates and returns the invisible window responsible
- *                for processing tray messages.
+ * Description :  Creates and returns the invisible window responsible for processing tray messages.
  *
  * Parameters  :
  *          1  :  hInstance = instance handle of this application
@@ -89,7 +79,7 @@ static LRESULT CALLBACK TrayProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 HWND CreateTrayWindow(HINSTANCE hInstance)
 {
    WNDCLASS wc;
-   static const char *szWndName = "PrivoxyTrayWindow";
+   static const char *szWndName = "JunkbusterTrayWindow";
 
    wc.style          = 0;
    wc.lpfnWndProc    = TrayProc;
@@ -244,7 +234,7 @@ LRESULT CALLBACK TrayProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
       case WM_TRAYMSG:
       {
-         /* UINT uID = (UINT) wParam; */
+         UINT uID = (UINT) wParam;
          UINT uMouseMsg = (UINT) lParam;
 
          if (uMouseMsg == WM_RBUTTONDOWN)

@@ -1,4 +1,4 @@
-const char w32log_rcs[] = "$Id: w32log.c,v 1.22 2002/03/24 12:48:23 jongfoster Exp $";
+const char w32log_rcs[] = "$Id: w32log.c,v 1.12 2001/07/13 14:04:59 oes Exp $";
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/w32log.c,v $
@@ -6,8 +6,8 @@ const char w32log_rcs[] = "$Id: w32log.c,v 1.22 2002/03/24 12:48:23 jongfoster E
  * Purpose     :  Functions for creating and destroying the log window,
  *                ouputting strings, processing messages and so on.
  *
- * Copyright   :  Written by and Copyright (C) 2001-2002 members of
- *                the Privoxy team.  http://www.privoxy.org/
+ * Copyright   :  Written by and Copyright (C) 2001 the SourceForge
+ *                IJBSWA team.  http://ijbswa.sourceforge.net
  *
  *                Written by and Copyright (C) 1999 Adam Lock
  *                <locka@iol.ie>
@@ -32,42 +32,6 @@ const char w32log_rcs[] = "$Id: w32log.c,v 1.22 2002/03/24 12:48:23 jongfoster E
  *
  * Revisions   :
  *    $Log: w32log.c,v $
- *    Revision 1.22  2002/03/24 12:48:23  jongfoster
- *    Fixing doc links
- *
- *    Revision 1.21  2002/03/24 12:07:35  jongfoster
- *    Consistern name for filters file
- *
- *    Revision 1.20  2002/03/24 12:03:47  jongfoster
- *    Name change
- *
- *    Revision 1.19  2002/01/17 21:04:17  jongfoster
- *    Replacing hard references to the URL of the config interface
- *    with #defines from project.h
- *
- *    Revision 1.18  2001/11/30 23:37:24  jongfoster
- *    Renaming the Win32 config file to config.txt - this is almost the
- *    same as the corresponding UNIX name "config"
- *
- *    Revision 1.17  2001/11/16 00:46:31  jongfoster
- *    Fixing compiler warnings
- *
- *    Revision 1.16  2001/08/01 19:58:12  jongfoster
- *    Fixing documentation filenames in help menu, and making status
- *    option work without needing the "Junkbuster Status.URL" file.
- *
- *    Revision 1.15  2001/07/30 22:08:36  jongfoster
- *    Tidying up #defines:
- *    - All feature #defines are now of the form FEATURE_xxx
- *    - Permanently turned off WIN_GUI_EDIT
- *    - Permanently turned on WEBDAV and SPLIT_PROXY_ARGS
- *
- *    Revision 1.14  2001/07/29 18:47:05  jongfoster
- *    Adding missing #include "loadcfg.h"
- *
- *    Revision 1.13  2001/07/19 19:15:14  haroon
- *    - Added a FIXME for EditFile but didn't fix :-)
- *
  *    Revision 1.12  2001/07/13 14:04:59  oes
  *    Removed all #ifdef PCRS
  *
@@ -156,12 +120,12 @@ const char w32log_rcs[] = "$Id: w32log.c,v 1.22 2002/03/24 12:48:23 jongfoster E
 #include "project.h"
 #include "w32log.h"
 #include "w32taskbar.h"
+#include "w32rulesdlg.h"
 #include "win32.h"
 #include "w32res.h"
 #include "jcc.h"
 #include "miscutil.h"
 #include "errlog.h"
-#include "loadcfg.h"
 
 const char w32res_h_rcs[] = W32RES_H_VERSION;
 
@@ -241,9 +205,9 @@ int g_nFontSize = DEFAULT_LOG_FONT_SIZE;
 
 const char * g_actions_file = NULL;
 const char * g_re_filterfile = NULL;
-#ifdef FEATURE_TRUST
+#ifdef TRUST_FILES
 const char * g_trustfile = NULL;
-#endif /* def FEATURE_TRUST */
+#endif /* def TRUST_FILES */
 
 /* FIXME: end kludge */
 
@@ -350,14 +314,14 @@ BOOL InitLogWindow(void)
    g_hiconIdle = LoadIcon(g_hInstance, MAKEINTRESOURCE(IDI_IDLE));
    for (i = 0; i < ANIM_FRAMES; i++)
    {
-      g_hiconAnim[i] = LoadIcon(g_hInstance, MAKEINTRESOURCE(IDI_ANIMATED1 + i));
+      g_hiconAnim[i] = LoadIcon(g_hInstance, MAKEINTRESOURCE(IDI_JUNKBUSTER1 + i));
    }
-   g_hiconApp = LoadIcon(g_hInstance, MAKEINTRESOURCE(IDI_MAINICON));
+   g_hiconApp = LoadIcon(g_hInstance, MAKEINTRESOURCE(IDI_JUNKBUSTER));
 
    /* Create the user interface */
    g_hwndLogFrame = CreateLogWindow(g_hInstance, g_nCmdShow);
    g_hwndTray = CreateTrayWindow(g_hInstance);
-   TrayAddIcon(g_hwndTray, 1, g_hiconApp, "Privoxy");
+   TrayAddIcon(g_hwndTray, 1, g_hiconApp, "Junkbuster");
 
    /* Create pattern matching buffers (for highlighting */
    LogCreatePatternMatchingBuffers();
@@ -778,7 +742,7 @@ void LogClipBuffer(void)
  *********************************************************************/
 HWND CreateHiddenLogOwnerWindow(HINSTANCE hInstance)
 {
-   static const char *szWndName = "PrivoxyLogOwner";
+   static const char *szWndName = "JunkbusterLogLogOwner";
    WNDCLASS wc;
    HWND hwnd;
 
@@ -841,11 +805,12 @@ LRESULT CALLBACK LogOwnerWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
  *********************************************************************/
 HWND CreateLogWindow(HINSTANCE hInstance, int nCmdShow)
 {
-   static const char *szWndName = "PrivoxyLogWindow";
-   static const char *szWndTitle = "Privoxy";
+   static const char *szWndName = "JunkbusterLogWindow";
+   static const char *szWndTitle = "Junkbuster";
 
    HWND hwnd = NULL;
    HWND hwndOwner = (g_bShowOnTaskBar) ? NULL : CreateHiddenLogOwnerWindow(hInstance);
+   HWND hwndChild = NULL;
    RECT rcClient;
    WNDCLASSEX wc;
 
@@ -982,7 +947,7 @@ void ShowLogWindow(BOOL bShow)
 *        from ShellExecute??
  *
  * Parameters  :
- *          1  :  filename = filename from the config (aka config.txt) file.
+ *          1  :  filename = filename from the config (aka junkbstr.txt) file.
  *
  * Returns     :  N/A
  *
@@ -1022,6 +987,9 @@ void OnLogRButtonUp(int nModifier, int x, int y)
    if (hMenu != NULL)
    {
       HMENU hMenuPopup = GetSubMenu(hMenu, 0);
+#ifdef WIN_GUI_EDIT
+      char *szURL;
+#endif /* def WIN_GUI_EDIT */
 
       /* Check if there is a selection */
       CHARRANGE range;
@@ -1034,6 +1002,40 @@ void OnLogRButtonUp(int nModifier, int x, int y)
       {
          EnableMenuItem(hMenuPopup, ID_EDIT_COPY, MF_BYCOMMAND | MF_ENABLED);
       }
+
+#ifdef WIN_GUI_EDIT
+      /* Check if cursor is over a link */
+      szURL = LogGetURLUnderCursor();
+      if (szURL)
+      {
+         MENUITEMINFO item;
+         TCHAR szMenuItemTemplate[1000];
+         char *szMenuItem;
+
+         memset(&item, 0, sizeof(item));
+         item.cbSize = sizeof(item);
+         item.fMask = MIIM_TYPE | MIIM_ID | MIIM_STATE;
+         item.fType = MFT_STRING;
+         item.fState = MFS_ENABLED;
+         item.wID = ID_NEW_BLOCKER;
+
+         /* Put the item into the menu */
+         memset(szMenuItemTemplate, 0, sizeof(szMenuItemTemplate));
+         LoadString(g_hInstance, IDS_NEW_BLOCKER, szMenuItemTemplate, sizeof(szMenuItemTemplate) / sizeof(szMenuItemTemplate[0]));
+
+         szMenuItem = (char *)malloc(strlen(szMenuItemTemplate) + strlen(szURL) + 1);
+         sprintf(szMenuItem, szMenuItemTemplate, szURL);
+
+         item.dwTypeData = szMenuItem;
+         item.cch = strlen(szMenuItem);
+
+         InsertMenuItem(hMenuPopup, 1, TRUE, &item);
+
+         SetDefaultRule(szURL);
+
+         free(szURL);
+      }
+#endif /* def WIN_GUI_EDIT */
 
       /* Display the popup */
       TrackPopupMenu(hMenuPopup, TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RIGHTBUTTON, x, y, 0, g_hwndLogFrame, NULL);
@@ -1095,9 +1097,9 @@ void OnLogCommand(int nCommand)
          /* SaveLogSettings(); */
          break;
 
-#ifdef FEATURE_TOGGLE
+#ifdef TOGGLE
       /* by haroon - change toggle to its opposite value */
-      case ID_TOGGLE_ENABLED:
+      case ID_TOGGLE_IJB:
          g_bToggleIJB = !g_bToggleIJB;
          if (g_bToggleIJB)
          {
@@ -1108,9 +1110,9 @@ void OnLogCommand(int nCommand)
             log_error(LOG_LEVEL_INFO, "Now toggled OFF.");
          }
          break;
-#endif /* def FEATURE_TOGGLE */
+#endif
 
-      case ID_TOOLS_EDITCONFIG:
+      case ID_TOOLS_EDITJUNKBUSTER:
          EditFile(configfile);
          break;
 
@@ -1118,34 +1120,40 @@ void OnLogCommand(int nCommand)
          EditFile(g_actions_file);
          break;
 
-      case ID_TOOLS_EDITFILTERS:
+      case ID_TOOLS_EDITPERLRE:
          EditFile(g_re_filterfile);
          break;
 
-#ifdef FEATURE_TRUST
+#ifdef TRUST_FILES
       case ID_TOOLS_EDITTRUST:
          EditFile(g_trustfile);
          break;
-#endif /* def FEATURE_TRUST */
+#endif /* def TRUST_FILES */
+
+#ifdef WIN_GUI_EDIT
+      case ID_NEW_BLOCKER:
+         ShowRulesDialog(g_hwndLogFrame);
+         break;
+#endif /* def WIN_GUI_EDIT */
 
       case ID_HELP_GPL:
-         ShellExecute(g_hwndLogFrame, "open", "LICENSE.txt", NULL, NULL, SW_SHOWNORMAL);
+         ShellExecute(g_hwndLogFrame, "open", "gpl.html", NULL, NULL, SW_SHOWNORMAL);
          break;
 
       case ID_HELP_FAQ:
-         ShellExecute(g_hwndLogFrame, "open", "doc\\faq\\index.html", NULL, NULL, SW_SHOWNORMAL);
+         ShellExecute(g_hwndLogFrame, "open", "ijbfaq.html", NULL, NULL, SW_SHOWNORMAL);
          break;
 
       case ID_HELP_MANUAL:
-         ShellExecute(g_hwndLogFrame, "open", "doc\\user-manual\\index.html", NULL, NULL, SW_SHOWNORMAL);
+         ShellExecute(g_hwndLogFrame, "open", "ijbman.html", NULL, NULL, SW_SHOWNORMAL);
          break;
 
       case ID_HELP_STATUS:
-         ShellExecute(g_hwndLogFrame, "open", CGI_PREFIX "show-status", NULL, NULL, SW_SHOWNORMAL);
+         ShellExecute(g_hwndLogFrame, "open", "Junkbuster Status.URL", NULL, NULL, SW_SHOWNORMAL);
          break;
 
-      case ID_HELP_ABOUT:
-         MessageBox(g_hwndLogFrame, win32_blurb, "About Privoxy", MB_OK);
+      case ID_HELP_ABOUTJUNKBUSTER:
+         MessageBox(g_hwndLogFrame, win32_blurb, "Junkbuster Information", MB_OK);
          break;
 
       default:
@@ -1173,20 +1181,20 @@ void OnLogInitMenu(HMENU hmenu)
 {
    /* Only enable editors if there is a file to edit */
    EnableMenuItem(hmenu, ID_TOOLS_EDITACTIONS, MF_BYCOMMAND | (g_actions_file ? MF_ENABLED : MF_GRAYED));
-   EnableMenuItem(hmenu, ID_TOOLS_EDITFILTERS, MF_BYCOMMAND | (g_re_filterfile ? MF_ENABLED : MF_GRAYED));
-#ifdef FEATURE_TRUST
+   EnableMenuItem(hmenu, ID_TOOLS_EDITPERLRE, MF_BYCOMMAND | (g_re_filterfile ? MF_ENABLED : MF_GRAYED));
+#ifdef TRUST_FILES
    EnableMenuItem(hmenu, ID_TOOLS_EDITTRUST, MF_BYCOMMAND | (g_trustfile ? MF_ENABLED : MF_GRAYED));
-#endif /* def FEATURE_TRUST */
+#endif /* def TRUST_FILES */
 
    /* Check/uncheck options */
    CheckMenuItem(hmenu, ID_VIEW_LOGMESSAGES, MF_BYCOMMAND | (g_bLogMessages ? MF_CHECKED : MF_UNCHECKED));
    CheckMenuItem(hmenu, ID_VIEW_MESSAGEHIGHLIGHTING, MF_BYCOMMAND | (g_bHighlightMessages ? MF_CHECKED : MF_UNCHECKED));
    CheckMenuItem(hmenu, ID_VIEW_LIMITBUFFERSIZE, MF_BYCOMMAND | (g_bLimitBufferSize ? MF_CHECKED : MF_UNCHECKED));
    CheckMenuItem(hmenu, ID_VIEW_ACTIVITYANIMATION, MF_BYCOMMAND | (g_bShowActivityAnimation ? MF_CHECKED : MF_UNCHECKED));
-#ifdef FEATURE_TOGGLE
+#ifdef TOGGLE
    /* by haroon - menu item for Enable toggle on/off */
-   CheckMenuItem(hmenu, ID_TOGGLE_ENABLED, MF_BYCOMMAND | (g_bToggleIJB ? MF_CHECKED : MF_UNCHECKED));
-#endif /* def FEATURE_TOGGLE */
+   CheckMenuItem(hmenu, ID_TOGGLE_IJB, MF_BYCOMMAND | (g_bToggleIJB ? MF_CHECKED : MF_UNCHECKED));
+#endif
 
 }
 

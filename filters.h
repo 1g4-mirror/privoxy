@@ -1,6 +1,6 @@
-#ifndef FILTERS_H_INCLUDED
-#define FILTERS_H_INCLUDED
-#define FILTERS_H_VERSION "$Id: filters.h,v 1.18 2002/03/25 22:12:45 oes Exp $"
+#ifndef _FILTERS_H
+#define _FILTERS_H
+#define FILTERS_H_VERSION "$Id: filters.h,v 1.10 2001/06/29 13:29:01 oes Exp $"
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/filters.h,v $
@@ -8,12 +8,13 @@
  * Purpose     :  Declares functions to parse/crunch headers and pages.
  *                Functions declared include:
  *                   `acl_addr', `add_stats', `block_acl', `block_imageurl',
- *                   `block_url', `url_actions', `filter_popups', `forward_url'
+ *                   `block_url', `url_actions', `domaincmp', `dsplit',
+ *                   `filter_popups', `forward_url'
  *                   `ij_untrusted_url', `intercept_url', `re_process_buffer',
  *                   `show_proxy_args', and `trust_url'
  *
  * Copyright   :  Written by and Copyright (C) 2001 the SourceForge
- *                Privoxy team. http://www.privoxy.org/
+ *                IJBSWA team.  http://ijbswa.sourceforge.net
  *
  *                Based on the Internet Junkbuster originally written
  *                by and Copyright (C) 1997 Anonymous Coders and 
@@ -39,36 +40,6 @@
  *
  * Revisions   :
  *    $Log: filters.h,v $
- *    Revision 1.18  2002/03/25 22:12:45  oes
- *    Added fix for undefined INADDR_NONE on Solaris by Bart Schelstraete
- *
- *    Revision 1.17  2002/03/24 13:25:43  swa
- *    name change related issues
- *
- *    Revision 1.16  2002/01/17 21:01:02  jongfoster
- *    Moving all our URL and URL pattern parsing code to urlmatch.c.
- *
- *    Revision 1.15  2001/10/10 16:44:16  oes
- *    Added match_portlist function
- *
- *    Revision 1.14  2001/10/07 15:41:40  oes
- *    Added prototype for remove_chunked_transfer_coding
- *
- *    Revision 1.13  2001/07/30 22:08:36  jongfoster
- *    Tidying up #defines:
- *    - All feature #defines are now of the form FEATURE_xxx
- *    - Permanently turned off WIN_GUI_EDIT
- *    - Permanently turned on WEBDAV and SPLIT_PROXY_ARGS
- *
- *    Revision 1.12  2001/07/29 19:01:11  jongfoster
- *    Changed _FILENAME_H to FILENAME_H_INCLUDED.
- *    Added forward declarations for needed structures.
- *
- *    Revision 1.11  2001/07/13 14:00:18  oes
- *     - Introduced gif_deanimate_response
- *     - Renamed re_process_buffer to pcrs_filter_response
- *     - Removed all #ifdef PCRS
- *
  *    Revision 1.10  2001/06/29 13:29:01  oes
  *    Cleaned up and updated to reflect the changesin
  *    filters.c
@@ -195,43 +166,32 @@
 extern "C" {
 #endif
 
-
-struct access_control_addr;
-struct client_state;
-struct http_request;
-struct http_response;
-struct current_action_spec;
-struct url_actions;
-struct url_spec;
-
-
 /*
  * ACL checking
  */
-#ifdef FEATURE_ACL
+#ifdef ACL_FILES
 extern int block_acl(struct access_control_addr *dst, struct client_state *csp);
 extern int acl_addr(char *aspec, struct access_control_addr *aca);
-#endif /* def FEATURE_ACL */
-extern int match_portlist(const char *portlist, int port);
+#endif /* def ACL_FILES */
 
 /*
  * Interceptors
  */
 extern struct http_response *block_url(struct client_state *csp);
 extern struct http_response *redirect_url(struct client_state *csp);
-#ifdef FEATURE_COOKIE_JAR
+#ifdef TRUST_FILES
 extern struct http_response *trust_url(struct client_state *csp);
-#endif /* def FEATURE_COOKIE_JAR */
+#endif /* def TRUST_FILES */
 
 /*
  * Request inspectors
  */
-#ifdef FEATURE_COOKIE_JAR
+#ifdef TRUST_FILES
 extern int is_untrusted_url(struct client_state *csp);
-#endif /* def FEATURE_COOKIE_JAR */
-#ifdef FEATURE_IMAGE_BLOCKING
+#endif /* def TRUST_FILES */
+#ifdef IMAGE_BLOCKING
 extern int is_imageurl(struct client_state *csp);
-#endif /* def FEATURE_IMAGE_BLOCKING */
+#endif /* def IMAGE_BLOCKING */
 
 /*
  * Determining applicable actions
@@ -246,19 +206,14 @@ extern void apply_url_actions(struct current_action_spec *action,
  */
 extern const struct forward_spec *forward_url(struct http_request *http, struct client_state *csp);
 
+extern struct url_spec dsplit(char *domain);
+extern int domaincmp(struct url_spec *pattern, struct url_spec *fqdn);
+
 /*
  * Content modification
  */
 extern char *pcrs_filter_response(struct client_state *csp);
 extern char *gif_deanimate_response(struct client_state *csp);
-extern int remove_chunked_transfer_coding(char *buffer, const size_t size);
-
-/*
- * Solaris fix:
- */
-#ifndef INADDR_NONE
-#define INADDR_NONE -1
-#endif     
 
 /* 
  * Revision control strings from this header and associated .c file
@@ -270,7 +225,7 @@ extern const char filters_h_rcs[];
 } /* extern "C" */
 #endif
 
-#endif /* ndef FILTERS_H_INCLUDED */
+#endif /* ndef _FILTERS_H */
 
 /*
   Local Variables:

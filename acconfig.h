@@ -1,5 +1,5 @@
-#ifndef CONFIG_H_INCLUDED
-#define CONFIG_H_INCLUDED
+#ifndef _CONFIG_H
+#define _CONFIG_H
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/acconfig.h,v $
@@ -11,7 +11,7 @@
  *                getting ludicrously long with feature defines.
  *
  * Copyright   :  Written by and Copyright (C) 2001 the SourceForge
- *                Privoxy team. http://www.privoxy.org/
+ *                IJBSWA team.  http://ijbswa.sourceforge.net
  *
  *                Based on the Internet Junkbuster originally written
  *                by and Copyright (C) 1997 Anonymous Coders and 
@@ -37,68 +37,6 @@
  *
  * Revisions   :
  *    $Log: acconfig.h,v $
- *    Revision 1.21  2002/03/24 14:31:08  swa
- *    remove more crappy files. set RPM
- *    release version correctly.
- *
- *    Revision 1.20  2002/03/24 13:46:44  swa
- *    name change related issue.
- *
- *    Revision 1.19  2002/03/24 13:25:42  swa
- *    name change related issues
- *
- *    Revision 1.18  2002/03/08 16:40:28  oes
- *    Added FEATURE_NO_GIFS
- *
- *    Revision 1.17  2002/03/04 17:52:44  oes
- *    Deleted PID_FILE_PATH
- *
- *    Revision 1.16  2002/01/10 12:36:18  oes
- *    Moved HAVE_*_R to acconfig.h, where they belong.
- *
- *    Revision 1.15  2001/12/30 14:07:31  steudten
- *    - Add signal handling (unix)
- *    - Add SIGHUP handler (unix)
- *    - Add creation of pidfile (unix)
- *    - Add action 'top' in rc file (RH)
- *    - Add entry 'SIGNALS' to manpage
- *    - Add exit message to logfile (unix)
- *
- *    Revision 1.14  2001/10/23 21:24:09  jongfoster
- *    Support for FEATURE_CGI_EDIT_ACTIONS
- *
- *    Revision 1.13  2001/10/07 15:30:41  oes
- *    Removed FEATURE_DENY_GZIP
- *
- *    Revision 1.12  2001/09/13 19:56:37  jongfoster
- *    Reverting to revision 1.10 - previous checking was majorly broken.
- *
- *    Revision 1.10  2001/07/30 22:08:36  jongfoster
- *    Tidying up #defines:
- *    - All feature #defines are now of the form FEATURE_xxx
- *    - Permanently turned off WIN_GUI_EDIT
- *    - Permanently turned on WEBDAV and SPLIT_PROXY_ARGS
- *
- *    Revision 1.9  2001/07/29 19:08:52  jongfoster
- *    Changing _CONFIG_H to CONFIG_H_INCLUDED.
- *    Also added protection against using a MinGW32 or CygWin version of
- *    config.h from within MS Visual C++
- *
- *    Revision 1.8  2001/07/29 17:09:17  jongfoster
- *    Major changes to build system in order to fix these bugs:
- *    - pthreads under Linux was broken - changed -lpthread to -pthread
- *    - Compiling in MinGW32 mode under CygWin now correctly detects
- *      which shared libraries are available
- *    - Solaris support (?) (Not tested under Solaris yet)
- *
- *    Revision 1.7  2001/07/25 22:53:59  jongfoster
- *    Will #error if pthreads is enabled under BeOs
- *
- *    Revision 1.6  2001/07/15 17:54:29  jongfoster
- *    Renaming #define STATIC to STATIC_PCRE
- *    Adding new #define FEATURE_PTHREAD that will be used to enable
- *    POSIX threads support.
- *
  *    Revision 1.5  2001/07/13 13:48:37  oes
  *     - (Fix:) Copied CODE_STATUS #define from config.h.in
  *     - split REGEX #define into REGEX_GNU and REGEX_PCRE
@@ -205,17 +143,12 @@
 #undef VERSION_POINT
 
 /*
- * Version number - RPM-release
- */
-#undef VERSION_RPM_PACKAGE
-
-/*
  * Version number, as a string
  */
 #undef VERSION
 
 /*
- * Status of the code: "alpha", "beta" or "stable".
+ * Status of the code: alpha, beta or stable
  */
 #undef CODE_STATUS
 
@@ -244,45 +177,57 @@
 #undef STATIC_PCRS
 
 /*
- * Allows the use of an ACL to control access to the proxy by IP address.
+ * Allow JunkBuster to be "disabled" so it is just a normal non-blocking
+ * non-anonymizing proxy.  This is useful if you're trying to access a
+ * blocked or broken site - just change the setting in the config file
+ * and send a SIGHUP (UN*X), or use the handy "Disable" menu option (Windows
+ * GUI).
  */
-#undef FEATURE_ACL
+#undef TOGGLE
 
 /*
- * Enables the web-based configuration (actionsfile) editor.  If you
- * have a shared proxy, you might want to turn this off.
+ * If a stream is compressed via gzip (Netscape specific I think), then
+ * it cannot be modified with Perl regexps.  This forces it to be 
+ * uncompressed.
  */
-#undef FEATURE_CGI_EDIT_ACTIONS
+#undef DENY_GZIP
 
 /*
- * Allows the use of jar files to capture cookies.
+ * Enables statistics function.
  */
-#undef FEATURE_COOKIE_JAR
-
-/*
- * Locally redirect remote script-redirect URLs
- */
-#undef FEATURE_FAST_REDIRECTS
+#undef STATISTICS
 
 /*
  * Bypass filtering for 1 page only
  */
-#undef FEATURE_FORCE_LOAD
+#undef FORCE_LOAD
 
 /*
- * Allow blocking using images as well as HTML.
- * If you do not define this then everything is blocked as HTML.
- *
- * Note that this is required if you want to use FEATURE_IMAGE_DETECT_MSIE.
+ * Locally redirect remote script-redirect URLs
  */
-#undef FEATURE_IMAGE_BLOCKING
+#undef FAST_REDIRECTS
+
+/*
+ * Split the show-proxy-args page into a page for each config file.
+ */
+#undef SPLIT_PROXY_ARGS
+
+/*
+ * Kills JavaScript popups - window.open, onunload, etc.
+ */
+#undef KILLPOPUPS
+
+/*
+ * Support for webDAV - e.g. so Microsoft Outlook can access HotMail e-mail
+ */
+#undef WEBDAV
 
 /*
  * Detect image requests automatically for MSIE.  Will fall back to
  * other image-detection methods (i.e. "+image" permission) for other
  * browsers.
  *
- * You must also define FEATURE_IMAGE_BLOCKING to use this feature.
+ * You must also define IMAGE_BLOCKING to use this feature.
  *
  * It detects the following header pair as an image request:
  *
@@ -307,89 +252,44 @@
  * These limitations are due to IE making inconsistent choices
  * about which "Accept:" header to send.
  */
-#undef FEATURE_IMAGE_DETECT_MSIE
+#undef DETECT_MSIE_IMAGES
 
 /*
- * Kills JavaScript popups - window.open, onunload, etc.
+ * Allow blocking using images as well as HTML.
+ * If you do not define this then everything is blocked as HTML.
+ *
+ * Note that this is required if you want to use DETECT_MSIE_IMAGES.
  */
-#undef FEATURE_KILL_POPUPS
+#undef IMAGE_BLOCKING
 
 /*
- * Use PNG instead of GIF for built-in images
+ * Allows the use of ACL files to control access to the proxy by IP address.
  */
-#undef FEATURE_NO_GIFS
+#undef ACL_FILES
+
+/*
+ * Allows the use of trust files.
+ */
+#undef TRUST_FILES
+
+/*
+ * Allows the use of jar files to capture cookies.
+ */
+#undef JAR_FILES
+
+/*
+ * Define this to use the Windows GUI for editing the blocklist.
+ * FIXME: This feature is only partially implemented and does not work
+ * FIXME: This #define can never be set by ./configure.
+ */
+#undef WIN_GUI_EDIT
 
 /*
  * Use POSIX threads instead of native threads.
  */
 #undef FEATURE_PTHREAD
 
-/*
- * Enables statistics function.
- */
-#undef FEATURE_STATISTICS
-
-/*
- * Allow Privoxy to be "disabled" so it is just a normal non-blocking
- * non-anonymizing proxy.  This is useful if you're trying to access a
- * blocked or broken site - just change the setting in the config file,
- * or use the handy "Disable" menu option in the Windows GUI.
- */
-#undef FEATURE_TOGGLE
-
-/*
- * Allows the use of trust files.
- */
-#undef FEATURE_TRUST
-
-/*
- * Defined on Solaris only.  Makes the system libraries thread safe.
- */
-#undef _REENTRANT
-
-/*
- * Defined on Solaris only.  Without this, many important functions are not
- * defined in the system headers.
- */
-#undef __EXTENSIONS__
-
-/*
- * Defined always.
- * FIXME: Don't know what it does or why we need it.
- * (presumably something to do with MultiThreading?)
- */
-#undef __MT__
-
-/* If the (nonstandard and thread-safe) function gethostbyname_r
- * is available, select which signature to use
- */
-#undef HAVE_GETHOSTBYNAME_R_6_ARGS
-#undef HAVE_GETHOSTBYNAME_R_5_ARGS
-#undef HAVE_GETHOSTBYNAME_R_3_ARGS
-
-/* If the (nonstandard and thread-safe) function gethostbyaddr_r
- * is available, select which signature to use
- */
-#undef HAVE_GETHOSTBYADDR_R_8_ARGS
-#undef HAVE_GETHOSTBYADDR_R_7_ARGS
-#undef HAVE_GETHOSTBYADDR_R_5_ARGS
-
-/* Define if you have gmtime_r and localtime_r with a signature
- * of (struct time *, struct tm *)
- */
-#undef HAVE_GMTIME_R
-#undef HAVE_LOCALTIME_R
-
 @BOTTOM@
-
-/*
- * Defined always.
- * FIXME: Don't know what it does or why we need it.
- * (presumably something to do with ANSI Standard C?)
- */
-#ifndef __STDC__
-#define __STDC__ 1
-#endif /* ndef __STDC__ */
 
 /*
  * Need to set up this define only for the Pthreads library for
@@ -399,23 +299,4 @@
 #define __CLEANUP_C
 #endif /* defined(FEATURE_PTHREAD) && defined(_WIN32) */
 
-/*
- * BEOS does not currently support POSIX threads.
- * This *should* be detected by ./configure, but let's be sure.
- */
-#if defined(FEATURE_PTHREAD) && defined(__BEOS__)
-#error BEOS does not support pthread - please run ./configure again with "--disable-pthread"
-
-#endif /* defined(FEATURE_PTHREAD) && defined(__BEOS__) */
-
-
-/*
- * It's too easy to accidentally use a Cygwin or MinGW32 version of config.h
- * under VC++, and it usually gives many wierd error messages.  Let's make
- * the error messages understandable, by bailing out now.
- */
-#ifdef _MSC_VER
-#error For MS VC++, please use config.h.win or config.h.win32threads.win.  You can usually do this by selecting the "Build", "Clean" menu option.
-#endif /* def _MSC_VER */
-
-#endif /* CONFIG_H_INCLUDED */
+#endif /* _CONFIG_H */

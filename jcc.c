@@ -1,19 +1,19 @@
-const char jcc_rcs[] = "$Id: jcc.c,v 1.87 2002/03/26 22:29:54 swa Exp $";
+const char jcc_rcs[] = "$Id: jcc.c,v 1.26 2001/07/18 12:31:36 oes Exp $";
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/jcc.c,v $
  *
- * Purpose     :  Main file.  Contains main() method, main loop, and
+ * Purpose     :  Main file.  Contains main() method, main loop, and 
  *                the main connection-handling function.
  *
  * Copyright   :  Written by and Copyright (C) 2001 the SourceForge
- *                Privoxy team. http://www.privoxy.org/
+ *                IJBSWA team.  http://ijbswa.sourceforge.net
  *
  *                Based on the Internet Junkbuster originally written
- *                by and Copyright (C) 1997 Anonymous Coders and
+ *                by and Copyright (C) 1997 Anonymous Coders and 
  *                Junkbusters Corporation.  http://www.junkbusters.com
  *
- *                This program is free software; you can redistribute it
+ *                This program is free software; you can redistribute it 
  *                and/or modify it under the terms of the GNU General
  *                Public License as published by the Free Software
  *                Foundation; either version 2 of the License, or (at
@@ -33,280 +33,6 @@ const char jcc_rcs[] = "$Id: jcc.c,v 1.87 2002/03/26 22:29:54 swa Exp $";
  *
  * Revisions   :
  *    $Log: jcc.c,v $
- *    Revision 1.87  2002/03/26 22:29:54  swa
- *    we have a new homepage!
- *
- *    Revision 1.86  2002/03/25 17:04:55  david__schmidt
- *    Workaround for closing the jarfile before load_config() comes around again
- *
- *    Revision 1.85  2002/03/24 15:23:33  jongfoster
- *    Name changes
- *
- *    Revision 1.84  2002/03/24 13:25:43  swa
- *    name change related issues
- *
- *    Revision 1.83  2002/03/16 23:54:06  jongfoster
- *    Adding graceful termination feature, to help look for memory leaks.
- *    If you enable this (which, by design, has to be done by hand
- *    editing config.h) and then go to http://i.j.b/die, then the program
- *    will exit cleanly after the *next* request.  It should free all the
- *    memory that was used.
- *
- *    Revision 1.82  2002/03/13 00:27:05  jongfoster
- *    Killing warnings
- *
- *    Revision 1.81  2002/03/12 01:42:50  oes
- *    Introduced modular filters
- *
- *    Revision 1.80  2002/03/11 22:07:05  david__schmidt
- *    OS/2 port maintenance:
- *    - Fixed EMX build - it had decayed a little
- *    - Fixed inexplicable crash during FD_ZERO - must be due to a bad macro.
- *      substituted a memset for now.
- *
- *    Revision 1.79  2002/03/09 20:03:52  jongfoster
- *    - Making various functions return int rather than size_t.
- *      (Undoing a recent change).  Since size_t is unsigned on
- *      Windows, functions like read_socket that return -1 on
- *      error cannot return a size_t.
- *
- *      THIS WAS A MAJOR BUG - it caused frequent, unpredictable
- *      crashes, and also frequently caused JB to jump to 100%
- *      CPU and stay there.  (Because it thought it had just
- *      read ((unsigned)-1) == 4Gb of data...)
- *
- *    - The signature of write_socket has changed, it now simply
- *      returns success=0/failure=nonzero.
- *
- *    - Trying to get rid of a few warnings --with-debug on
- *      Windows, I've introduced a new type "jb_socket".  This is
- *      used for the socket file descriptors.  On Windows, this
- *      is SOCKET (a typedef for unsigned).  Everywhere else, it's
- *      an int.  The error value can't be -1 any more, so it's
- *      now JB_INVALID_SOCKET (which is -1 on UNIX, and in
- *      Windows it maps to the #define INVALID_SOCKET.)
- *
- *    - The signature of bind_port has changed.
- *
- *    Revision 1.78  2002/03/08 21:35:04  oes
- *    Added optional group supplement to --user option. Will now use default group of user if no group given
- *
- *    Revision 1.77  2002/03/07 03:52:06  oes
- *     - Fixed compiler warnings etc
- *     - Improved handling of failed DNS lookups
- *
- *    Revision 1.76  2002/03/06 22:54:35  jongfoster
- *    Automated function-comment nitpicking.
- *
- *    Revision 1.75  2002/03/06 10:02:19  oes
- *    Fixed stupid bug when --user was not given
- *
- *    Revision 1.74  2002/03/06 00:49:31  jongfoster
- *    Fixing warning on Windows
- *    Making #ifdefs that refer to the same variable consistently
- *    use #ifdef unix rather than mixing #ifdef unix & #ifndef OS2
- *
- *    Revision 1.73  2002/03/05 23:57:30  hal9
- *    Stray character 's' on line 1618 was breaking build.
- *
- *    Revision 1.72  2002/03/05 21:33:45  david__schmidt
- *    - Re-enable OS/2 building after new parms were added
- *    - Fix false out of memory report when resolving CGI templates when no IP
- *      address is available of failed attempt (a la no such domain)
- *
- *    Revision 1.71  2002/03/05 18:13:56  oes
- *    Added --user option
- *
- *    Revision 1.70  2002/03/05 04:52:42  oes
- *    Deleted non-errlog debugging code
- *
- *    Revision 1.69  2002/03/04 23:50:00  jongfoster
- *    Splitting off bind_port() call into bind_port_helper(), with
- *    improved logging.
- *
- *    Revision 1.68  2002/03/04 20:17:32  oes
- *    Fixed usage info
- *
- *    Revision 1.67  2002/03/04 18:18:57  oes
- *    - Removed _DEBUG mode
- *    - Cleand up cmdline parsing
- *    - Introduced --no-daemon, --pidfile options
- *    - Cleaned up signal handling:
- *      - Terminate cleanly on INT, TERM and ABRT
- *      - Schedule logfile for re-opening on HUP
- *      - Ignore CHLD and PIPE
- *      - Leave the rest with their default handlers
- *      - Uniform handler registration
- *    - Added usage() function
- *    - Played styleguide police
- *
- *    Revision 1.66  2002/03/03 15:06:55  oes
- *    Re-enabled automatic config reloading
- *
- *    Revision 1.65  2002/03/03 14:49:11  oes
- *    Fixed CLF logging: Now uses client's original HTTP request
- *
- *    Revision 1.64  2002/03/03 09:18:03  joergs
- *    Made jumbjuster work on AmigaOS again.
- *
- *    Revision 1.63  2002/03/02 04:14:50  david__schmidt
- *    Clean up a little CRLF unpleasantness that suddenly appeared
- *
- *    Revision 1.62  2002/02/20 23:17:23  jongfoster
- *    Detecting some out-of memory conditions and exiting with a log message.
- *
- *    Revision 1.61  2002/01/17 21:01:52  jongfoster
- *    Moving all our URL and URL pattern parsing code to urlmatch.c.
- *
- *    Revision 1.60  2001/12/30 14:07:32  steudten
- *    - Add signal handling (unix)
- *    - Add SIGHUP handler (unix)
- *    - Add creation of pidfile (unix)
- *    - Add action 'top' in rc file (RH)
- *    - Add entry 'SIGNALS' to manpage
- *    - Add exit message to logfile (unix)
- *
- *    Revision 1.59  2001/12/13 14:07:18  oes
- *    Fixed Bug: 503 error page now sent OK
- *
- *    Revision 1.58  2001/11/30 23:37:24  jongfoster
- *    Renaming the Win32 config file to config.txt - this is almost the
- *    same as the corresponding UNIX name "config"
- *
- *    Revision 1.57  2001/11/16 00:47:43  jongfoster
- *    Changing the tty-disconnection code to use setsid().
- *
- *    Revision 1.56  2001/11/13 20:20:54  jongfoster
- *    Tabs->spaces, fixing a bug with missing {} around an if()
- *
- *    Revision 1.55  2001/11/13 20:14:53  jongfoster
- *    Patch for FreeBSD setpgrp() as suggested by Alexander Lazic
- *
- *    Revision 1.54  2001/11/07 00:03:14  steudten
- *    Give reliable return value if an error
- *    occurs not just 0 with new daemon mode.
- *
- *    Revision 1.53  2001/11/05 21:41:43  steudten
- *    Add changes to be a real daemon just for unix os.
- *    (change cwd to /, detach from controlling tty, set
- *    process group and session leader to the own process.
- *    Add DBG() Macro.
- *    Add some fatal-error log message for failed malloc().
- *    Add '-d' if compiled with 'configure --with-debug' to
- *    enable debug output.
- *
- *    Revision 1.52  2001/10/26 20:11:20  jongfoster
- *    Fixing type mismatch
- *
- *    Revision 1.51  2001/10/26 17:38:28  oes
- *    Cosmetics
- *
- *    Revision 1.50  2001/10/25 03:40:48  david__schmidt
- *    Change in porting tactics: OS/2's EMX porting layer doesn't allow multiple
- *    threads to call select() simultaneously.  So, it's time to do a real, live,
- *    native OS/2 port.  See defines for __EMX__ (the porting layer) vs. __OS2__
- *    (native). Both versions will work, but using __OS2__ offers multi-threading.
- *
- *    Revision 1.49  2001/10/23 21:41:35  jongfoster
- *    Added call to initialize the (statically-allocated of course)
- *    "out of memory" CGI response.
- *
- *    Revision 1.48  2001/10/10 19:56:46  jongfoster
- *    Moving some code that wasn't cookie-related out of an #ifdef
- *    FEATURE_COOKIE_JAR
- *
- *    Revision 1.47  2001/10/10 16:44:36  oes
- *    Added CONNECT destination port limitation check
- *
- *    Revision 1.46  2001/10/08 15:17:41  oes
- *    Re-enabled SSL forwarding
- *
- *    Revision 1.45  2001/10/07 15:42:11  oes
- *    Replaced 6 boolean members of csp with one bitmap (csp->flags)
- *
- *    Moved downgrading of the HTTP version from parse_http_request to
- *      chat(), since we can't decide if it is necessary before we have
- *      determined the actions for the URL. The HTTP command is now
- *      *always* re-built so the repairs need no longer be special-cased.
- *
- *    filter_popups now gets a csp pointer so it can raise the new
- *      CSP_FLAG_MODIFIED flag.
- *
- *    Bugfix
- *
- *    Added configurable size limit for the IOB. If the IOB grows so
- *      large that the next read would exceed the limit, the header
- *      is generated, and the header & unfiltered buffer are flushed
- *      to the client. Chat then continues in non-buffering,
- *      non-filtering body mode.
- *
- *    Revision 1.44  2001/10/02 18:13:57  oes
- *    Ooops
- *
- *    Revision 1.43  2001/10/02 15:32:13  oes
- *    Moved generation of hdr
- *
- *    Revision 1.42  2001/09/21 23:02:02  david__schmidt
- *    Cleaning up 2 compiler warnings on OS/2.
- *
- *    Revision 1.41  2001/09/16 17:05:14  jongfoster
- *    Removing unused #include showarg.h
- *
- *    Revision 1.40  2001/09/16 15:41:45  jongfoster
- *    Fixing signed/unsigned comparison warning.
- *
- *    Revision 1.39  2001/09/16 13:21:27  jongfoster
- *    Changes to use new list functions.
- *
- *    Revision 1.38  2001/09/16 13:01:46  jongfoster
- *    Removing redundant function call that zeroed zalloc()'d memory.
- *
- *    Revision 1.37  2001/09/10 11:12:24  oes
- *    Deleted unused variable
- *
- *    Revision 1.36  2001/09/10 10:56:15  oes
- *    Silenced compiler warnings
- *
- *    Revision 1.35  2001/07/31 14:44:22  oes
- *    Deleted unused size parameter from filter_popups()
- *
- *    Revision 1.34  2001/07/30 22:08:36  jongfoster
- *    Tidying up #defines:
- *    - All feature #defines are now of the form FEATURE_xxx
- *    - Permanently turned off WIN_GUI_EDIT
- *    - Permanently turned on WEBDAV and SPLIT_PROXY_ARGS
- *
- *    Revision 1.33  2001/07/29 19:32:00  jongfoster
- *    Renaming _main() [mingw32 only] to real_main(), for ANSI compliance.
- *
- *    Revision 1.32  2001/07/29 18:47:05  jongfoster
- *    Adding missing #include "loadcfg.h"
- *
- *    Revision 1.31  2001/07/29 12:17:48  oes
- *    Applied pthread fix by Paul Lieverse
- *
- *    Revision 1.30  2001/07/25 22:57:13  jongfoster
- *    __BEOS__ no longer overrides FEATURE_PTHREAD.
- *    This is because FEATURE_PTHREAD will soon be widely used, so I
- *    want to keep it simple.
- *
- *    Revision 1.29  2001/07/24 12:47:06  oes
- *    Applied BeOS support update by Eugenia
- *
- *    Revision 1.28  2001/07/23 13:26:12  oes
- *    Fixed bug in popup-killing for the first read that caused binary garbage to be sent between headers and body
- *
- *    Revision 1.27  2001/07/19 19:09:47  haroon
- *    - Added code to take care of the situation where while processing the first
- *      server response (which includes the server header), after finding the end
- *      of the headers we were not looking past the end of the headers for
- *      content modification. I enabled it for filter_popups.
- *      Someone else should look to see if other similar operations should be
- *      done to the discarded portion of the buffer.
- *
- *      Note 2001/07/20: No, the other content modification mechanisms will process
- *                       the whole iob later anyway. --oes
- *
  *    Revision 1.26  2001/07/18 12:31:36  oes
  *    cosmetics
  *
@@ -538,37 +264,15 @@ const char jcc_rcs[] = "$Id: jcc.c,v 1.87 2002/03/26 22:29:54 swa Exp $";
 
 #else /* ifndef _WIN32 */
 
-# if !defined (__OS2__)
 # include <unistd.h>
-# include <sys/wait.h>
-# endif /* ndef __OS2__ */
 # include <sys/time.h>
+# include <sys/wait.h>
 # include <sys/stat.h>
-# include <sys/ioctl.h>
-
-#ifdef sun
-#include <sys/termios.h>
-#endif /* sun */
-
-#ifdef unix
-#include <pwd.h>
-#include <grp.h>
-#endif
-
 # include <signal.h>
 
 # ifdef __BEOS__
 #  include <socket.h>  /* BeOS has select() for sockets only. */
 #  include <OS.h>      /* declarations for threads and stuff. */
-# endif
-
-# if defined(__EMX__) || defined(__OS2__)
-#  include <sys/select.h>  /* OS/2/EMX needs a little help with select */
-# endif
-# ifdef __OS2__
-#define INCL_DOS
-# include <os2.h>
-#define bzero(B,N) memset(B,0x00,n)
 # endif
 
 # ifndef FD_ZERO
@@ -582,6 +286,7 @@ const char jcc_rcs[] = "$Id: jcc.c,v 1.87 2002/03/26 22:29:54 swa Exp $";
 #include "jcc.h"
 #include "filters.h"
 #include "loaders.h"
+#include "showargs.h"
 #include "parsers.h"
 #include "killpopup.h"
 #include "miscutil.h"
@@ -590,24 +295,18 @@ const char jcc_rcs[] = "$Id: jcc.c,v 1.87 2002/03/26 22:29:54 swa Exp $";
 #include "gateway.h"
 #include "actions.h"
 #include "cgi.h"
-#include "loadcfg.h"
-#include "urlmatch.h"
 
 const char jcc_h_rcs[] = JCC_H_VERSION;
 const char project_h_rcs[] = PROJECT_H_VERSION;
 
-int no_daemon = 0;
 struct client_state  clients[1];
 struct file_list     files[1];
 
-#ifdef FEATURE_STATISTICS
+#ifdef STATISTICS
 int urls_read     = 0;     /* total nr of urls read inc rejected */
 int urls_rejected = 0;     /* total nr of urls rejected */
-#endif /* def FEATURE_STATISTICS */
+#endif /* def STATISTICS */
 
-#ifdef FEATURE_GRACEFUL_TERMINATION
-int g_terminate = 0;
-#endif
 
 static void listen_loop(void);
 static void chat(struct client_state *csp);
@@ -625,15 +324,6 @@ static int32 server_thread(void *data);
 #define sleep(N)  Sleep(((N) * 1000))
 #endif
 
-#ifdef __OS2__
-#define sleep(N)  DosSleep(((N) * 100))
-#endif
-
-#if defined(unix) || defined(__EMX__)
-const char *basedir;
-const char *pidfile = NULL;
-int received_hup_signal = 0;
-#endif /* defined unix */
 
 /* The vanilla wafer. */
 static const char VANILLA_WAFER[] =
@@ -646,60 +336,13 @@ static const char VANILLA_WAFER[] =
    "(copyright_or_otherwise)_applying_to_any_cookie._";
 
 
-#if !defined(_WIN32) && !defined(__OS2__) && !defined(AMIGA)
-/*********************************************************************
- *
- * Function    :  sig_handler 
- *
- * Description :  Signal handler for different signals.
- *                Exit gracefully on ABRT, TERM and  INT
- *                or set a flag that will cause the errlog
- *                to be reopened by the main thread on HUP.
- *
- * Parameters  :
- *          1  :  the_signal = the signal cause this function to call
- *
- * Returns     :  - 
- *
- *********************************************************************/
-static void sig_handler(int the_signal)
-{
-   switch(the_signal)
-   {
-      case SIGABRT:
-      case SIGTERM:
-      case SIGINT:
-         log_error(LOG_LEVEL_INFO, "exiting by signal %d .. bye", the_signal);
-#if defined(unix)
-         unlink(pidfile);
-#endif /* unix */
-         exit(the_signal);
-         break;
-
-      case SIGHUP:
-         received_hup_signal = 1;
-         break;         
-
-      default:
-         /* 
-          * We shouldn't be here, unless we catch signals
-          * in main() that we can't handle here!
-          */
-         log_error(LOG_LEVEL_FATAL, "sig_handler: exiting on unexpected signal %d", the_signal);
-   }
-   return;
-
-}
-#endif
-
-
 /*********************************************************************
  *
  * Function    :  chat
  *
  * Description :  Once a connection to the client has been accepted,
  *                this function is called (via serve()) to handle the
- *                main business of the communication.  When this
+ *                main business of the communication.  When this 
  *                function returns, the caller must close the client
  *                socket handle.
  *
@@ -717,47 +360,42 @@ static void sig_handler(int the_signal)
 static void chat(struct client_state *csp)
 {
 /*
- * This next lines are a little ugly, but they simplifies the if statements
- * below.  Basically if TOGGLE, then we want the if to test if the
- * CSP_FLAG_TOGGLED_ON flag ist set, else we don't.  And if FEATURE_FORCE_LOAD,
- * then we want the if to test for CSP_FLAG_FORCED , else we don't
+ * This next lines are a little ugly, but they simplifies the if statements below.
+ * Basically if TOGGLE, then we want the if to test "csp->toggled_on", else we don't
+ * And if FORCE_LOAD, then we want the if to test "csp->toggled_on", else we don't
  */
-#ifdef FEATURE_TOGGLE
-#   define IS_TOGGLED_ON_AND (csp->flags & CSP_FLAG_TOGGLED_ON) &&
-#else /* ifndef FEATURE_TOGGLE */
+#ifdef TOGGLE
+#   define IS_TOGGLED_ON_AND (csp->toggled_on) &&
+#else /* ifndef TOGGLE */
 #   define IS_TOGGLED_ON_AND
-#endif /* ndef FEATURE_TOGGLE */
-#ifdef FEATURE_FORCE_LOAD
-#   define IS_NOT_FORCED_AND !(csp->flags & CSP_FLAG_FORCED) &&
-#else /* ifndef FEATURE_FORCE_LOAD */
+#endif /* ndef TOGGLE */
+#ifdef FORCE_LOAD
+#   define IS_NOT_FORCED_AND (!csp->force) && 
+#else /* ifndef FORCE_LOAD */
 #   define IS_NOT_FORCED_AND
-#endif /* def FEATURE_FORCE_LOAD */
+#endif /* def FORCE_LOAD */
 
 #define IS_ENABLED_AND   IS_TOGGLED_ON_AND IS_NOT_FORCED_AND
 
    char buf[BUFFER_SIZE];
-   char *hdr;
-   char *p;
-   char *req;
+   char *hdr, *p, *req;
+   char *err = NULL;
    fd_set rfds;
-   int n;
-   jb_socket maxfd;
-   int server_body;
+   int n, maxfd, server_body;
    int ms_iis5_hack = 0;
    int byte_count = 0;
    const struct forward_spec * fwd;
    struct http_request *http;
-   int len; /* for buffer sizes */
-#ifdef FEATURE_KILL_POPUPS
+#ifdef KILLPOPUPS
    int block_popups;         /* bool, 1==will block popups */
    int block_popups_now = 0; /* bool, 1==currently blocking popups */
-#endif /* def FEATURE_KILL_POPUPS */
+#endif /* def KILLPOPUPS */
 
    int pcrs_filter;        /* bool, 1==will filter through pcrs */
    int gif_deanimate;      /* bool, 1==will deanimate gifs */
 
    /* Function that does the content filtering for the current request */
-   char *(*content_filter)() = NULL;
+   char *(*content_filter)() = NULL; 
 
    /* Skeleton for HTTP response, if we should intercept the request */
    struct http_response *rsp;
@@ -769,13 +407,13 @@ static void chat(struct client_state *csp)
     * could get blocked here if a client connected, then didn't say anything!
     */
 
-   for (;;)
+   while (FOREVER)
    {
-      len = read_socket(csp->cfd, buf, sizeof(buf));
+      n = read_socket(csp->cfd, buf, sizeof(buf));
 
-      if (len <= 0) break;      /* error! */
+      if (n <= 0) break;      /* error! */
 
-      add_to_iob(csp, buf, len);
+      add_to_iob(csp, buf, n);
 
       req = get_header(csp);
 
@@ -788,8 +426,8 @@ static void chat(struct client_state *csp)
       {
          continue;   /* more to come! */
       }
-
-#ifdef FEATURE_FORCE_LOAD
+ 
+#ifdef FORCE_LOAD
       /* If this request contains the FORCE_PREFIX,
        * better get rid of it now and set the force flag --oes
        */
@@ -798,11 +436,14 @@ static void chat(struct client_state *csp)
       {
          strclean(req, FORCE_PREFIX);
          log_error(LOG_LEVEL_FORCE, "Enforcing request \"%s\".\n", req);
-         csp->flags |= CSP_FLAG_FORCED;
+         csp->force = 1;
+      } 
+      else
+      {
+         csp->force = 0;
       }
-
-#endif /* def FEATURE_FORCE_LOAD */
-
+#endif /* def FORCE_LOAD */
+  
       parse_http_request(req, http, csp);
       freez(req);
       break;
@@ -830,171 +471,98 @@ static void chat(struct client_state *csp)
     * we have to do one of the following:
     *
     * create = use the original HTTP request to create a new
-    *          HTTP request that has either the path component
-    *          without the http://domainspec (w/path) or the
-    *          full orininal URL (w/url)
-    *          Note that the path and/or the HTTP version may
-    *          have been altered by now.
+    *          HTTP request that has only the path component
+    *          without the http://domainspec
+    * pass   = pass the original HTTP request unchanged
     *
-    * connect = Open a socket to the host:port of the server
-    *           and short-circuit server and client socket.
-    *
-    * pass =  Pass the request unchanged if forwarding a CONNECT
-    *         request to a parent proxy. Note that we'll be sending
-    *         the CFAIL message ourselves if connecting to the parent
-    *         fails, but we won't send a CSUCCEED message if it works,
-    *         since that would result in a double message (ours and the
-    *         parent's). After sending the request to the parent, we simply
-    *         tunnel.
+    * drop   = drop the HTTP request
     *
     * here's the matrix:
     *                        SSL
     *                    0        1
     *                +--------+--------+
     *                |        |        |
-    *             0  | create | connect|
-    *                | w/path |        |
+    *             0  | create | drop   |
+    *                |        |        |
     *  Forwarding    +--------+--------+
     *                |        |        |
-    *             1  | create | pass   |
-    *                | w/url  |        |
+    *             1  | pass   | pass   |
+    *                |        |        |
     *                +--------+--------+
     *
     */
 
-   /*
-    * Determine the actions for this URL
-    */
-#ifdef FEATURE_TOGGLE
-   if (!(csp->flags & CSP_FLAG_TOGGLED_ON))
+   if (fwd->forward_host)
+   {
+      /* if forwarding, just pass the request as is */
+      enlist(csp->headers, http->cmd);
+   }
+   else
+   {
+      if (http->ssl == 0)
+      {
+         /* otherwise elide the host information from the url */
+         p = NULL;
+         p = strsav(p, http->gpc);
+         p = strsav(p, " ");
+         p = strsav(p, http->path);
+         p = strsav(p, " ");
+         p = strsav(p, http->ver);
+         enlist(csp->headers, p);
+         freez(p);
+      }
+   }
+
+   /* decide what we're to do with cookies */
+
+#ifdef TOGGLE
+   if (!csp->toggled_on)
    {
       /* Most compatible set of actions (i.e. none) */
       init_current_action(csp->action);
    }
    else
-#endif /* ndef FEATURE_TOGGLE */
+#endif /* ndef TOGGLE */
    {
       url_actions(http, csp);
    }
 
-
-   /*
-    * Check if a CONNECT request is allowable:
-    * In the absence of a +limit-connect action, allow only port 443.
-    * If there is an action, allow whatever matches the specificaton.
-    */
-   if(http->ssl)
-   {
-      if(  ( !(csp->action->flags & ACTION_LIMIT_CONNECT) && csp->http->port != 443)
-           || (csp->action->flags & ACTION_LIMIT_CONNECT
-              && !match_portlist(csp->action->string[ACTION_STRING_LIMIT_CONNECT], csp->http->port)) )
-      {
-         strcpy(buf, CFORBIDDEN);
-         write_socket(csp->cfd, buf, strlen(buf));
-
-         log_error(LOG_LEVEL_CONNECT, "Denying suspicious CONNECT request from %s", csp->ip_addr_str);
-         log_error(LOG_LEVEL_CLF, "%s - - [%T] \" \" 403 0", csp->ip_addr_str);
-
-         return;
-      }
-   }
-
-
-   /*
-    * Downgrade http version from 1.1 to 1.0 if +downgrade
-    * action applies
-    */
-   if ( (http->ssl == 0)
-     && (!strcmpic(http->ver, "HTTP/1.1"))
-     && (csp->action->flags & ACTION_DOWNGRADE))
-   {
-      freez(http->ver);
-      http->ver = strdup("HTTP/1.0");
-
-      if (http->ver == NULL)
-      {
-         log_error(LOG_LEVEL_FATAL, "Out of memory downgrading HTTP version");
-      }
-   }
-
-   /* 
-    * Save a copy of the original request for logging
-    */
-   http->ocmd = strdup(http->cmd);
-
-   if (http->ocmd == NULL)
-   {
-      log_error(LOG_LEVEL_FATAL, "Out of memory copying HTTP request line");
-   }
-
-   /*
-    * (Re)build the HTTP request for non-SSL requests.
-    * If forwarding, use the whole URL, else, use only the path.
-    */
-   if (http->ssl == 0)
-   {
-      freez(http->cmd);
-
-      http->cmd = strdup(http->gpc);
-      string_append(&http->cmd, " ");
-
-      if (fwd->forward_host)
-      {
-         string_append(&http->cmd, http->url);
-      }
-      else
-      {
-         string_append(&http->cmd, http->path);
-      }
-
-      string_append(&http->cmd, " ");
-      string_append(&http->cmd, http->ver);
-
-      if (http->cmd == NULL)
-      {
-         log_error(LOG_LEVEL_FATAL, "Out of memory rewiting SSL command");
-      }
-   }
-   enlist(csp->headers, http->cmd);
-
-
-#ifdef FEATURE_COOKIE_JAR
+#ifdef JAR_FILES
    /*
     * If we're logging cookies in a cookie jar, and the user has not
     * supplied any wafers, and the user has not told us to suppress the
     * vanilla wafer, then send the vanilla wafer.
     */
    if ((csp->config->jarfile != NULL)
-       && list_is_empty(csp->action->multi[ACTION_MULTI_WAFER])
+       && (csp->action->multi[ACTION_MULTI_WAFER]->next == NULL)
        && ((csp->action->flags & ACTION_VANILLA_WAFER) != 0))
    {
       enlist(csp->action->multi[ACTION_MULTI_WAFER], VANILLA_WAFER);
    }
-#endif /* def FEATURE_COOKIE_JAR */
+#endif /* def JAR_FILES */
 
-
-#ifdef FEATURE_KILL_POPUPS
+#ifdef KILLPOPUPS
    block_popups               = ((csp->action->flags & ACTION_NO_POPUPS) != 0);
-#endif /* def FEATURE_KILL_POPUPS */
+#endif /* def KILLPOPUPS */
 
    pcrs_filter                = (csp->rlist != NULL) &&  /* There are expressions to be used */
-                                (!list_is_empty(csp->action->multi[ACTION_MULTI_FILTER]));
+                                ((csp->action->flags & ACTION_FILTER) != 0);
 
    gif_deanimate              = ((csp->action->flags & ACTION_DEANIMATE) != 0);
 
    /* grab the rest of the client's headers */
 
-   for (;;)
+   while (FOREVER)
    {
-      if ( ( ( p = get_header(csp) ) != NULL) && ( *p == '\0' ) )
+      if ( ( p = get_header(csp) ) && ( *p == '\0' ) )
       {
-         len = read_socket(csp->cfd, buf, sizeof(buf));
-         if (len <= 0)
+         n = read_socket(csp->cfd, buf, sizeof(buf));
+         if (n <= 0)
          {
             log_error(LOG_LEVEL_ERROR, "read from client failed: %E");
             return;
          }
-         add_to_iob(csp, buf, len);
+         add_to_iob(csp, buf, n);
          continue;
       }
 
@@ -1003,52 +571,59 @@ static void chat(struct client_state *csp)
       enlist(csp->headers, p);
       freez(p);
    }
-   /*
-    * We have a request. Now, check to see if we need to
-    * intercept it, i.e. If ..
-    */
 
+   /* We have a request. */
+
+   hdr = sed(client_patterns, add_client_headers, csp);
+   destroy_list(csp->headers);
+
+   /* 
+    * Now, check to see if we need to intercept it, i.e.
+    * If
+    */
+ 
    if (
        /* a CGI call was detected and answered */
-       (NULL != (rsp = dispatch_cgi(csp)))
+   	 (NULL != (rsp = dispatch_cgi(csp))) 
 
        /* or we are enabled and... */
        || (IS_ENABLED_AND (
 
             /* ..the request was blocked */
-          ( NULL != (rsp = block_url(csp)))
+   	    ( NULL != (rsp = block_url(csp)))
 
           /* ..or untrusted */
-#ifdef FEATURE_TRUST
+#ifdef TRUST_FILES
           || ( NULL != (rsp = trust_url(csp)))
-#endif /* def FEATURE_TRUST */
+#endif 
 
           /* ..or a fast redirect kicked in */
-#ifdef FEATURE_FAST_REDIRECTS
-          || (((csp->action->flags & ACTION_FAST_REDIRECTS) != 0) &&
-                (NULL != (rsp = redirect_url(csp))))
-#endif /* def FEATURE_FAST_REDIRECTS */
-          ))
-      )
+#ifdef FAST_REDIRECTS
+          || (((csp->action->flags & ACTION_FAST_REDIRECTS) != 0) && 
+   		     (NULL != (rsp = redirect_url(csp))))
+#endif /* def FAST_REDIRECTS */
+   		 ))
+   	)
    {
       /* Write the answer to the client */
-      if (write_socket(csp->cfd, rsp->head, rsp->head_length)
-       || write_socket(csp->cfd, rsp->body, rsp->content_length))
-      {
+      if ((write_socket(csp->cfd, rsp->head, rsp->head_length) != rsp->head_length)
+   	     || (write_socket(csp->cfd, rsp->body, rsp->content_length) != rsp->content_length))
+      { 
          log_error(LOG_LEVEL_ERROR, "write to: %s failed: %E", http->host);
       }
 
-#ifdef FEATURE_STATISTICS
+#ifdef STATISTICS
       /* Count as a rejected request */
-      csp->flags |= CSP_FLAG_REJECTED;
-#endif /* def FEATURE_STATISTICS */
+      csp->rejected = 1;
+#endif /* def STATISTICS */
 
       /* Log (FIXME: All intercept reasons apprear as "crunch" with Status 200) */
       log_error(LOG_LEVEL_GPC, "%s%s crunch!", http->hostport, http->path);
-      log_error(LOG_LEVEL_CLF, "%s - - [%T] \"%s\" 200 3", csp->ip_addr_str, http->ocmd);
+      log_error(LOG_LEVEL_CLF, "%s - - [%T] \"%s\" 200 3", csp->ip_addr_str, http->cmd); 
 
       /* Clean up and return */
       free_http_response(rsp);
+      freez(hdr);
       return;
    }
 
@@ -1068,51 +643,42 @@ static void chat(struct client_state *csp)
 
    csp->sfd = forwarded_connect(fwd, http, csp);
 
-   if (csp->sfd == JB_INVALID_SOCKET)
+   if (csp->sfd < 0)
    {
       log_error(LOG_LEVEL_CONNECT, "connect to: %s failed: %E",
                 http->hostport);
 
       if (errno == EINVAL)
       {
-         rsp = error_response(csp, "no-such-domain", errno);
+   	   rsp = error_response(csp, "no-such-domain", errno);
 
-         log_error(LOG_LEVEL_CLF, "%s - - [%T] \"%s\" 404 0",
-                   csp->ip_addr_str, http->ocmd);
+         log_error(LOG_LEVEL_CLF, "%s - - [%T] \"%s\" 404 0", 
+                   csp->ip_addr_str, http->cmd);
       }
       else
       {
-         rsp = error_response(csp, "connect-failed", errno);
+   	   rsp = error_response(csp, "connect-failed", errno);
 
-         log_error(LOG_LEVEL_CLF, "%s - - [%T] \"%s\" 503 0",
-                   csp->ip_addr_str, http->ocmd);
+         log_error(LOG_LEVEL_CLF, "%s - - [%T] \"%s\" 503 0", 
+                   csp->ip_addr_str, http->cmd);
       }
-
 
       /* Write the answer to the client */
       if(rsp)
-      {
-         if (write_socket(csp->cfd, rsp->head, rsp->head_length)
-          || write_socket(csp->cfd, rsp->body, rsp->content_length))
-         {
+   	{
+         if ((write_socket(csp->cfd, rsp->head, rsp->head_length) != rsp->head_length)
+   	        || (write_socket(csp->cfd, rsp->body, rsp->content_length) != rsp->content_length))
+         { 
             log_error(LOG_LEVEL_ERROR, "write to: %s failed: %E", http->host);
          }
       }
 
       free_http_response(rsp);
+      freez(hdr);
       return;
    }
 
    log_error(LOG_LEVEL_CONNECT, "OK");
-
-   hdr = sed(client_patterns, add_client_headers, csp);
-   if (hdr == NULL)
-   {
-      /* FIXME Should handle error properly */
-      log_error(LOG_LEVEL_FATAL, "Out of memory parsing client header");
-   }
-
-   list_remove_all(csp->headers);
 
    if (fwd->forward_host || (http->ssl == 0))
    {
@@ -1120,22 +686,24 @@ static void chat(struct client_state *csp)
        * (along with anything else that may be in the buffer)
        */
 
-      if (write_socket(csp->sfd, hdr, strlen(hdr))
-       || (flush_socket(csp->sfd, csp) <  0))
+      n = strlen(hdr);
+
+      if ((write_socket(csp->sfd, hdr, n) != n)
+          || (flush_socket(csp->sfd, csp   ) <  0))
       {
          log_error(LOG_LEVEL_CONNECT, "write header to: %s failed: %E",
                     http->hostport);
 
-         log_error(LOG_LEVEL_CLF, "%s - - [%T] \"%s\" 503 0",
-                   csp->ip_addr_str, http->ocmd);
+         log_error(LOG_LEVEL_CLF, "%s - - [%T] \"%s\" 503 0", 
+                   csp->ip_addr_str, http->cmd); 
 
          rsp = error_response(csp, "connect-failed", errno);
 
          if(rsp)
          {
-            if (write_socket(csp->cfd, rsp->head, rsp->head_length)
-             || write_socket(csp->cfd, rsp->body, rsp->content_length))
-            {
+            if ((write_socket(csp->cfd, rsp->head, n) != n)
+   	        || (write_socket(csp->cfd, rsp->body, rsp->content_length) != rsp->content_length))
+            { 
                log_error(LOG_LEVEL_ERROR, "write to: %s failed: %E", http->host);
             }
          }
@@ -1152,10 +720,10 @@ static void chat(struct client_state *csp)
        * so just send the "connect succeeded" message to the
        * client, flush the rest, and get out of the way.
        */
-      log_error(LOG_LEVEL_CLF, "%s - - [%T] \"%s\" 200 2\n",
-                csp->ip_addr_str, http->ocmd);
+      log_error(LOG_LEVEL_CLF, "%s - - [%T] \"%s\" 200 2\n", 
+                csp->ip_addr_str, http->cmd); 
 
-      if (write_socket(csp->cfd, CSUCCEED, sizeof(CSUCCEED)-1))
+      if (write_socket(csp->cfd, CSUCCEED, sizeof(CSUCCEED)-1) < 0)
       {
          freez(hdr);
          return;
@@ -1174,21 +742,14 @@ static void chat(struct client_state *csp)
 
    server_body = 0;
 
-   for (;;)
+   while (FOREVER)
    {
-#ifdef __OS2__
-      /*
-       * FD_ZERO here seems to point to an errant macro which crashes.
-       * So do this by hand for now...
-       */
-      memset(&rfds,0x00,sizeof(fd_set));
-#else
       FD_ZERO(&rfds);
-#endif
+
       FD_SET(csp->cfd, &rfds);
       FD_SET(csp->sfd, &rfds);
 
-      n = select((int)maxfd+1, &rfds, NULL, NULL, NULL);
+      n = select(maxfd+1, &rfds, NULL, NULL, NULL);
 
       if (n < 0)
       {
@@ -1202,14 +763,14 @@ static void chat(struct client_state *csp)
 
       if (FD_ISSET(csp->cfd, &rfds))
       {
-         len = read_socket(csp->cfd, buf, sizeof(buf));
+         n = read_socket(csp->cfd, buf, sizeof(buf));
 
-         if (len <= 0)
+         if (n <= 0)
          {
             break; /* "game over, man" */
          }
 
-         if (write_socket(csp->sfd, buf, (size_t)len))
+         if (write_socket(csp->sfd, buf, n) != n)
          {
             log_error(LOG_LEVEL_ERROR, "write to: %s failed: %E", http->host);
             return;
@@ -1227,25 +788,25 @@ static void chat(struct client_state *csp)
       if (FD_ISSET(csp->sfd, &rfds))
       {
          fflush( 0 );
-         len = read_socket(csp->sfd, buf, sizeof(buf) - 1);
+         n = read_socket(csp->sfd, buf, sizeof(buf) - 1);
 
-         if (len < 0)
+         if (n < 0)
          {
             log_error(LOG_LEVEL_ERROR, "read from: %s failed: %E", http->host);
 
-            log_error(LOG_LEVEL_CLF, "%s - - [%T] \"%s\" 503 0",
-                      csp->ip_addr_str, http->ocmd);
+            log_error(LOG_LEVEL_CLF, "%s - - [%T] \"%s\" 503 0", 
+                      csp->ip_addr_str, http->cmd); 
 
             rsp = error_response(csp, "connect-failed", errno);
 
             if(rsp)
             {
-               if (write_socket(csp->cfd, rsp->head, rsp->head_length)
-                || write_socket(csp->cfd, rsp->body, rsp->content_length))
-               {
+               if ((write_socket(csp->cfd, rsp->head, rsp->head_length) != rsp->head_length)
+   	            || (write_socket(csp->cfd, rsp->body, rsp->content_length) != rsp->content_length))
+               { 
                   log_error(LOG_LEVEL_ERROR, "write to: %s failed: %E", http->host);
-               }
-            }
+   			   }
+   			}
 
             free_http_response(rsp);
             return;
@@ -1254,15 +815,15 @@ static void chat(struct client_state *csp)
          /* Add a trailing zero.  This lets filter_popups
           * use string operations.
           */
-         buf[len] = '\0';
+         buf[n] = '\0';
 
-#ifdef FEATURE_KILL_POPUPS
+#ifdef KILLPOPUPS
          /* Filter the popups on this read. */
          if (block_popups_now)
          {
-            filter_popups(buf, csp);
+            filter_popups(buf, n);
          }
-#endif /* def FEATURE_KILL_POPUPS */
+#endif /* def KILLPOPUPS */
 
          /* Normally, this would indicate that we've read
           * as much as the server has sent us and we can
@@ -1282,9 +843,9 @@ static void chat(struct client_state *csp)
           * doesn't generate a valid header, then we won't
           * transmit anything to the client.
           */
-         if (len == 0)
+         if (n == 0)
          {
-
+            
             if (server_body || http->ssl)
             {
                /*
@@ -1305,33 +866,27 @@ static void chat(struct client_state *csp)
                   }
 
                   hdr = sed(server_patterns, add_server_headers, csp);
-                  if (hdr == NULL)
-                  {
-                     /* FIXME Should handle error properly */
-                     log_error(LOG_LEVEL_FATAL, "Out of memory parsing server header");
-                  }
+                  n = strlen(hdr);
 
-                  if (write_socket(csp->cfd, hdr, strlen(hdr))
-                   || write_socket(csp->cfd, p != NULL ? p : csp->iob->cur, csp->content_length))
+                  if ((write_socket(csp->cfd, hdr, n) != n)
+                      || (write_socket(csp->cfd, p != NULL ? p : csp->iob->cur, csp->content_length) != csp->content_length))
                   {
-                     log_error(LOG_LEVEL_ERROR, "write modified content to client failed: %E");
+                     log_error(LOG_LEVEL_CONNECT, "write modified content to client failed: %E");
                      return;
                   }
 
                   freez(hdr);
-                  if (NULL != p) {
-                     freez(p);
-                  }
+                  freez(p);
                }
 
                break; /* "game over, man" */
             }
 
             /*
-             * This is NOT the body, so
+             * This is NOT the body, so 
              * Let's pretend the server just sent us a blank line.
              */
-            len = sprintf(buf, "\r\n");
+            n = sprintf(buf, "\r\n");
 
             /*
              * Now, let the normal header parsing algorithm below do its
@@ -1351,55 +906,17 @@ static void chat(struct client_state *csp)
          {
             if (content_filter)
             {
-               add_to_iob(csp, buf, len);
-
-               /*
-                * If the buffer limit will be reached on the next read,
-                * switch to non-filtering mode, i.e. make & write the
-                * header, flush the socket and get out of the way.
-                */
-               if (((size_t)(csp->iob->eod - csp->iob->buf)) + (size_t)BUFFER_SIZE > csp->config->buffer_limit)
-               {
-                  size_t hdrlen;
-
-                  log_error(LOG_LEVEL_ERROR, "Buffer size limit reached! Flushing and stepping back.");
-
-                  hdr = sed(server_patterns, add_server_headers, csp);
-                  if (hdr == NULL)
-                  {
-                     /* FIXME Should handle error properly */
-                     log_error(LOG_LEVEL_FATAL, "Out of memory parsing server header");
-                  }
-
-                  hdrlen = strlen(hdr);
-                  byte_count += hdrlen;
-
-                  if (write_socket(csp->cfd, hdr, hdrlen)
-                   || ((len = flush_socket(csp->cfd, csp)) < 0))
-                  {
-                     log_error(LOG_LEVEL_CONNECT, "write header to client failed: %E");
-
-                     freez(hdr);
-                     return;
-                  }
-
-                  freez(hdr);
-                  byte_count += len;
-
-                  content_filter = NULL;
-                  server_body = 1;
-
-               }
+               add_to_iob(csp, buf, n); 
             }
             else
             {
-               if (write_socket(csp->cfd, buf, (size_t)len))
+               if (write_socket(csp->cfd, buf, n) != n)
                {
                   log_error(LOG_LEVEL_ERROR, "write to client failed: %E");
                   return;
                }
             }
-            byte_count += len;
+            byte_count += n;
             continue;
          }
          else
@@ -1410,11 +927,11 @@ static void chat(struct client_state *csp)
              */
 
             /* buffer up the data we just read */
-            add_to_iob(csp, buf, len);
+            add_to_iob(csp, buf, n);
 
             /* get header lines from the iob */
 
-            while ((p = get_header(csp)) != NULL)
+            while ((p = get_header(csp)))
             {
                if (*p == '\0')
                {
@@ -1459,13 +976,14 @@ static void chat(struct client_state *csp)
              */
 
             hdr = sed(server_patterns, add_server_headers, csp);
-            if (hdr == NULL)
-            {
-               /* FIXME Should handle error properly */
-               log_error(LOG_LEVEL_FATAL, "Out of memory parsing server header");
-            }
+            n   = strlen(hdr);
 
-#ifdef FEATURE_KILL_POPUPS
+            /* write the server's (modified) header to
+             * the client (along with anything else that
+             * may be in the buffer)
+             */
+
+#ifdef KILLPOPUPS
             /* Start blocking popups if appropriate. */
 
             if ((csp->content_type & CT_TEXT) &&  /* It's a text / * MIME-Type */
@@ -1474,13 +992,14 @@ static void chat(struct client_state *csp)
             {
                block_popups_now = 1;
                /*
-                * Filter the part of the body that came in the same read
-                * as the last headers:
-                */
-               filter_popups(csp->iob->cur, csp);
+                    * even though the header has been found, don't forget about the
+                    * left over portion of the buffer which will usually contain body text
+                    */
+               n = strlen(csp->iob->cur);
+               filter_popups(csp->iob->cur, n);
             }
 
-#endif /* def FEATURE_KILL_POPUPS */
+#endif /* def KILLPOPUPS */
 
             /* Buffer and pcrs filter this if appropriate. */
 
@@ -1500,31 +1019,24 @@ static void chat(struct client_state *csp)
                content_filter = gif_deanimate_response;
             }
 
+
             /*
              * Only write if we're not buffering for content modification
              */
-            if (!content_filter)
+            if (!content_filter && ((write_socket(csp->cfd, hdr, n) != n)
+                || (n = flush_socket(csp->cfd, csp) < 0)))
             {
-               /* write the server's (modified) header to
-                * the client (along with anything else that
-                * may be in the buffer)
+               log_error(LOG_LEVEL_CONNECT, "write header to client failed: %E");
+
+               /* the write failed, so don't bother
+                * mentioning it to the client...
+                * it probably can't hear us anyway.
                 */
-
-               if (write_socket(csp->cfd, hdr, strlen(hdr))
-                || ((len = flush_socket(csp->cfd, csp)) < 0))
-               {
-                  log_error(LOG_LEVEL_CONNECT, "write header to client failed: %E");
-
-                  /* the write failed, so don't bother
-                   * mentioning it to the client...
-                   * it probably can't hear us anyway.
-                   */
-                  freez(hdr);
-                  return;
-               }
-
-               byte_count += len;
+               freez(hdr);
+               return;
             }
+
+            !content_filter && (byte_count += n);
 
             /* we're finished with the server's header */
 
@@ -1547,8 +1059,8 @@ static void chat(struct client_state *csp)
       return; /* huh? we should never get here */
    }
 
-   log_error(LOG_LEVEL_CLF, "%s - - [%T] \"%s\" 200 %d",
-             csp->ip_addr_str, http->ocmd, byte_count);
+   log_error(LOG_LEVEL_CLF, "%s - - [%T] \"%s\" 200 %d", 
+             csp->ip_addr_str, http->cmd, byte_count); 
 }
 
 
@@ -1574,12 +1086,12 @@ static void serve(struct client_state *csp)
    chat(csp);
    close_socket(csp->cfd);
 
-   if (csp->sfd != JB_INVALID_SOCKET)
+   if (csp->sfd >= 0)
    {
       close_socket(csp->sfd);
    }
 
-   csp->flags &= ~CSP_FLAG_ACTIVE;
+   csp->active = 0;
 
 }
 
@@ -1608,28 +1120,6 @@ static int32 server_thread(void *data)
 
 /*********************************************************************
  *
- * Function    :  usage
- *
- * Description :  Print usage info & exit.
- *
- * Parameters  :  Pointer to argv[0] for identifying ourselves
- *
- * Returns     :  No. ,-)
- *
- *********************************************************************/
-void usage(const char *myname)
-{
-   printf("Privoxy version " VERSION " (" HOME_PAGE_URL ")\n"
-           "Usage: %s [--help] [--version] [--no-daemon] [--pidfile pidfile] [--user user[.group]] [configfile]\n"
-           "Aborting.\n", myname);
- 
-   exit(2);
-
-}
-
-
-/*********************************************************************
- *
  * Function    :  main
  *
  * Description :  Load the config file and start the listen loop.
@@ -1647,116 +1137,50 @@ void usage(const char *myname)
  *                any load fails, and can't bind port.
  *
  *                Else main never returns, the process must be signaled
- *                to terminate execution.  Or, on Windows, use the
+ *                to terminate execution.  Or, on Windows, use the 
  *                "File", "Exit" menu option.
  *
  *********************************************************************/
 #ifdef __MINGW32__
-int real_main(int argc, const char *argv[])
+int _main(int argc, const char *argv[])
 #else
 int main(int argc, const char *argv[])
 #endif
 {
-   int argc_pos = 0;
-#ifdef unix
-   struct passwd *pw = NULL;
-   struct group *grp = NULL;
-   char *p;
+   configfile =
+#ifdef AMIGA
+   "AmiTCP:db/junkbuster/config"
+#elif !defined(_WIN32)
+   "config"
+#else
+   "junkbstr.txt"
 #endif
+      ;
+
+#if !defined(_WIN32) || defined(_WIN_CONSOLE)
+   if ((argc >= 2) && (strcmp(argv[1], "--help")==0))
+   {
+      printf("JunkBuster proxy version " VERSION ".\n\n"
+         "Usage: %s [configfile]\n\n"
+         "See " HOME_PAGE_URL " for details.\n"
+         "This program is distributed under the GNU GPL, version 2 or later.\n",
+         argv[0]);
+      exit(2);
+   }
+   if ((argc >= 2) && (strcmp(argv[1], "--version")==0))
+   {
+      printf(VERSION "\n");
+      exit(2);
+   }
+#endif /* !defined(_WIN32) || defined(_WIN_CONSOLE) */
 
    Argc = argc;
    Argv = argv;
 
-   configfile =
-#if !defined(_WIN32)
-   "config"
-#else
-   "config.txt"
-#endif
-      ;
-
-   /*
-    * Parse the command line arguments
-    */
-   while (++argc_pos < argc)
+   if (argc > 1)
    {
-#if !defined(_WIN32) || defined(_WIN_CONSOLE)
-
-      if (strcmp(argv[argc_pos], "--help") == 0)
-      {
-         usage(argv[0]);
-      }
-
-      else if(strcmp(argv[argc_pos], "--version") == 0)
-      {
-         printf("Privoxy version " VERSION " (" HOME_PAGE_URL ")\n");
-         exit(0);
-      }
-
-      else if (strcmp(argv[argc_pos], "--no-daemon" ) == 0)
-      {
-         no_daemon = 1;
-      }
-#if defined(unix)
-      else if (strcmp(argv[argc_pos], "--pidfile" ) == 0)
-      {
-         if (++argc_pos == argc) usage(argv[0]);
-         pidfile = strdup(argv[argc_pos]);
-      }
-
-      else if (strcmp(argv[argc_pos], "--user" ) == 0)
-      {
-         if (++argc_pos == argc) usage(argv[argc_pos]);
-
-         if ((NULL != (p = strchr(argv[argc_pos], '.'))) && *(p + 1) != '0')
-         {
-            *p++ = '\0';
-            if (NULL == (grp = getgrnam(p)))
-            {
-               log_error(LOG_LEVEL_FATAL, "Group %s not found.", p);
-            }
-         }
-
-         if (NULL == (pw = getpwnam(argv[argc_pos])))
-         {
-            log_error(LOG_LEVEL_FATAL, "User %s not found.", argv[argc_pos]);
-         }
-
-         if (p != NULL) *--p = '\0';
-      }
-#endif /* defined(unix) */
-      else
-#endif /* defined(_WIN32) && !defined(_WIN_CONSOLE) */
-      {
-         configfile = argv[argc_pos];
-      }
-
-   } /* -END- while (more arguments) */
-
-#if defined(unix)
-   if ( *configfile != '/' )
-   {
-      char *abs_file;
-
-      /* make config-filename absolute here */
-      if ( !(basedir = getcwd( NULL, 1024 )))
-      {
-         perror("get working dir failed");
-         exit( 1 );
-      }
-
-      if ( !(abs_file = malloc( strlen( basedir ) + strlen( configfile ) + 5 )))
-      {
-         perror("malloc failed");
-         exit( 1 );
-      }
-      strcpy( abs_file, basedir );
-      strcat( abs_file, "/" );
-      strcat( abs_file, configfile );
-      configfile = abs_file;
+      configfile = argv[1];
    }
-#endif /* defined unix */
-
 
    files->next = NULL;
 
@@ -1766,37 +1190,11 @@ int main(int argc, const char *argv[])
    InitWin32();
 #endif
 
-   /*
-    * Unix signal handling
-    *
-    * Catch the abort, interrupt and terminate signals for a graceful exit
-    * Catch the hangup signal so the errlog can be reopened.
-    * Ignore the broken pipe and child signals
-    *  FIXME: Isn't ignoring the default for SIGCHLD anyway and why ignore SIGPIPE? 
-    */
-#if !defined(_WIN32) && !defined(__OS2__) && !defined(AMIGA)
-{
-   int idx;
-   const int catched_signals[] = { SIGABRT, SIGTERM, SIGINT, SIGHUP, 0 };
-   const int ignored_signals[] = { SIGPIPE, SIGCHLD, 0 };
 
-   for (idx = 0; catched_signals[idx] != 0; idx++)
-   {
-      if (signal(catched_signals[idx], sig_handler) == SIG_ERR)
-      {
-         log_error(LOG_LEVEL_FATAL, "Can't set signal-handler for signal %d: %E", catched_signals[idx]);
-      }
-   }
+#ifndef _WIN32
+   signal(SIGPIPE, SIG_IGN);
+   signal(SIGCHLD, SIG_IGN);
 
-   for (idx = 0; ignored_signals[idx] != 0; idx++)
-   {
-      if (signal(ignored_signals[idx], SIG_IGN) == SIG_ERR)
-      {
-         log_error(LOG_LEVEL_FATAL, "Can't set ignore-handler for signal %d: %E", ignored_signals[idx]);
-      }
-   }
-
-}
 #else /* ifdef _WIN32 */
 # ifdef _WIN_CONSOLE
    /*
@@ -1808,173 +1206,11 @@ int main(int argc, const char *argv[])
 #endif /* def _WIN32 */
 
 
-   /* Initialize the CGI subsystem */
-   cgi_init_error_messages();
-
-   /*
-    * If runnig on unix and without the --nodaemon
-    * option, become a daemon. I.e. fork, detach
-    * from tty and get process group leadership
-    */
-#if defined(unix)
-{
-   pid_t pid = 0;
-#if 0
-   int   fd;
-#endif
-
-   if (!no_daemon)
-   {
-      pid  = fork();
-
-      if ( pid < 0 ) /* error */
-      {
-         perror("fork");
-         exit( 3 );
-      }
-      else if ( pid != 0 ) /* parent */
-      {
-         int status;
-         pid_t wpid;
-         /*
-          * must check for errors
-          * child died due to missing files aso
-          */
-         sleep( 1 );
-         wpid = waitpid( pid, &status, WNOHANG );
-         if ( wpid != 0 )
-         {
-            exit( 1 );
-         }
-         exit( 0 );
-      }
-      /* child */
-#if 1
-      /* Should be more portable, but not as well tested */
-      setsid();
-#else /* !1 */
-#ifdef __FreeBSD__
-      setpgrp(0,0);
-#else /* ndef __FreeBSD__ */
-      setpgrp();
-#endif /* ndef __FreeBSD__ */
-      fd = open("/dev/tty", O_RDONLY);
-      if ( fd )
-      {
-         /* no error check here */
-         ioctl( fd, TIOCNOTTY,0 );
-         close ( fd );
-      }
-#endif /* 1 */
-      /* FIXME: should close stderr (fd 2) here too, but the test
-       * for existence
-       * and load config file is done in listen_loop() and puts
-       * some messages on stderr there.
-       */
-
-      close( 0 );
-      close( 1 );
-      chdir("/");
-
-   } /* -END- if (!no_daemon) */
-
-   /*
-    * As soon as we have written the PID file, we can switch
-    * to the user and group ID indicated by the --user option
-    */
-   write_pid_file();
-   
-   if (NULL != pw)
-   {
-      if (((NULL != grp) && setgid(grp->gr_gid)) || (setgid(pw->pw_gid)))
-      {
-         log_error(LOG_LEVEL_FATAL, "Cannot setgid(): Insufficient permissions.");
-      }
-      if (setuid(pw->pw_uid))
-      {
-         log_error(LOG_LEVEL_FATAL, "Cannot setuid(): Insufficient permissions.");
-      }
-   }
-}
-#endif /* defined unix */
-
    listen_loop();
 
    /* NOTREACHED */
    return(-1);
 
-}
-
-
-/*********************************************************************
- *
- * Function    :  bind_port_helper
- *
- * Description :  Bind the listen port.  Handles logging, and aborts
- *                on failure.
- *
- * Parameters  :
- *          1  :  config = Privoxy configuration.  Specifies port
- *                         to bind to.
- *
- * Returns     :  Port that was opened.
- *
- *********************************************************************/
-static jb_socket bind_port_helper(struct configuration_spec * config)
-{
-   int result;
-   jb_socket bfd;
-
-   if ( (config->haddr != NULL)
-     && (config->haddr[0] == '1')
-     && (config->haddr[1] == '2')
-     && (config->haddr[2] == '7')
-     && (config->haddr[3] == '.') )
-   {
-      log_error(LOG_LEVEL_INFO, "Listening on port %d for local connections only",
-                config->hport);
-   }
-   else if (config->haddr == NULL)
-   {
-      log_error(LOG_LEVEL_INFO, "Listening on port %d on all IP addresses",
-                config->hport);
-   }
-   else
-   {
-      log_error(LOG_LEVEL_INFO, "Listening on port %d on IP address %s",
-                config->hport, config->haddr);
-   }
-
-   result = bind_port(config->haddr, config->hport, &bfd);
-
-   if (result < 0)
-   {
-      switch(result)
-      {
-         case -3 :
-            log_error(LOG_LEVEL_FATAL, "can't bind to %s:%d: "
-               "There may be another Privoxy or some other "
-               "proxy running on port %d",
-               (NULL != config->haddr) ? config->haddr : "INADDR_ANY",
-                      config->hport, config->hport);
-
-         case -2 :
-            log_error(LOG_LEVEL_FATAL, "can't bind to %s:%d: " 
-               "The hostname is not resolvable",
-               (NULL != config->haddr) ? config->haddr : "INADDR_ANY", config->hport);
-
-         default :
-            log_error(LOG_LEVEL_FATAL, "can't bind to %s:%d: because %E",
-               (NULL != config->haddr) ? config->haddr : "INADDR_ANY", config->hport);
-      }
-
-      /* shouldn't get here */
-      return JB_INVALID_SOCKET;
-   }
-
-   config->need_bind = 0;
-
-   return bfd;
 }
 
 
@@ -1992,58 +1228,40 @@ static jb_socket bind_port_helper(struct configuration_spec * config)
 static void listen_loop(void)
 {
    struct client_state *csp = NULL;
-   jb_socket bfd;
+   int bfd;
    struct configuration_spec * config;
 
    config = load_config();
 
-   bfd = bind_port_helper(config);
+   log_error(LOG_LEVEL_CONNECT, "bind (%s, %d)",
+             config->haddr ? config->haddr : "INADDR_ANY", config->hport);
 
-#ifdef FEATURE_GRACEFUL_TERMINATION
-   while (!g_terminate)
-#else
-   for (;;)
-#endif
+   bfd = bind_port(config->haddr, config->hport);
+
+   if (bfd < 0)
    {
-#if !defined(FEATURE_PTHREAD) && !defined(_WIN32) && !defined(__BEOS__) && !defined(AMIGA) && !defined(__OS2__)
+      log_error(LOG_LEVEL_FATAL, "can't bind %s:%d: %E "
+         "- There may be another junkbuster or some other "
+         "proxy running on port %d", 
+         (NULL != config->haddr) ? config->haddr : "INADDR_ANY", 
+         config->hport, config->hport
+      );
+      /* shouldn't get here */
+      return;
+   }
+
+   config->need_bind = 0;
+
+
+   while (FOREVER)
+   {
+#if !defined(FEATURE_PTHREAD) && !defined(_WIN32) && !defined(__BEOS__) && !defined(AMIGA)
       while (waitpid(-1, NULL, WNOHANG) > 0)
       {
          /* zombie children */
       }
 #endif /* !defined(FEATURE_PTHREAD) && !defined(_WIN32) && !defined(__BEOS__) && !defined(AMIGA) */
-
-      /*
-       * Free data that was used by died threads
-       */
       sweep();
-
-#if defined(unix)
-      /*
-       * Re-open the errlog after HUP signal
-       */
-      if (received_hup_signal)
-      {
-         init_error_log(Argv[0], config->logfile, config->debug);
-         received_hup_signal = 0;
-      }
-#endif
-
-#ifdef __OS2__
-#ifdef FEATURE_COOKIE_JAR
-      /*
-       * Need a workaround here: we have to fclose() the jarfile, or we die because it's
-       * already open.  I think unload_configfile() is not being run, which should do
-       * this work.  Until that can get resolved, we'll use this workaround.
-       */
-       if (csp)
-         if(csp->config)
-           if (csp->config->jar)
-           {
-             fclose(csp->config->jar);
-             csp->config->jar = NULL;
-           }
-#endif /* FEATURE_COOKIE_JAR */
-#endif /* __OS2__ */
 
       if ( NULL == (csp = (struct client_state *) zalloc(sizeof(*csp))) )
       {
@@ -2051,8 +1269,10 @@ static void listen_loop(void)
          continue;
       }
 
-      csp->flags |= CSP_FLAG_ACTIVE;
-      csp->sfd    = JB_INVALID_SOCKET;
+      memset(csp, '\0', sizeof(*csp));
+
+      csp->active = 1;
+      csp->sfd    = -1;
 
       csp->config = config = load_config();
 
@@ -2073,7 +1293,23 @@ static void listen_loop(void)
 
          close_socket(bfd);
 
-         bfd = bind_port_helper(config);
+         log_error(LOG_LEVEL_CONNECT, "bind (%s, %d)",
+                   config->haddr ? config->haddr : "INADDR_ANY", config->hport);
+         bfd = bind_port(config->haddr, config->hport);
+
+         if (bfd < 0)
+         {
+            log_error(LOG_LEVEL_FATAL, "can't bind %s:%d: %E "
+               "- There may be another junkbuster or some other "
+               "proxy running on port %d", 
+               (NULL != config->haddr) ? config->haddr : "INADDR_ANY", 
+               config->hport, config->hport
+            );
+            /* shouldn't get here */
+            return;
+         }
+
+         config->need_bind = 0;
       }
 
       log_error(LOG_LEVEL_CONNECT, "accept connection ... ");
@@ -2085,7 +1321,7 @@ static void listen_loop(void)
 #ifdef AMIGA
          if(!childs)
          {
-            exit(1);
+            exit(1); 
          }
 #endif
          freez(csp);
@@ -2096,12 +1332,10 @@ static void listen_loop(void)
          log_error(LOG_LEVEL_CONNECT, "OK");
       }
 
-#ifdef FEATURE_TOGGLE
-      if (g_bToggleIJB)
-      {
-         csp->flags |= CSP_FLAG_TOGGLED_ON;
-      }
-#endif /* def FEATURE_TOGGLE */
+#if defined(TOGGLE)
+      /* by haroon - most of credit to srt19170 */
+      csp->toggled_on = g_bToggleIJB;
+#endif
 
       if (run_loader(csp))
       {
@@ -2109,7 +1343,7 @@ static void listen_loop(void)
          /* Never get here - LOG_LEVEL_FATAL causes program exit */
       }
 
-#ifdef FEATURE_ACL
+#ifdef ACL_FILES
       if (block_acl(NULL,csp))
       {
          log_error(LOG_LEVEL_CONNECT, "Connection dropped due to ACL");
@@ -2117,7 +1351,7 @@ static void listen_loop(void)
          freez(csp);
          continue;
       }
-#endif /* def FEATURE_ACL */
+#endif /* def ACL_FILES */
 
       /* add it to the list of clients */
       csp->next = clients->next;
@@ -2138,7 +1372,6 @@ static void listen_loop(void)
             pthread_attr_t attrs;
 
             pthread_attr_init(&attrs);
-            pthread_attr_setdetachstate(&attrs, PTHREAD_CREATE_DETACHED);
             child_id = (pthread_create(&the_thread, &attrs,
                (void*)serve, csp) ? -1 : 0);
             pthread_attr_destroy(&attrs);
@@ -2148,16 +1381,7 @@ static void listen_loop(void)
 #if defined(_WIN32) && !defined(_CYGWIN) && !defined(SELECTED_ONE_OPTION)
 #define SELECTED_ONE_OPTION
          child_id = _beginthread(
-            (void (*)(void *))serve,
-            64 * 1024,
-            csp);
-#endif
-
-#if defined(__OS2__) && !defined(SELECTED_ONE_OPTION)
-#define SELECTED_ONE_OPTION
-         child_id = _beginthread(
-            (void(* _Optlink)(void*))serve,
-            NULL,
+            (void*)serve,
             64 * 1024,
             csp);
 #endif
@@ -2186,7 +1410,7 @@ static void listen_loop(void)
             NP_Entry, (ULONG)server_thread,
             NP_Output, Output(),
             NP_CloseOutput, FALSE,
-            NP_Name, (ULONG)"privoxy child",
+            NP_Name, (ULONG)"junkbuster child",
             NP_StackSize, 200*1024,
             TAG_DONE)))
          {
@@ -2221,7 +1445,7 @@ static void listen_loop(void)
             wait( NULL );
 #endif /* !defined(_WIN32) && defined(__CYGWIN__) */
             close_socket(csp->cfd);
-            csp->flags &= ~CSP_FLAG_ACTIVE;
+            csp->active = 0;
          }
 #endif
 
@@ -2238,7 +1462,7 @@ static void listen_loop(void)
 
             write_socket(csp->cfd, buf, strlen(buf));
             close_socket(csp->cfd);
-            csp->flags &= ~CSP_FLAG_ACTIVE;
+            csp->active = 0;
             sleep(5);
             continue;
          }
@@ -2248,48 +1472,7 @@ static void listen_loop(void)
          serve(csp);
       }
    }
-
-   /* NOTREACHED unless FEATURE_GRACEFUL_TERMINATION is defined */
-
-   /* Clean up.  Aim: free all memory (no leaks) */
-#ifdef FEATURE_GRACEFUL_TERMINATION
-
-   log_error(LOG_LEVEL_ERROR, "Graceful termination requested");
-
-   unload_current_config_file();
-   unload_current_actions_file();
-   unload_current_re_filterfile();
-#ifdef FEATURE_TRUST
-   unload_current_trust_file();
-#endif
-
-   if (config->multi_threaded)
-   {
-      int i = 60;
-      do
-      {
-         sleep(1);
-         sweep();
-      } while ((clients->next != NULL) && (--i > 0));
-
-      if (i <= 0)
-      {
-         log_error(LOG_LEVEL_ERROR, "Graceful termination failed - still some live clients after 1 minute wait.");
-      }
-   }
-   sweep();
-   sweep();
-
-#if defined(unix)
-   free(basedir);
-#endif
-#if defined(_WIN32) && !defined(_WIN_CONSOLE)
-   /* Cleanup - remove taskbar icon etc. */
-   TermLogWindow();
-#endif
-
-   exit(0);
-#endif /* FEATURE_GRACEFUL_TERMINATION */
+   /* NOTREACHED */
 
 }
 
