@@ -30,6 +30,7 @@ core
 GNUmakefile
 Makefile
 configure
+config.base
 config.cache
 config.h
 config.h.in
