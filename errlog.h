@@ -1,9 +1,9 @@
 #ifndef ERRLOG_H_INCLUDED
 #define ERRLOG_H_INCLUDED
-#define ERRLOG_H_VERSION "$Id: errlog.h,v 1.12 2002/03/24 13:25:43 swa Exp $"
+#define ERRLOG_H_VERSION "$Id: errlog.h,v 1.13 2002/03/26 22:29:54 swa Exp $"
 /*********************************************************************
  *
- * File        :  $Source: /cvsroot/ijbswa/current/errlog.h,v $
+ * File        :  $Source: /cvsroot/ijbswa/current/Attic/errlog.h,v $
  *
  * Purpose     :  Log errors to a designated destination in an elegant,
  *                printf-like fashion.
@@ -35,6 +35,9 @@
  *
  * Revisions   :
  *    $Log: errlog.h,v $
+ *    Revision 1.13  2002/03/26 22:29:54  swa
+ *    we have a new homepage!
+ *
  *    Revision 1.12  2002/03/24 13:25:43  swa
  *    name change related issues
  *
@@ -149,7 +152,7 @@ extern "C" {
 #define LOG_LEVEL_POPUPS     0x0400 /* Kill Popups */
 #endif /* def FEATURE_KILL_POPUPS */
 
-#define LOG_LEVEL_CGI   0x0800 /* CGI / templates */
+#define LOG_LEVEL_CGI        0x0800 /* CGI / templates */
 
 /* Following are always on: */
 #define LOG_LEVEL_INFO    0x1000
