@@ -1,7 +1,7 @@
-const char parsers_rcs[] = "$Id: parsers.c,v 1.56 2002/05/12 15:34:22 jongfoster Exp $";
+const char parsers_rcs[] = "$Id: parsers.c,v 1.56.2.1 2002/09/25 14:52:45 oes Exp $";
 /*********************************************************************
  *
- * File        :  $Source: /cvsroot/ijbswa//current/Attic/parsers.c,v $
+ * File        :  $Source: /cvsroot/ijbswa/current/Attic/parsers.c,v $
  *
  * Purpose     :  Declares functions to parse/crunch headers and pages.
  *                Functions declared include:
@@ -40,6 +40,17 @@ const char parsers_rcs[] = "$Id: parsers.c,v 1.56 2002/05/12 15:34:22 jongfoster
  *
  * Revisions   :
  *    $Log: parsers.c,v $
+ *    Revision 1.56.2.1  2002/09/25 14:52:45  oes
+ *    Added basic support for OPTIONS and TRACE HTTP methods:
+ *     - New parser function client_max_forwards which decrements
+ *       the Max-Forwards HTTP header field of OPTIONS and TRACE
+ *       requests by one before forwarding
+ *     - New parser function client_host which extracts the host
+ *       and port information from the HTTP header field if the
+ *       request URI was not absolute
+ *     - Don't crumble and re-add the Host: header, but only generate
+ *       and append if missing
+ *
  *    Revision 1.56  2002/05/12 15:34:22  jongfoster
  *    Fixing typo in a comment
  *
@@ -1282,7 +1293,7 @@ jb_err client_send_cookie(struct client_state *csp, char **header)
    }
    else
    {
-      log_error(LOG_LEVEL_HEADER, " crunch!");
+      log_error(LOG_LEVEL_HEADER, "Crunched outgoing cookie -- yum!");
    }
 
    /*
@@ -1773,6 +1784,7 @@ jb_err server_set_cookie(struct client_state *csp, char **header)
 
    if ((csp->action->flags & ACTION_NO_COOKIE_SET) != 0)
    {
+      log_error(LOG_LEVEL_HEADER, "Crunched incoming cookie -- yum!");
       return crumble(csp, header);
    }
    else if ((csp->action->flags & ACTION_NO_COOKIE_KEEP) != 0)
