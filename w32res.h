@@ -1,14 +1,14 @@
-#ifndef W32RES_H_INCLUDED
-#define W32RES_H_INCLUDED
-#define W32RES_H_VERSION "$Id: w32res.h,v 1.12 2002/03/24 12:07:36 jongfoster Exp $"
+#ifndef _W32RES_H
+#define _W32RES_H
+#define W32RES_H_VERSION "$Id: w32res.h,v 1.7 2001/06/07 23:08:12 jongfoster Exp $"
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/w32res.h,v $
  *
  * Purpose     :  Identifiers for Windows GUI resources.
  *
- * Copyright   :  Written by and Copyright (C) 2001-2002 members of
- *                the Privoxy team.  http://www.privoxy.org/
+ * Copyright   :  Written by and Copyright (C) 2001 the SourceForge
+ *                IJBSWA team.  http://ijbswa.sourceforge.net
  *
  *                Based on the Internet Junkbuster originally written
  *                by and Copyright (C) 1997 Anonymous Coders and 
@@ -34,25 +34,6 @@
  *
  * Revisions   :
  *    $Log: w32res.h,v $
- *    Revision 1.12  2002/03/24 12:07:36  jongfoster
- *    Consistern name for filters file
- *
- *    Revision 1.11  2002/03/24 12:03:47  jongfoster
- *    Name change
- *
- *    Revision 1.10  2001/07/30 22:08:36  jongfoster
- *    Tidying up #defines:
- *    - All feature #defines are now of the form FEATURE_xxx
- *    - Permanently turned off WIN_GUI_EDIT
- *    - Permanently turned on WEBDAV and SPLIT_PROXY_ARGS
- *
- *    Revision 1.9  2001/07/29 18:43:08  jongfoster
- *    Changing #ifdef _FILENAME_H to FILENAME_H_INCLUDED, to conform to
- *    ANSI C rules.
- *
- *    Revision 1.8  2001/07/13 14:04:59  oes
- *    Removed all #ifdef PCRS
- *
  *    Revision 1.7  2001/06/07 23:08:12  jongfoster
  *    Forward and ACL edit options removed.
  *
@@ -113,25 +94,49 @@
  *
  *********************************************************************/
 
+#ifdef WIN_GUI_EDIT
+#define IDS_NEW_BLOCKER                   1
+
+#define ID_NEW_BLOCKER                    100
+#endif /* def WIN_GUI_EDIT */
+
 #define IDR_TRAYMENU                      101
 #define IDI_IDLE                          102
 #define IDR_LOGVIEW                       103
 #define IDR_ACCELERATOR                   104
 #define IDR_POPUP_SELECTION               105
 
+#ifdef WIN_GUI_EDIT
+#define IDD_RULES                         106
+#endif /* def WIN_GUI_EDIT */
 
-#define IDI_MAINICON                      200
-#define IDI_ANIMATED1                     201
-#define IDI_ANIMATED2                     202
-#define IDI_ANIMATED3                     203
-#define IDI_ANIMATED4                     204
-#define IDI_ANIMATED5                     205
-#define IDI_ANIMATED6                     206
-#define IDI_ANIMATED7                     207
-#define IDI_ANIMATED8                     208
+
+#define IDI_JUNKBUSTER                    200
+#define IDI_JUNKBUSTER1                   201
+#define IDI_JUNKBUSTER2                   202
+#define IDI_JUNKBUSTER3                   203
+#define IDI_JUNKBUSTER4                   204
+#define IDI_JUNKBUSTER5                   205
+#define IDI_JUNKBUSTER6                   206
+#define IDI_JUNKBUSTER7                   207
+#define IDI_JUNKBUSTER8                   208
+
+#ifdef WIN_GUI_EDIT
+#define IDI_DENYRULE                      209
+#define IDI_ALLOWRULE                     210
+
+#define IDC_NEW                           300
+#define IDC_ACTION                        301
+#define IDC_RULES                         302
+#define IDC_CREATE                        303
+#define IDC_MOVEUP                        304
+#define IDC_MOVEDOWN                      305
+#define IDC_DELETE                        306
+#define IDC_SAVE                          307
+#endif /* def WIN_GUI_EDIT */
 
 #define ID_SHOWWINDOW                     4000
-#define ID_HELP_ABOUT                     4001
+#define ID_HELP_ABOUTJUNKBUSTER           4001
 #define ID_FILE_EXIT                      4002
 #define ID_VIEW_CLEARLOG                  4003
 #define ID_VIEW_LOGMESSAGES               4004
@@ -142,18 +147,18 @@
 #define ID_HELP_MANUAL                    4009
 #define ID_HELP_GPL                       4010
 #define ID_HELP_STATUS                    4011
-#ifdef FEATURE_TOGGLE
-#define ID_TOGGLE_ENABLED                 4012
-#endif /* def FEATURE_TOGGLE */
+#ifdef TOGGLE
+#define ID_TOGGLE_IJB                     4012
+#endif
 
 /* Break these out so they are easier to extend, but keep consecutive */
-#define ID_TOOLS_EDITCONFIG               5000
+#define ID_TOOLS_EDITJUNKBUSTER           5000
 #define ID_TOOLS_EDITACTIONS              5001
-#define ID_TOOLS_EDITFILTERS              5002
+#define ID_TOOLS_EDITPERLRE               5002
 
-#ifdef FEATURE_TRUST
+#ifdef TRUST_FILES
 #define ID_TOOLS_EDITTRUST                5003
-#endif /* def FEATURE_TRUST */
+#endif /* def TRUST_FILES */
 
 /*
  * The following symbols are declared in <afxres.h> in VC++.
@@ -165,7 +170,7 @@
 #define ID_EDIT_COPY  30000
 
 
-#endif /* ndef W32RES_H_INCLUDED */
+#endif /* ndef _W32RES_H */
 
 /*
   Local Variables:

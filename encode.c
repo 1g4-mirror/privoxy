@@ -1,4 +1,4 @@
-const char encode_rcs[] = "$Id: encode.c,v 1.7 2002/03/24 13:25:43 swa Exp $";
+const char encode_rcs[] = "$Id: encode.c,v 1.1.1.1 2001/05/15 13:58:51 oes Exp $";
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/encode.c,v $
@@ -7,7 +7,7 @@ const char encode_rcs[] = "$Id: encode.c,v 1.7 2002/03/24 13:25:43 swa Exp $";
  *                encode cookies and HTML text.
  *
  * Copyright   :  Written by and Copyright (C) 2001 the SourceForge
- *                Privoxy team. http://www.privoxy.org/
+ *                IJBSWA team.  http://ijbswa.sourceforge.net
  *
  *                Based on the Internet Junkbuster originally written
  *                by and Copyright (C) 1997 Anonymous Coders and 
@@ -33,27 +33,6 @@ const char encode_rcs[] = "$Id: encode.c,v 1.7 2002/03/24 13:25:43 swa Exp $";
  *
  * Revisions   :
  *    $Log: encode.c,v $
- *    Revision 1.7  2002/03/24 13:25:43  swa
- *    name change related issues
- *
- *    Revision 1.6  2002/03/13 00:27:04  jongfoster
- *    Killing warnings
- *
- *    Revision 1.5  2002/03/07 03:46:53  oes
- *    Fixed compiler warnings etc
- *
- *    Revision 1.4  2002/01/22 23:28:07  jongfoster
- *    Adding convenience function html_encode_and_free_original()
- *    Making all functions accept NULL paramaters - in this case, they
- *    simply return NULL.  This allows error-checking to be deferred.
- *
- *    Revision 1.3  2001/11/13 00:16:40  jongfoster
- *    Replacing references to malloc.h with the standard stdlib.h
- *    (See ANSI or K&R 2nd Ed)
- *
- *    Revision 1.2  2001/05/17 22:52:35  oes
- *     - Cleaned CRLF's from the sources and related files
- *
  *    Revision 1.1.1.1  2001/05/15 13:58:51  oes
  *    Initial import of version 2.9.3 source tree
  *
@@ -64,8 +43,8 @@ const char encode_rcs[] = "$Id: encode.c,v 1.7 2002/03/24 13:25:43 swa Exp $";
 #include "config.h"
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+#include <malloc.h>
 
 #include "encode.h"
 
@@ -176,20 +155,12 @@ static const char * const cookie_code_map[256] = {
  *
  * Returns     :  Encoded string, newly allocated on the heap. 
  *                Caller is responsible for freeing it with free().
- *                If s is NULL, or on out-of memory, returns NULL.
  *
  *********************************************************************/
 char * html_encode(const char *s)
 {
-   char * buf;
-   
-   if (s == NULL)
-   {
-      return NULL;
-   }
-
    /* each input char can expand to at most 6 chars */
-   buf = (char *) malloc((strlen(s) * 6) + 1);
+   char * buf = (char *) malloc((strlen(s) * 6) + 1);
 
    if (buf)
    {
@@ -215,41 +186,6 @@ char * html_encode(const char *s)
    return(buf);
 }
 
-
-/*********************************************************************
- *
- * Function    :  html_encode_and_free_original
- *
- * Description :  Encodes a string so it's not interpreted as
- *                containing HTML tags or entities.
- *                Replaces <, >, &, and " with the appropriate HTML
- *                entities.  Free()s original string.
- *                If original string is NULL, simply returns NULL.
- *
- * Parameters  :
- *          1  :  s = String to encode.  Null-terminated.
- *
- * Returns     :  Encoded string, newly allocated on the heap. 
- *                Caller is responsible for freeing it with free().
- *                If s is NULL, or on out-of memory, returns NULL.
- *
- *********************************************************************/
-char * html_encode_and_free_original(char *s)
-{
-   char * result;
-   
-   if (s == NULL)
-   {
-      return NULL;
-   }
-
-   result = html_encode(s);
-   free(s);
-
-   return result;
-}
-
-
 /*********************************************************************
  *
  * Function    :  cookie_encode
@@ -263,20 +199,12 @@ char * html_encode_and_free_original(char *s)
  *
  * Returns     :  Encoded string, newly allocated on the heap. 
  *                Caller is responsible for freeing it with free().
- *                If s is NULL, or on out-of memory, returns NULL.
  *
  *********************************************************************/
 char * cookie_encode(const char *s)
 {
-   char * buf;
-
-   if (s == NULL)
-   {
-      return NULL;
-   }
-
    /* each input char can expand to at most 3 chars */
-   buf = (char *) malloc((strlen(s) * 3) + 1);
+   char * buf = (char *) malloc((strlen(s) * 3) + 1);
 
    if (buf)
    {
@@ -315,20 +243,12 @@ char * cookie_encode(const char *s)
  *
  * Returns     :  Encoded string, newly allocated on the heap. 
  *                Caller is responsible for freeing it with free().
- *                If s is NULL, or on out-of memory, returns NULL.
  *
  *********************************************************************/
 char * url_encode(const char *s)
 {
-   char * buf;
-
-   if (s == NULL)
-   {
-      return NULL;
-   }
-
    /* each input char can expand to at most 3 chars */
-   buf = (char *) malloc((strlen(s) * 3) + 1);
+   char * buf = (char *) malloc((strlen(s) * 3) + 1);
 
    if (buf)
    {
@@ -368,7 +288,7 @@ char * url_encode(const char *s)
  * Returns     :  The integer value, or -1 for non-hex characters.
  *
  *********************************************************************/
-static int xdtoi(const int d)
+static int xdtoi(char d)
 {
    if ((d >= '0') && (d <= '9'))
    {
@@ -406,10 +326,10 @@ static int xtoi(const char *s)
 {
    int d1, d2;
 
-   d1 = xdtoi(*s);
+   d1 = xdtoi(*s++);
    if(d1 >= 0)
    {
-      d2 = xdtoi(*(s+1));
+      d2 = xdtoi(*s);
       if(d2 >= 0)
       {
          return (d1 << 4) + d2;
@@ -451,7 +371,7 @@ char *url_decode(const char * s)
                break;
 
             case '%':
-               if ((*q = xtoi(s + 1)) != '\0')
+               if ((*q = xtoi(s + 1)))
                {
                   s += 3;
                   q++;

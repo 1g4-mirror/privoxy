@@ -1,7 +1,7 @@
 #ifdef AMIGA
-#ifndef AMIGA_H_INCLUDED
-#define AMIGA_H_INCLUDED
-#define AMIGA_H_VERSION "$Id: amiga.h,v 1.8 2002/03/24 13:25:43 swa Exp $"
+#ifndef _AMIGA_H
+#define _AMIGA_H
+#define AMIGA_H_VERSION "$Id: amiga.h,v 1.3 2001/05/25 21:53:27 jongfoster Exp $"
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/amiga.h,v $
@@ -9,7 +9,7 @@
  * Purpose     :  Amiga-specific declarations.
  *
  * Copyright   :  Written by and Copyright (C) 2001 the SourceForge
- *                Privoxy team. http://www.privoxy.org/
+ *                IJBSWA team.  http://ijbswa.sourceforge.net
  *
  *                This program is free software; you can redistribute it 
  *                and/or modify it under the terms of the GNU General
@@ -31,23 +31,6 @@
  *
  * Revisions   :
  *    $Log: amiga.h,v $
- *    Revision 1.8  2002/03/24 13:25:43  swa
- *    name change related issues
- *
- *    Revision 1.7  2002/03/03 09:18:03  joergs
- *    Made jumbjuster work on AmigaOS again.
- *
- *    Revision 1.6  2001/10/13 12:46:08  joergs
- *    Added #undef EINTR to avoid warnings
- *
- *    Revision 1.5  2001/07/29 18:43:08  jongfoster
- *    Changing #ifdef _FILENAME_H to FILENAME_H_INCLUDED, to conform to
- *    ANSI C rules.
- *
- *    Revision 1.4  2001/05/29 20:05:06  joergs
- *    Fixed exit() macro not exiting if called before InitAmiga()
- *    (junkbuster --help and --version).
- *
  *    Revision 1.3  2001/05/25 21:53:27  jongfoster
  *    Fixing indentation
  *
@@ -70,7 +53,6 @@
 #undef __NOLIBBASE__
 
 #define __CONSTLIBBASEDECL__ const
-#define DEVICES_TIMER_H
 #include <proto/exec.h>
 #include <exec/tasks.h>
 #include <proto/dos.h>
@@ -116,8 +98,7 @@ __saveds ULONG server_thread(void);
    }                                                        \
 }
 
-#undef EINTR
 #define EINTR 0
 
-#endif /* ndef AMIGA_H_INCLUDED */
+#endif /* ndef _AMIGA_H */
 #endif /* def AMIGA */

@@ -1,6 +1,6 @@
-#ifndef DEANIMATE_H_INCLUDED
-#define DEANIMATE_H_INCLUDED
-#define DEANIMATE_H_VERSION "$Id: deanimate.h,v 1.7 2002/03/24 13:25:43 swa Exp $"
+#ifndef _DEANIMATE_H
+#define _DEANIMATE_H
+#define DEANIMATE_H_VERSION "$Id: deanimate.h,v 1.2 2001/07/13 13:46:20 oes Exp $"
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/deanimate.h,v $
@@ -11,7 +11,7 @@
  *                
  *
  * Copyright   :  Written by and Copyright (C) 2001 Andreas S. Oesterhelt
- *                for the Privoxy team. http://www.privoxy.org/
+ *                for the SourceForge IJBSWA team. http://ijbswa.sourceforge.net
  *
  *                Based on ideas from the Image::DeAnim Perl module by
  *                Ken MacFarlane, <ksm+cpan@universal.dca.net>
@@ -40,31 +40,12 @@
  *
  * Revisions   :
  *    $Log: deanimate.h,v $
- *    Revision 1.7  2002/03/24 13:25:43  swa
- *    name change related issues
- *
- *    Revision 1.6  2002/03/08 17:46:04  jongfoster
- *    Fixing int/size_t warnings
- *
- *    Revision 1.5  2002/03/07 03:46:17  oes
- *    Fixed compiler warnings
- *
- *    Revision 1.4  2001/07/29 18:50:04  jongfoster
- *    Fixing "extern C" block, and renaming #define _DEANIMATE_H
- *
- *    Revision 1.3  2001/07/18 12:29:05  oes
- *    Updated prototype for gif_deanimate
- *
  *    Revision 1.2  2001/07/13 13:46:20  oes
  *    Introduced GIF deanimation feature
  *
  *
  *********************************************************************/
 
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /*
  * A struct that holds a buffer, a read/write offset,
@@ -73,8 +54,8 @@ extern "C" {
 struct binbuffer
 {
    char *buffer; 
-   size_t offset;   
-   size_t size;    
+   int offset;   
+   int size;    
 };
 
 /*
@@ -93,7 +74,7 @@ extern const char deanimate_h_rcs[];
 } /* extern "C" */
 #endif
 
-#endif /* ndef DEANIMATE_H_INCLUDED */
+#endif /* ndef _DEANIMATE_H */
 
 /*
   Local Variables:

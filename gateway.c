@@ -1,20 +1,20 @@
-const char gateway_rcs[] = "$Id: gateway.c,v 1.14 2002/03/24 13:25:43 swa Exp $";
+const char gateway_rcs[] = "$Id: gateway.c,v 1.3 2001/06/09 10:55:28 jongfoster Exp $";
 /*********************************************************************
  *
- * File        :  $Source: /cvsroot/ijbswa/current/gateway.c,v $
+ * File        :  $Source: /cvsroot/ijbswa//current/gateway.c,v $
  *
  * Purpose     :  Contains functions to connect to a server, possibly
  *                using a "forwarder" (i.e. HTTP proxy and/or a SOCKS4
  *                proxy).
  *
  * Copyright   :  Written by and Copyright (C) 2001 the SourceForge
- *                Privoxy team. http://www.privoxy.org/
+ *                IJBSWA team.  http://ijbswa.sourceforge.net
  *
  *                Based on the Internet Junkbuster originally written
- *                by and Copyright (C) 1997 Anonymous Coders and
+ *                by and Copyright (C) 1997 Anonymous Coders and 
  *                Junkbusters Corporation.  http://www.junkbusters.com
  *
- *                This program is free software; you can redistribute it
+ *                This program is free software; you can redistribute it 
  *                and/or modify it under the terms of the GNU General
  *                Public License as published by the Free Software
  *                Foundation; either version 2 of the License, or (at
@@ -34,65 +34,6 @@ const char gateway_rcs[] = "$Id: gateway.c,v 1.14 2002/03/24 13:25:43 swa Exp $"
  *
  * Revisions   :
  *    $Log: gateway.c,v $
- *    Revision 1.14  2002/03/24 13:25:43  swa
- *    name change related issues
- *
- *    Revision 1.13  2002/03/13 00:29:59  jongfoster
- *    Killing warnings
- *
- *    Revision 1.12  2002/03/09 20:03:52  jongfoster
- *    - Making various functions return int rather than size_t.
- *      (Undoing a recent change).  Since size_t is unsigned on
- *      Windows, functions like read_socket that return -1 on
- *      error cannot return a size_t.
- *
- *      THIS WAS A MAJOR BUG - it caused frequent, unpredictable
- *      crashes, and also frequently caused JB to jump to 100%
- *      CPU and stay there.  (Because it thought it had just
- *      read ((unsigned)-1) == 4Gb of data...)
- *
- *    - The signature of write_socket has changed, it now simply
- *      returns success=0/failure=nonzero.
- *
- *    - Trying to get rid of a few warnings --with-debug on
- *      Windows, I've introduced a new type "jb_socket".  This is
- *      used for the socket file descriptors.  On Windows, this
- *      is SOCKET (a typedef for unsigned).  Everywhere else, it's
- *      an int.  The error value can't be -1 any more, so it's
- *      now JB_INVALID_SOCKET (which is -1 on UNIX, and in
- *      Windows it maps to the #define INVALID_SOCKET.)
- *
- *    - The signature of bind_port has changed.
- *
- *    Revision 1.11  2002/03/08 17:46:04  jongfoster
- *    Fixing int/size_t warnings
- *
- *    Revision 1.10  2002/03/07 03:50:19  oes
- *     - Improved handling of failed DNS lookups
- *     - Fixed compiler warnings
- *
- *    Revision 1.9  2001/10/25 03:40:48  david__schmidt
- *    Change in porting tactics: OS/2's EMX porting layer doesn't allow multiple
- *    threads to call select() simultaneously.  So, it's time to do a real, live,
- *    native OS/2 port.  See defines for __EMX__ (the porting layer) vs. __OS2__
- *    (native). Both versions will work, but using __OS2__ offers multi-threading.
- *
- *    Revision 1.8  2001/09/13 20:10:12  jongfoster
- *    Fixing missing #include under Windows
- *
- *    Revision 1.7  2001/09/12 17:58:26  steudten
- *
- *    add #include <string.h>
- *
- *    Revision 1.6  2001/09/10 10:41:16  oes
- *    Added #include in.h
- *
- *    Revision 1.5  2001/07/29 18:47:57  jongfoster
- *    Adding missing #include project.h
- *
- *    Revision 1.4  2001/07/24 12:47:06  oes
- *    Applied BeOS support update by Eugenia
- *
  *    Revision 1.3  2001/06/09 10:55:28  jongfoster
  *    Changing BUFSIZ ==> BUFFER_SIZE
  *
@@ -118,13 +59,7 @@ const char gateway_rcs[] = "$Id: gateway.c,v 1.14 2002/03/24 13:25:43 swa Exp $"
 
 #include <stdio.h>
 #include <sys/types.h>
-
-#ifndef _WIN32
-#include <netinet/in.h>
-#endif
-
 #include <errno.h>
-#include <string.h>
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -134,11 +69,6 @@ const char gateway_rcs[] = "$Id: gateway.c,v 1.14 2002/03/24 13:25:43 swa Exp $"
 #include <netdb.h>
 #endif /* def __BEOS__ */
 
-#ifdef __OS2__
-#include <utils.h>
-#endif /* def __OS2__ */
-
-#include "project.h"
 #include "jcc.h"
 #include "errlog.h"
 #include "jbsockets.h"
@@ -146,10 +76,10 @@ const char gateway_rcs[] = "$Id: gateway.c,v 1.14 2002/03/24 13:25:43 swa Exp $"
 
 const char gateway_h_rcs[] = GATEWAY_H_VERSION;
 
-static jb_socket socks4_connect(const struct forward_spec * fwd,
-                                const char * target_host,
-                                int target_port,
-                                struct client_state *csp);
+static int socks4_connect(const struct forward_spec * fwd, 
+                          const char * target_host,
+                          int target_port,
+                          struct client_state *csp);
 
 
 #define SOCKS_REQUEST_GRANTED          90
@@ -193,9 +123,9 @@ static const char socks_userid[] = "anonymous";
  * Returns     :  -1 => failure, else it is the socket file descriptor.
  *
  *********************************************************************/
-jb_socket forwarded_connect(const struct forward_spec * fwd,
-                            struct http_request *http,
-                            struct client_state *csp)
+int forwarded_connect(const struct forward_spec * fwd, 
+                      struct http_request *http, 
+                      struct client_state *csp)
 {
    const char * dest_host;
    int dest_port;
@@ -228,7 +158,7 @@ jb_socket forwarded_connect(const struct forward_spec * fwd,
          /* Should never get here */
          log_error(LOG_LEVEL_FATAL, "SOCKS4 impossible internal error - bad SOCKS type.");
          errno = EINVAL;
-         return(JB_INVALID_SOCKET);
+         return(-1);
    }
 }
 
@@ -251,19 +181,19 @@ jb_socket forwarded_connect(const struct forward_spec * fwd,
  * Returns     :  -1 => failure, else a socket file descriptor.
  *
  *********************************************************************/
-static jb_socket socks4_connect(const struct forward_spec * fwd,
-                                const char * target_host,
-                                int target_port,
-                                struct client_state *csp)
+static int socks4_connect(const struct forward_spec * fwd, 
+                          const char * target_host,
+                          int target_port,
+                          struct client_state *csp)
 {
    int web_server_addr;
-   char cbuf[BUFFER_SIZE];
-   char sbuf[BUFFER_SIZE];
+   unsigned char cbuf[BUFFER_SIZE];
+   unsigned char sbuf[BUFFER_SIZE];
    struct socks_op    *c = (struct socks_op    *)cbuf;
    struct socks_reply *s = (struct socks_reply *)sbuf;
-   size_t n;
-   size_t csiz;
-   jb_socket sfd;
+   int n;
+   int csiz;
+   int sfd;
    int err = 0;
    char *errstr;
 
@@ -282,7 +212,7 @@ static jb_socket socks4_connect(const struct forward_spec * fwd,
    if (err)
    {
       errno = EINVAL;
-      return(JB_INVALID_SOCKET);
+      return(-1);
    }
 
    /* build a socks request for connection to the web server */
@@ -295,11 +225,6 @@ static jb_socket socks4_connect(const struct forward_spec * fwd,
    {
       case SOCKS_4:
          web_server_addr = htonl(resolve_hostname_to_ip(target_host));
-         if (web_server_addr == INADDR_NONE)
-         {
-            log_error(LOG_LEVEL_CONNECT, "socks4_connect: could not resolve target host %s", target_host);
-            return(JB_INVALID_SOCKET);
-         }
          break;
       case SOCKS_4A:
          web_server_addr = 0x00000001;
@@ -307,16 +232,16 @@ static jb_socket socks4_connect(const struct forward_spec * fwd,
          if (n > sizeof(cbuf))
          {
             errno = EINVAL;
-            return(JB_INVALID_SOCKET);
+            return(-1);
          }
-         strcpy(cbuf + csiz, target_host);
+         strcpy(((char *)cbuf) + csiz, target_host);
          csiz = n;
          break;
       default:
          /* Should never get here */
          log_error(LOG_LEVEL_FATAL, "SOCKS4 impossible internal error - bad SOCKS type.");
          errno = EINVAL;
-         return(JB_INVALID_SOCKET);
+         return(-1);
    }
 
    c->vn          = 4;
@@ -331,23 +256,23 @@ static jb_socket socks4_connect(const struct forward_spec * fwd,
    /* pass the request to the socks server */
    sfd = connect_to(fwd->gateway_host, fwd->gateway_port, csp);
 
-   if (sfd == JB_INVALID_SOCKET)
+   if (sfd < 0)
    {
-      return(JB_INVALID_SOCKET);
+      return(-1);
    }
 
-   if (write_socket(sfd, (char *)c, csiz))
+   if ((n = write_socket(sfd, (char *)c, csiz)) != csiz)
    {
       log_error(LOG_LEVEL_CONNECT, "SOCKS4 negotiation write failed...");
       close_socket(sfd);
-      return(JB_INVALID_SOCKET);
+      return(-1);
    }
 
-   if (read_socket(sfd, sbuf, sizeof(sbuf)) != sizeof(*s))
+   if ((n = read_socket(sfd, sbuf, sizeof(sbuf))) != sizeof(*s))
    {
       log_error(LOG_LEVEL_CONNECT, "SOCKS4 negotiation read failed...");
       close_socket(sfd);
-      return(JB_INVALID_SOCKET);
+      return(-1);
    }
 
    switch (s->cd)
@@ -371,7 +296,7 @@ static jb_socket socks4_connect(const struct forward_spec * fwd,
          errno = EACCES;
          break;
       default:
-         errstr = cbuf;
+         errstr = (char *) cbuf;
          errno = ENOENT;
          sprintf(errstr,
                  "SOCKS request rejected for reason code %d\n", s->cd);
@@ -380,7 +305,7 @@ static jb_socket socks4_connect(const struct forward_spec * fwd,
    log_error(LOG_LEVEL_CONNECT, "socks4_connect: %s ...", errstr);
 
    close_socket(sfd);
-   return(JB_INVALID_SOCKET);
+   return(-1);
 
 }
 

@@ -1,6 +1,6 @@
-#ifndef MISCUTIL_H_INCLUDED
-#define MISCUTIL_H_INCLUDED
-#define MISCUTIL_H_VERSION "$Id: miscutil.h,v 1.19 2002/03/24 13:25:43 swa Exp $"
+#ifndef _MISCUTIL_H
+#define _MISCUTIL_H
+#define MISCUTIL_H_VERSION "$Id: miscutil.h,v 1.7 2001/06/05 22:32:01 jongfoster Exp $"
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/miscutil.h,v $
@@ -11,7 +11,7 @@
  *                really fit in any other file.
  *
  * Copyright   :  Written by and Copyright (C) 2001 the SourceForge
- *                Privoxy team. http://www.privoxy.org/
+ *                IJBSWA team.  http://ijbswa.sourceforge.net
  *
  *                Based on the Internet Junkbuster originally written
  *                by and Copyright (C) 1997 Anonymous Coders and 
@@ -37,53 +37,6 @@
  *
  * Revisions   :
  *    $Log: miscutil.h,v $
- *    Revision 1.19  2002/03/24 13:25:43  swa
- *    name change related issues
- *
- *    Revision 1.18  2002/03/07 03:46:17  oes
- *    Fixed compiler warnings
- *
- *    Revision 1.17  2002/03/04 18:28:32  oes
- *    Deleted deletePidFile, played syleguide police
- *
- *    Revision 1.16  2002/01/21 00:53:36  jongfoster
- *    Adding string_join()
- *
- *    Revision 1.15  2001/12/30 14:07:32  steudten
- *    - Add signal handling (unix)
- *    - Add SIGHUP handler (unix)
- *    - Add creation of pidfile (unix)
- *    - Add action 'top' in rc file (RH)
- *    - Add entry 'SIGNALS' to manpage
- *    - Add exit message to logfile (unix)
- *
- *    Revision 1.14  2001/11/05 21:43:48  steudten
- *    Add global var 'basedir' for unix os.
- *
- *    Revision 1.13  2001/10/29 03:48:10  david__schmidt
- *    OS/2 native needed a snprintf() routine.  Added one to miscutil, brackedted
- *    by and __OS2__ ifdef.
- *
- *    Revision 1.12  2001/10/23 21:27:50  jongfoster
- *    Standardising error codes in string_append
- *    make_path() no longer adds '\\' if the dir already ends in '\\' (this
- *    is just copying a UNIX-specific fix to the Windows-specific part)
- *
- *    Revision 1.11  2001/10/14 22:02:57  jongfoster
- *    New function string_append() which is like strsav(), but running
- *    out of memory isn't automatically FATAL.
- *
- *    Revision 1.10  2001/09/20 13:34:09  steudten
- *
- *    change long to int for prototype hash_string()
- *
- *    Revision 1.9  2001/07/29 18:43:08  jongfoster
- *    Changing #ifdef _FILENAME_H to FILENAME_H_INCLUDED, to conform to
- *    ANSI C rules.
- *
- *    Revision 1.8  2001/06/29 13:32:14  oes
- *    Removed logentry from cancelled commit
- *
  *    Revision 1.7  2001/06/05 22:32:01  jongfoster
  *    New function make_path() to splice directory and file names together.
  *
@@ -134,20 +87,13 @@
  *********************************************************************/
 
 
-#include "project.h"
-
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
-extern const char *basedir;
-extern void *zalloc(size_t size);
+extern void *zalloc(int size);
 
-#if defined(unix)
-extern void write_pid_file(void);
-#endif /* unix */
-
-extern unsigned int hash_string(const char* s);
+extern unsigned long hash_string(const char* s);
 
 extern char *safe_strerror(int err);
 
@@ -155,23 +101,17 @@ extern int strcmpic(const char *s1, const char *s2);
 extern int strncmpic(const char *s1, const char *s2, size_t n);
 
 extern char *strsav(char *old, const char *text_to_append);
-extern jb_err string_append(char **target_string, const char *text_to_append);
-extern jb_err string_join  (char **target_string,       char *text_to_append);
 
 extern char *chomp(char *string);
 extern int simplematch(char *pattern, char *text);
 
-extern char *bindup(const char *string, size_t len);
+extern char *bindup(const char *string, int n);
 
 extern char *make_path(const char * dir, const char * file);
 
 #ifdef __MINGW32__
 extern char *strdup(const char *s);
 #endif /* def __MINGW32__ */
-
-#ifdef __OS2__
-extern int snprintf(char *, size_t, const char *, /*args*/ ...);
-#endif /* def __OS2__ */
 
 /* Revision control strings from this header and associated .c file */
 extern const char miscutil_rcs[];
@@ -181,7 +121,7 @@ extern const char miscutil_h_rcs[];
 }
 #endif
 
-#endif /* ndef MISCUTIL_H_INCLUDED */
+#endif /* ndef _MISCUTIL_H */
 
 /*
   Local Variables:

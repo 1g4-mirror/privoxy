@@ -1,6 +1,6 @@
 ##########################################################
 #
-# "Untrusted" Error Output template for Privoxy.
+# "Untrusted" Error Output template for junkbuster 2.9.x.
 #
 #
 # USING HTML TEMPLATES:
@@ -15,7 +15,7 @@
 # - Each item in the below list of exported symbols will
 #   be replaced by dynamically generated text, if they
 #   are enclosed in '@'-characters. E.g. The string @version@
-#   will be replaced by the version number of Privoxy.
+#   will be replaced by the version number of Junkbuster.
 #
 # - One special application of this is to make whole blocks
 #   of the HTML template disappear if the condition <name>
@@ -49,10 +49,16 @@
 #
 #  hostport:
 #    The host and port part of the request that lead to this problem
+#  hostport-html:
+#    The host and port part of the request that lead to this problem, HTML-encoded
 #  path:
 #    The path part of the request that lead to this problem
+#  path-html:
+#    The path part of the request that lead to this problem, HTML-encoded
 #  referrer:
 #    The referrer of the request that lead to this problem
+#  referrer-html:
+#    The referrer of the request that lead to this problem, HTML-encoded
 #  trusted-referrers:
 #    An HTML-formatted list of referrers that are marked as trusted in
 #    the trustfile
@@ -63,20 +69,12 @@
 #
 #  unstable:
 #    This is an alpha or beta release of the proxy software
-#  have-adminaddr-info:
-#    An e-mail address for the local Privoxy adminstrator has
-#    been specified and is available through the "admin-address"
-#    symbol
 #  have-proxy-info:
 #    A URL for online documentation about this proxy has been
 #    specified and is available through the "proxy-info-url"
 #    symbol
-#  have-help-info:
-#    If either have-proxy-info is true or have-adminaddr-info is
-#    true, have-help-info is true.  Used to conditionally include
-#    a grey box for any and all help info.
 #  force-support:
-#    Privoxy has been compiled with support for forced loading
+#    Junkbuster has been compiled with support for forced loading
 #    of blocked content. In that case, the symbol "force-prefix" is
 #    avaiable, which translates to the FORCE_PREFIX  
 #  have-trust-info:
@@ -88,7 +86,7 @@
 <html>
 
 <head>
-  <title>Untrusted request (Privoxy@@my-hostname@)</title>
+  <title>Untrusted request (Junkbuster@@my-hostname@)</title>
   <style type="text/css">
     BODY, P, H1, H2, UL, OL, LI { font-family: Helvetica, Helv, Arial, Sans-Serif, sans-serif }
   </style>
@@ -103,17 +101,35 @@
         <p><font size=+5 color=#ffffff><b>UNTRUSTED</b></font></p>
       </td>
       <td bgcolor=#dddddd width=100%>
-        <p><big><big><b>This is Privoxy (privacy enhancing proxy) @version@ on @my-hostname@ (@my-ip-address@), port @my-port@, @if-enabled-display-then@Enabled@else-not-enabled-display@Disabled@endif-enabled-display@</b></big></big></p>
+        <p><font size=+2><b>This is the Internet J</b></font><font size=+1><b>UNK<i></font><font color="red">BUSTER</font></i></b>
+          <font size=+2><b>@version@ on @my-hostname@ (@my-ip-address@), port @my-port@</b></font></p>
       </td>
     </tr>
+
+<!-- @if-unstable-start -->
+# This will only appear if CODE_STATUS is "alpha" or "beta". See configure.in
+    <tr>
+      <td bgcolor=#ffdddd colspan=2>
+        <p><b>Please note that this is a <font color=red>@code-status@</font> release,
+          of the proxy software, not intended for production systems!
+          <br>Use at your own risk. See the <a href="http://www.gnu.org/copyleft/gpl.html">license</a> for details.</b>
+        </p>
+
+        <p>Feel free to <a href=mailto:ijbswa-developers@lists.sourceforge.net>mail the developers</a>
+          with any problems you might have
+        </p>
+      </td>
+    </tr>
+<!-- if-unstable-end@ -->
+
 
     <tr>
       <td bgcolor=#eeeeee colspan=2>
         <h2>Request for untrusted URL</h2>
         <blockquote>
-          <p>Your request for <b>@hostport@@path@</b> was blocked,
+          <p>Your request for <b>@hostport-html@@path-html@</b> was blocked,
             because neither the request URL itself, nor its referrer
-            (<a href="@referrer@">@referrer@</a>) were trusted.
+            (<a href="@referrer@">@referrer-html@</a>) were trusted.
           </p>
 <!-- @if-force-support-start -->
           <p>(You can <a href="http://@hostport@@force-prefix@@path@">go there anyway</a>.)</p>
@@ -148,60 +164,24 @@
 
     <tr>
       <td bgcolor=#dddddd colspan=2>
-        <h2>More Privoxy:</h2>
+        <h2>More Junkbuster:</h2>
         <ul>@menu@</ul>
       </td>
     </tr>
 
-<!-- @if-unstable-start -->
-# This will only appear if CODE_STATUS is "alpha" or "beta". See configure.in
-    <tr>
-      <td bgcolor=#ffdddd colspan=2>
-        <p><b>Please note that this <font color=red>@code-status@</font> release
-          of the proxy software is not intended for production systems!
-          <br>Use at your own risk. See the <a href="http://www.gnu.org/copyleft/gpl.html">license</a> for details.</b>
-        </p>
- 	<p>
-<h2>Support and Service via Sourceforge</h2>
-<p>
-We value your feedback. However, to provide you with the best support,
-please note:
-<ul>
-  <li>Use the <a href="http://sourceforge.net/tracker/?group_id=11118&atid=211118">support forum</a> to get
-  help.</li>
-  <li>Submit bugs only thru our <a href="http://sourceforge.net/tracker/?group_id=11118&atid=111118">bug
-      forum</a>. Make sure that the bug has not yet been submitted.</li>
-  <li>Submit feature requests only thru our <a
-      href="http://sourceforge.net/tracker/?atid=361118&group_id=11118&func=browse">feature request forum</a>.</li>
-</ul>
-</p>
-<p>
-For any other issues, feel free to use the <a
-href="http://sourceforge.net/mail/?group_id=11118">mailing lists</a>.
-</p>
-      </td>
-    </tr>
-<!-- if-unstable-end@ -->
-
-<!-- @if-have-help-info-start -->
     <tr>
       <td bgcolor=#dddddd colspan=2>
-        <h2>Local Privoxy support:</h2>
+        <p>If you have any questions about this service,
 
 <!-- @if-have-proxy-info-start -->
-        <p>You can consult the <a href="@proxy-info-url@">online documentation</a> for more information about this Privoxy installation.         
+          consult the <a href="@proxy-info-url@">online documentation</a> or
 <!-- if-have-proxy-info-end@ -->
 
-<!-- @if-have-adminaddr-info-start -->
-        <p>Address e-mail questions about this service to
-          <a href=mailto:@admin-address@><code>@admin-address@</code></a>,
+          <a href=mailto:@admin-address@>send mail to <code>@admin-address@</code></a>
           who will be glad to help you.
-<!-- if-have-adminaddr-info-end@ -->
-
         </p>
       </td>
     </tr>
-<!-- if-have-help-info-end@ -->
 
   </table>
 

@@ -1,4 +1,4 @@
-const char list_rcs[] = "$Id: list.c,v 1.14 2002/03/24 13:25:43 swa Exp $";
+const char list_rcs[] = "$Id: list.c,v 1.4 2001/06/29 13:30:22 oes Exp $";
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/list.c,v $
@@ -8,13 +8,13 @@ const char list_rcs[] = "$Id: list.c,v 1.14 2002/03/24 13:25:43 swa Exp $";
  *                   `destroy_list', `enlist' and `list_to_text'
  *
  * Copyright   :  Written by and Copyright (C) 2001 the SourceForge
- *                Privoxy team. http://www.privoxy.org/
+ *                IJBSWA team.  http://ijbswa.sourceforge.net
  *
  *                Based on the Internet Junkbuster originally written
- *                by and Copyright (C) 1997 Anonymous Coders and
+ *                by and Copyright (C) 1997 Anonymous Coders and 
  *                Junkbusters Corporation.  http://www.junkbusters.com
  *
- *                This program is free software; you can redistribute it
+ *                This program is free software; you can redistribute it 
  *                and/or modify it under the terms of the GNU General
  *                Public License as published by the Free Software
  *                Foundation; either version 2 of the License, or (at
@@ -34,47 +34,6 @@ const char list_rcs[] = "$Id: list.c,v 1.14 2002/03/24 13:25:43 swa Exp $";
  *
  * Revisions   :
  *    $Log: list.c,v $
- *    Revision 1.14  2002/03/24 13:25:43  swa
- *    name change related issues
- *
- *    Revision 1.13  2002/03/07 03:46:17  oes
- *    Fixed compiler warnings
- *
- *    Revision 1.12  2001/10/25 03:40:48  david__schmidt
- *    Change in porting tactics: OS/2's EMX porting layer doesn't allow multiple
- *    threads to call select() simultaneously.  So, it's time to do a real, live,
- *    native OS/2 port.  See defines for __EMX__ (the porting layer) vs. __OS2__
- *    (native). Both versions will work, but using __OS2__ offers multi-threading.
- *
- *    Revision 1.11  2001/10/23 21:21:03  jongfoster
- *    New error handling - error codes are now jb_errs, not ints.
- *    Changed the way map() handles out-of-memory, to dramatically
- *    reduce the amount of error-checking clutter needed.
- *
- *    Revision 1.10  2001/09/16 17:30:24  jongfoster
- *    Fixing a compiler warning.
- *
- *    Revision 1.9  2001/09/16 13:20:29  jongfoster
- *    Rewrite of list library.  Now has seperate header and list_entry
- *    structures.  Also added a large sprinking of assert()s to the list
- *    code.
- *
- *    Revision 1.8  2001/08/07 14:00:20  oes
- *    Fixed comment
- *
- *    Revision 1.7  2001/08/05 16:06:20  jongfoster
- *    Modifiying "struct map" so that there are now separate header and
- *    "map_entry" structures.  This means that functions which modify a
- *    map no longer need to return a pointer to the modified map.
- *    Also, it no longer reverses the order of the entries (which may be
- *    important with some advanced template substitutions).
- *
- *    Revision 1.6  2001/07/31 14:44:51  oes
- *    list_to_text() now appends empty line at end
- *
- *    Revision 1.5  2001/06/29 21:45:41  oes
- *    Indentation, CRLF->LF, Tab-> Space
- *
  *    Revision 1.4  2001/06/29 13:30:22  oes
  *    - Added Convenience function enlist_unique_header(),
  *      which takes the Header name and value as separate
@@ -111,173 +70,22 @@ const char list_rcs[] = "$Id: list.c,v 1.14 2002/03/24 13:25:43 swa Exp $";
 
 #include "config.h"
 
-#ifndef _WIN32
-/* FIXME: The following headers are not needed for Win32.  Are they
- * needed on other platforms?
- */
 #include <stdio.h>
 #include <sys/types.h>
 #include <stdlib.h>
 #include <ctype.h>
-#endif
 #include <string.h>
 
-#if !defined(_WIN32) && !defined(__OS2__)
+#ifndef _WIN32
 #include <unistd.h>
 #endif
 
-#include <assert.h>
-
 #include "project.h"
+#include "jcc.h"
 #include "list.h"
 #include "miscutil.h"
 
 const char list_h_rcs[] = LIST_H_VERSION;
-
-
-static int list_is_valid (const struct list *the_list);
-
-
-/*********************************************************************
- *
- * Function    :  list_init
- *
- * Description :  Create a new, empty list in user-allocated memory.
- *                Caller should allocate a "struct list" variable,
- *                then pass it to this function.
- *                (Implementation note:  Rather than calling this
- *                function, you can also just memset the memory to
- *                zero, e.g. if you have a larger structure you
- *                want to initialize quickly.  However, that isn't
- *                really good design.)
- *
- * Parameters  :
- *          1  :  the_list = pointer to list
- *
- * Returns     :  N/A
- *
- *********************************************************************/
-void init_list(struct list *the_list)
-{
-   memset(the_list, '\0', sizeof(*the_list));
-}
-
-
-/*********************************************************************
- *
- * Function    :  destroy_list
- *
- * Description :  Destroy a string list (opposite of list_init).
- *                On return, the memory used by the list entries has
- *                been freed, but not the memory used by the_list
- *                itself.  You should not re-use the_list without
- *                calling list_init().
- *
- *                (Implementation note:  You *can* reuse the_list
- *                without calling list_init(), but please don't.
- *                If you want to remove all entries from a list
- *                and still have a usable list, then use
- *                list_remove_all().)
- *
- * Parameters  :
- *          1  :  the_list = pointer to list
- *
- * Returns     :  N/A
- *
- *********************************************************************/
-void destroy_list (struct list *the_list)
-{
-   struct list_entry *cur_entry, *next_entry;
-
-   assert(the_list);
-
-   for (cur_entry = the_list->first; cur_entry ; cur_entry = next_entry)
-   {
-      next_entry = cur_entry->next;
-      freez(cur_entry->str);
-      free(cur_entry);
-   }
-
-   the_list->first = NULL;
-   the_list->last = NULL;
-}
-
-
-/*********************************************************************
- *
- * Function    :  list_is_valid
- *
- * Description :  Check that a string list is valid.  The intended
- *                usage is "assert(list_is_valid(the_list))".
- *                Currently this checks that "the_list->last"
- *                is correct, and that the list dosn't contain
- *                circular references.  It is likely to crash if
- *                it's passed complete garbage.
- *
- * Parameters  :
- *          1  :  the_list = pointer to list.  Must be non-null.
- *
- * Returns     :  1 if list is valid, 0 otherwise.
- *
- *********************************************************************/
-static int list_is_valid (const struct list *the_list)
-{
-   /*
-    * If you don't want this check, just change the line below
-    * from "#if 1" to "#if 0".
-    */
-#if 1
-   const struct list_entry *cur_entry;
-   const struct list_entry *last_entry = NULL;
-   int length = 0;
-
-   assert(the_list);
-
-   for (cur_entry = the_list->first; cur_entry ; cur_entry = cur_entry->next)
-   {
-      last_entry = cur_entry;
-
-      if (cur_entry->str)
-      {
-         /*
-          * Just check that this string can be accessed - i.e. it's a valid
-          * pointer.
-          */
-         strlen(cur_entry->str);
-      }
-
-      /*
-       * Check for looping back to first
-       */
-      if ((length != 0) && (cur_entry == the_list->first))
-      {
-         return 0;
-      }
-
-      /*
-       * Arbitrarily limit length to prevent infinite loops.
-       */
-      if (++length > 1000)
-      {
-         return 0;
-      }
-
-      /*
-       * Check this isn't marked as the last entry, unless of course it's
-       * *really* the last entry.
-       */
-      if ((the_list->last == cur_entry) && (cur_entry->next != NULL))
-      {
-         /* This is the last entry, but there's data after it !!?? */
-         return 0;
-      }
-   }
-
-   return (the_list->last == last_entry);
-#else
-   return 1;
-#endif
-}
 
 /*********************************************************************
  *
@@ -286,51 +94,32 @@ static int list_is_valid (const struct list *the_list)
  * Description :  Append a string into a specified string list.
  *
  * Parameters  :
- *          1  :  the_list = pointer to list
+ *          1  :  header = pointer to list 'dummy' header
  *          2  :  str = string to add to the list (maybe NULL)
  *
- * Returns     :  JB_ERR_OK on success
- *                JB_ERR_MEMORY on out-of-memory error.
- *                On error, the_list will be unchanged.
+ * Returns     :  N/A
  *
  *********************************************************************/
-jb_err enlist(struct list *the_list, const char *str)
+void enlist(struct list *header, const char *str)
 {
-   struct list_entry *cur;
+   struct list *cur = (struct list *)malloc(sizeof(*cur));
+   struct list *last;
 
-   assert(the_list);
-   assert(list_is_valid(the_list));
-
-   if (NULL == (cur = (struct list_entry *)zalloc(sizeof(*cur))))
+   if (cur)
    {
-      return JB_ERR_MEMORY;
-   }
+      cur->str  = (str ? strdup(str) : NULL);
+      cur->next = NULL;
 
-   if (str)
-   {
-      if (NULL == (cur->str = strdup(str)))
+      last = header->last;
+      if (last == NULL)
       {
-         free(cur);
-         return JB_ERR_MEMORY;
+         last = header;
       }
-   }
-   /* else { cur->str = NULL; }  - implied by zalloc */
 
-   /* cur->next = NULL;  - implied by zalloc */
-
-   if (the_list->last)
-   {
-      the_list->last->next = cur;
-      the_list->last = cur;
-   }
-   else
-   {
-      the_list->first = cur;
-      the_list->last = cur;
+      last->next   = cur;
+      header->last = cur;
    }
 
-   assert(list_is_valid(the_list));
-   return JB_ERR_OK;
 }
 
 
@@ -342,46 +131,28 @@ jb_err enlist(struct list *the_list, const char *str)
  *                string list.
  *
  * Parameters  :
- *          1  :  the_list = pointer to list
+ *          1  :  header = pointer to list 'dummy' header
  *          2  :  str = string to add to the list (maybe NULL)
  *
- * Returns     :  JB_ERR_OK on success
- *                JB_ERR_MEMORY on out-of-memory error.
- *                On error, the_list will be unchanged.
+ * Returns     :  N/A
  *
  *********************************************************************/
-jb_err enlist_first(struct list *the_list, const char *str)
+void enlist_first(struct list *header, const char *str)
 {
-   struct list_entry *cur;
+   struct list *cur = (struct list *)malloc(sizeof(*cur));
 
-   assert(the_list);
-   assert(list_is_valid(the_list));
-
-   if (NULL == (cur = (struct list_entry *)zalloc(sizeof(*cur))))
+   if (cur)
    {
-      return JB_ERR_MEMORY;
-   }
+      cur->str  = (str ? strdup(str) : NULL);
+      cur->next = header->next;
 
-   if (str)
-   {
-      if (NULL == (cur->str = strdup(str)))
+      header->next = cur;
+      if (header->last == NULL)
       {
-         free(cur);
-         return JB_ERR_MEMORY;
+         header->last = cur;
       }
    }
-   /* else { cur->str = NULL; }  - implied by zalloc */
 
-   cur->next = the_list->first;
-
-   the_list->first = cur;
-   if (the_list->last == NULL)
-   {
-      the_list->last = cur;
-   }
-
-   assert(list_is_valid(the_list));
-   return JB_ERR_OK;
 }
 
 
@@ -391,59 +162,49 @@ jb_err enlist_first(struct list *the_list, const char *str)
  *
  * Description :  Append a string into a specified string list,
  *                if & only if it's not there already.
- *                If the num_significant_chars argument is nonzero,
- *                only compare up to the nth character.
+ *                If the n argument is nonzero, only compare up to
+ *                the nth character. 
  *
  * Parameters  :
- *          1  :  the_list = pointer to list
- *          2  :  str = string to add to the list
- *          3  :  num_significant_chars = number of chars to use
- *                for uniqueness test, or 0 to require an exact match.
+ *          1  :  header = pointer to list 'dummy' header
+ *          2  :  str = string to add to the list (maybe NULL)
+ *          3  :  n = number of chars to use for uniqueness test
  *
- * Returns     :  JB_ERR_OK on success
- *                JB_ERR_MEMORY on out-of-memory error.
- *                On error, the_list will be unchanged.
- *                "Success" does not indicate whether or not the
- *                item was already in the list.
+ * Returns     :  N/A
  *
  *********************************************************************/
-jb_err enlist_unique(struct list *the_list, const char *str,
-                     size_t num_significant_chars)
+void enlist_unique(struct list *header, const char *str, int n)
 {
-   struct list_entry *cur_entry;
+   struct list *last;
+   struct list *cur = header->next;
 
-   assert(the_list);
-   assert(list_is_valid(the_list));
-   assert(str);
-   assert(num_significant_chars >= 0);
-   assert(num_significant_chars <= strlen(str));
-
-   if (num_significant_chars > 0)
+   while (cur != NULL)
    {
-      for (cur_entry = the_list->first; cur_entry != NULL; cur_entry = cur_entry->next)
+      if ((cur->str != NULL) && (
+         (n && (0 == strncmp(str, cur->str, n))) || 
+         (!n && (0 == strcmp(str, cur->str)))))
       {
-         if ( (cur_entry->str != NULL)
-           && (0 == strncmp(str, cur_entry->str, num_significant_chars)))
-         {
-            /* Already there */
-            return JB_ERR_OK;
-         }
+         /* Already there */
+         return;
       }
-   }
-   else
-   {
-      /* Test whole string */
-      for (cur_entry = the_list->first; cur_entry != NULL; cur_entry = cur_entry->next)
-      {
-         if ( (cur_entry->str != NULL) && (0 == strcmp(str, cur_entry->str)))
-         {
-            /* Already there */
-            return JB_ERR_OK;
-         }
-      }
+      cur = cur->next;
    }
 
-   return enlist(the_list, str);
+   cur = (struct list *)malloc(sizeof(*cur));
+
+   if (cur != NULL)
+   {
+      cur->str  = (str ? strdup(str) : NULL); /* FIXME check retval */
+      cur->next = NULL;
+
+      last = header->last;
+      if (last == NULL)
+      {
+         last = header;
+      }
+      last->next   = cur;
+      header->last = cur;
+   }
 }
 
 
@@ -456,84 +217,80 @@ jb_err enlist_unique(struct list *the_list, const char *str,
  *                if & only if there isn't already a header with that name.
  *
  * Parameters  :
- *          1  :  the_list = pointer to list
- *          2  :  name = HTTP header name (e.g. "Content-type")
- *          3  :  value = HTTP header value (e.g. "text/html")
+ *          1  :  header = pointer to list 'dummy' header
+ *          2  :  first = first string to add to the list (maybe NULL)
+ *          3  :  second = number of chars to use for uniqueness test
  *
- * Returns     :  JB_ERR_OK on success
- *                JB_ERR_MEMORY on out-of-memory error.
- *                On error, the_list will be unchanged.
- *                "Success" does not indicate whether or not the
- *                header was already in the list.
+ * Returns     :  N/A
  *
  *********************************************************************/
-jb_err enlist_unique_header(struct list *the_list, const char *name,
-                            const char *value)
+void enlist_unique_header(struct list *header, const char *name, const char *value)
 {
-   size_t length;
-   jb_err result;
-   char *str;
+   struct list *last;
+   struct list *cur = header->next;
+   int length;
+   char *dummy;
 
-   assert(the_list);
-   assert(list_is_valid(the_list));
-   assert(name);
-   assert(value);
+   if (name == NULL || value == NULL) return;
 
-   length = strlen(name) + 2;
-   if (NULL == (str = (char *)malloc(length + strlen(value) + 1)))
+   dummy = strdup(name);
+   dummy = strsav(dummy, ": ");
+   length = strlen(dummy);
+
+   while (cur != NULL)
    {
-      return JB_ERR_MEMORY;
+      if ((cur->str != NULL) && 
+   		(0 == strncmp(dummy, cur->str, length)))
+      {
+         /* Already there */
+         return;
+      }
+      cur = cur->next;
    }
-   strcpy(str, name);
-   str[length - 2] = ':';
-   str[length - 1] = ' ';
-   strcpy(str + length, value);
 
-   result = enlist_unique(the_list, str, length);
+   cur = (struct list *)malloc(sizeof(*cur));
 
-   free(str);
+   if (cur != NULL)
+   {
+      cur->str  = strsav(dummy, value);
+      cur->next = NULL;
 
-   assert(list_is_valid(the_list));
-
-   return result;
-
+      last = header->last;
+      if (last == NULL)
+      {
+         last = header;
+      }
+      last->next   = cur;
+      header->last = cur;
+   }
 }
 
 
 /*********************************************************************
  *
- * Function    :  list_remove_all
+ * Function    :  destroy_list
  *
- * Description :  Remove all entries from a list.  On return, the_list
- *                is a valid, empty list.  Note that this is similar
- *                to destroy_list(), but the difference is that this
- *                function guarantees that the list structure is still
- *                valid after the call.
+ * Description :  Destroy a string list (opposite of enlist)
  *
  * Parameters  :
- *          1  :  the_list = pointer to list
+ *          1  :  header = pointer to list 'dummy' header
  *
  * Returns     :  N/A
  *
  *********************************************************************/
-void list_remove_all(struct list *the_list)
+void destroy_list(struct list *header)
 {
-   struct list_entry *cur_entry;
-   struct list_entry *next_entry;
+   struct list *p, *n;
 
-   assert(the_list);
-   assert(list_is_valid(the_list));
-
-   for (cur_entry = the_list->first; cur_entry ; cur_entry = next_entry)
+   for (p = header->next; p ; p = n)
    {
-      next_entry = cur_entry->next;
-      freez(cur_entry->str);
-      free(cur_entry);
+      n = p->next;
+      freez(p->str);
+      free(p);
    }
 
-   the_list->first = the_list->last = NULL;
+   memset(header, '\0', sizeof(*header));
 
-   assert(list_is_valid(the_list));
 }
 
 
@@ -541,56 +298,52 @@ void list_remove_all(struct list *the_list)
  *
  * Function    :  list_to_text
  *
- * Description :  "Flatten" a string list into 1 long \r\n delimited string,
- *                adding an empty line at the end.  NULL entries are ignored.
- *                This function does not change the_list.
+ * Description :  "Flaten" a string list into 1 long \r\n delimited string.
  *
  * Parameters  :
- *          1  :  the_list = pointer to list
+ *          1  :  h = pointer to list 'dummy' header
  *
  * Returns     :  NULL on malloc error, else new long string.
- *                Caller must free() it.
  *
  *********************************************************************/
-char *list_to_text(const struct list *the_list)
+char *list_to_text(struct list *h)
 {
-   struct list_entry *cur_entry;
+   struct list *p;
    char *ret = NULL;
    char *s;
-   size_t size = 2;
+   int size;
 
-   assert(the_list);
-   assert(list_is_valid(the_list));
+   size = 0;
 
-   for (cur_entry = the_list->first; cur_entry ; cur_entry = cur_entry->next)
+   for (p = h->next; p ; p = p->next)
    {
-      if (cur_entry->str)
+      if (p->str)
       {
-         size += strlen(cur_entry->str) + 2;
+         size += strlen(p->str) + 2;
       }
    }
 
    if ((ret = (char *)malloc(size + 1)) == NULL)
    {
-      return NULL;
+      return(NULL);
    }
 
    ret[size] = '\0';
 
    s = ret;
 
-   for (cur_entry = the_list->first; cur_entry ; cur_entry = cur_entry->next)
+   for (p = h->next; p ; p = p->next)
    {
-      if (cur_entry->str)
+      if (p->str)
       {
-         strcpy(s, cur_entry->str);
+         strcpy(s, p->str);
          s += strlen(s);
          *s++ = '\r'; *s++ = '\n';
       }
    }
-   *s++ = '\r'; *s++ = '\n';
 
-   return ret;
+   return(ret);
+
 }
 
 
@@ -601,54 +354,36 @@ char *list_to_text(const struct list *the_list)
  * Description :  Remove a string from a specified string list.
  *
  * Parameters  :
- *          1  :  the_list = pointer to list
- *          2  :  str = string to remove from the list - non-NULL
+ *          1  :  header = pointer to list 'dummy' header
+ *          2  :  str = string to remove from the list
  *
  * Returns     :  Number of times it was removed.
  *
  *********************************************************************/
-int list_remove_item(struct list *the_list, const char *str)
+int list_remove_item(struct list *header, const char *str)
 {
-   struct list_entry *prev = NULL;
-   struct list_entry *cur;
-   struct list_entry *next;
+   struct list *prev = header;
+   struct list *cur = prev->next;
    int count = 0;
-
-   assert(the_list);
-   assert(list_is_valid(the_list));
-   assert(str);
-
-   cur = the_list->first;
 
    while (cur != NULL)
    {
-      next = cur->next;
-
       if ((cur->str != NULL) && (0 == strcmp(str, cur->str)))
       {
          count++;
 
-         if (prev != NULL)
-         {
-            prev->next = next;
-         }
-         else
-         {
-            the_list->first = next;
-         }
-         free((char *)cur->str);
+         prev->next = cur->next;
+         free(cur->str);
          free(cur);
       }
       else
       {
          prev = cur;
       }
-      cur = next;
+      cur = prev->next;
    }
 
-   the_list->last = prev;
-
-   assert(list_is_valid(the_list));
+   header->last = prev;
 
    return count;
 }
@@ -671,24 +406,17 @@ int list_remove_item(struct list *the_list, const char *str)
  *********************************************************************/
 int list_remove_list(struct list *dest, const struct list *src)
 {
-   struct list_entry *cur;
+   struct list *cur = src->next;
    int count = 0;
 
-   assert(src);
-   assert(dest);
-   assert(list_is_valid(src));
-   assert(list_is_valid(dest));
-
-   for (cur = src->first; cur != NULL; cur = cur->next)
+   while (cur != NULL)
    {
       if (cur->str != NULL)
       {
          count += list_remove_item(dest, cur->str);
       }
+      cur = cur->next;
    }
-
-   assert(list_is_valid(src));
-   assert(list_is_valid(dest));
 
    return count;
 }
@@ -698,96 +426,35 @@ int list_remove_list(struct list *dest, const struct list *src)
  *
  * Function    :  list_duplicate
  *
- * Description :  Copy a string list
+ * Description :  Duplicate a string list
  *
  * Parameters  :
- *          1  :  dest = Destination list.  Must be a valid list.
- *                       All existing entries will be removed.
- *          1  :  src = pointer to source list for copy.
+ *          1  :  dest = pointer to destination for copy.  Caller allocs.
+ *          2  :  src = pointer to source for copy.
  *
- * Returns     :  JB_ERR_OK on success
- *                JB_ERR_MEMORY on out-of-memory error.
- *                On error, dest will be empty.
+ * Returns     :  N/A
  *
  *********************************************************************/
-jb_err list_duplicate(struct list *dest, const struct list *src)
+void list_duplicate(struct list *dest, const struct list *src)
 {
-   struct list_entry * cur_src;
-   struct list_entry * cur_dest;
+   struct list * cur_src = src->next;
+   struct list * cur_dest = dest;
 
-   assert(src);
-   assert(dest);
-   assert(list_is_valid(src));
-   assert(list_is_valid(dest));
+   memset(dest, '\0', sizeof(*dest));
 
-   list_remove_all(dest);
-
-   /* Need to process first entry specially so we can set dest->first */
-   cur_src = src->first;
-   if (cur_src)
+   while (cur_src)
    {
-      cur_dest = dest->first = (struct list_entry *)zalloc(sizeof(*cur_dest));
+      cur_dest = cur_dest->next = (struct list *)zalloc(sizeof(*cur_dest));
       if (cur_dest == NULL)
       {
-         destroy_list(dest);
-
-         assert(list_is_valid(src));
-         assert(list_is_valid(dest));
-
-         return JB_ERR_MEMORY;
+         return;
       }
-
-      if (cur_src->str)
-      {
-         cur_dest->str = strdup(cur_src->str);
-         if (cur_dest->str == NULL)
-         {
-            destroy_list(dest);
-
-            assert(list_is_valid(src));
-            assert(list_is_valid(dest));
-
-            return JB_ERR_MEMORY;
-         }
-      }
-      /* else { cur_dest->str = NULL; }  - implied by zalloc */
-
-      /* Now process the rest */
-      for (cur_src = cur_src->next; cur_src; cur_src = cur_src->next)
-      {
-         cur_dest = cur_dest->next = (struct list_entry *)zalloc(sizeof(*cur_dest));
-         if (cur_dest == NULL)
-         {
-            destroy_list(dest);
-
-            assert(list_is_valid(src));
-            assert(list_is_valid(dest));
-
-            return JB_ERR_MEMORY;
-         }
-         if (cur_src->str)
-         {
-            cur_dest->str = strdup(cur_src->str);
-            if (cur_dest->str == NULL)
-            {
-               destroy_list(dest);
-
-               assert(list_is_valid(src));
-               assert(list_is_valid(dest));
-
-               return JB_ERR_MEMORY;
-            }
-         }
-         /* else { cur_dest->str = NULL; }  - implied by zalloc */
-      }
-
-      dest->last = cur_dest;
+      cur_dest->str = strdup(cur_src->str);
+      cur_src = cur_src->next;
    }
 
-   assert(list_is_valid(src));
-   assert(list_is_valid(dest));
+   dest->last = cur_dest;
 
-   return JB_ERR_OK;
 }
 
 
@@ -799,118 +466,21 @@ jb_err list_duplicate(struct list *dest, const struct list *src)
  *                Duplicate items are not added.
  *
  * Parameters  :
- *          1  :  dest = pointer to destination list for merge.
+ *          1  :  dest = pointer to destination for merge.  Caller allocs.
  *          2  :  src = pointer to source for merge.
- *
- * Returns     :  JB_ERR_OK on success
- *                JB_ERR_MEMORY on out-of-memory error.
- *                On error, some (but not all) of src might have
- *                been copied into dest.
- *
- *********************************************************************/
-jb_err list_append_list_unique(struct list *dest, const struct list *src)
-{
-   struct list_entry * cur;
-
-   assert(src);
-   assert(dest);
-   assert(list_is_valid(src));
-   assert(list_is_valid(dest));
-
-   for (cur = src->first; cur; cur = cur->next)
-   {
-      if (cur->str)
-      {
-         if (enlist_unique(dest, cur->str, 0))
-         {
-            assert(list_is_valid(src));
-            assert(list_is_valid(dest));
-
-            return JB_ERR_MEMORY;
-         }
-      }
-   }
-
-   assert(list_is_valid(src));
-   assert(list_is_valid(dest));
-
-   return JB_ERR_OK;
-}
-
-
-/*********************************************************************
- *
- * Function    :  list_is_empty
- *
- * Description :  Test whether a list is empty.  Does not change the list.
- *
- * Parameters  :
- *          1  :  the_list = pointer to list to test.
- *
- * Returns     :  Nonzero iff the list contains no entries.
- *
- *********************************************************************/
-int list_is_empty(const struct list *the_list)
-{
-   assert(the_list);
-   assert(list_is_valid(the_list));
-
-   return (the_list->first == NULL);
-}
-
-
-/*********************************************************************
- *
- * Function    :  new_map
- *
- * Description :  Create a new, empty map.
- *
- * Parameters  :  N/A
- *
- * Returns     :  A new, empty map, or NULL if out of memory.
- *
- *********************************************************************/
-struct map *new_map(void)
-{
-   return (struct map *) zalloc(sizeof(struct map));
-}
-
-
-/*********************************************************************
- *
- * Function    :  free_map
- *
- * Description :  Free the memory occupied by a map and its
- *                depandant strings
- *
- * Parameters  :
- *          1  :  the_map = map to be freed.  May be NULL.
  *
  * Returns     :  N/A
  *
  *********************************************************************/
-void free_map(struct map *the_map)
+void list_append_list_unique(struct list *dest, const struct list *src)
 {
-   struct map_entry *cur_entry;
-   struct map_entry *next_entry;
+   struct list * cur = src->next;
 
-   if (the_map == NULL)
+   while (cur)
    {
-      return;
+      enlist_unique(dest, cur->str, 0);
+      cur = cur->next;
    }
-
-   for (cur_entry = the_map->first; cur_entry != NULL; cur_entry = next_entry)
-   {
-      freez(cur_entry->name);
-      freez(cur_entry->value);
-
-      next_entry = cur_entry->next;
-      free(cur_entry);
-   }
-
-   the_map->first = the_map->last = NULL;
-
-   free(the_map);
 }
 
 
@@ -922,103 +492,34 @@ void free_map(struct map *the_map)
  *                given map.
  *
  *                Note: Since all strings will be free()d in free_map()
- *                      later, set the copy flags for constants or
+ *                      later, use the copy flags for constants or
  *                      strings that will be independantly free()d.
  *
- *                Note2: This function allows NULL parameters - it
- *                       returns JB_ERR_MEMORY in that case.
- *
- *                Note3: If this function returns JB_ERR_MEMORY,
- *                       it will free(name) unless you specify
- *                       name_needs_copying, and similarly it will
- *                       free(value) unless you specify
- *                       value_needs_copying.
- *
- *                Due to Note2 and Note3 above, the following code
- *                is legal, and will never crash or leak memory even
- *                if the system runs out of memory:
- *
- *                    err = map(mymap, "xyz", 1, html_encode(somestring), 0);
- *
- *                err will be set to JB_ERR_MEMORY if either call runs
- *                out-of-memory.  Without these features, you would
- *                need to check the return value of html_encode in the
- *                above example for NULL, which (at least) doubles the
- *                amount of error-checking code needed.
- *
  * Parameters  :
- *          1  :  the_map = map to add to
+ *          1  :  map = map to add to
  *          2  :  name = name to add
- *          3  :  name_needs_copying = flag set if a copy of name should be used
+ *          3  :  nc = flag set if a copy of name should be used
  *          4  :  value = value to add
- *          5  :  value_needs_copying = flag set if a copy of value should be used
+ *          5  :  vc = flag set if a copy of value should be used
  *
- * Returns     :  JB_ERR_OK on success
- *                JB_ERR_MEMORY on out-of-memory error.
+ * Returns     :  pointer to extended map, or NULL if failiure
  *
  *********************************************************************/
-jb_err map(struct map *the_map,
-           const char *name, int name_needs_copying,
-           const char *value, int value_needs_copying)
+struct map *map(struct map *map, char *name, int nc, char *value, int vc)
 {
-   struct map_entry *new_entry;
+   struct map *cur;
 
-   assert(the_map);
-
-   if ( (NULL == value)
-     || (NULL == name)
-     || (NULL == (new_entry = zalloc(sizeof(*new_entry)))) )
+   if (NULL == (cur = zalloc(sizeof(*cur))))
    {
-      if ((name != NULL) && (!name_needs_copying))
-      {
-          free((char *)name);
-      }
-      if ((value != NULL) && (!value_needs_copying))
-      {
-          free((char *)value);
-      }
-      return JB_ERR_MEMORY;
+      return(NULL);
    }
 
-   if (name_needs_copying)
-   {
-      if (NULL == (name = strdup(name)))
-      {
-         free(new_entry);
-         if (!value_needs_copying)
-         {
-             free((char *)value);
-         }
-         return JB_ERR_MEMORY;
-      }
-   }
+   cur->name  = nc ? strdup(name) : name;
+   cur->value = vc ? strdup(value) : value;
+   cur->next = map;
 
-   if (value_needs_copying)
-   {
-      if (NULL == (value = strdup(value)))
-      {
-         free((char *)name);
-         free(new_entry);
-         return JB_ERR_MEMORY;
-      }
-   }
+   return(cur);
 
-   new_entry->name = name;
-   new_entry->value = value;
-   /* new_entry->next = NULL;  - implied by zalloc */
-
-   if (the_map->last)
-   {
-      the_map->last->next = new_entry;
-      the_map->last = new_entry;
-   }
-   else
-   {
-      the_map->first = new_entry;
-      the_map->last = new_entry;
-   }
-
-   return JB_ERR_OK;
 }
 
 
@@ -1030,30 +531,55 @@ jb_err map(struct map *the_map,
  *                return its value
  *
  * Parameters  :
- *          1  :  the_map = map to look in
- *          2  :  name = name parameter to look for
+ *          1  :  name = name parameter to look for
  *
- * Returns     :  the value if found, else the empty string.
- *                Return value is alloced as part of the map, so
- *                it is freed when the map is destroyed.  Caller
- *                must not free or modify it.
+ * Returns     :  the value if found, else the empty string
  *
  *********************************************************************/
-const char *lookup(const struct map *the_map, const char *name)
+char *lookup(struct map *map, char *name)
 {
-   const struct map_entry *cur_entry;
+   struct map *p = map;
 
-   assert(the_map);
-   assert(name);
-
-   for (cur_entry = the_map->first; cur_entry != NULL; cur_entry = cur_entry->next)
+   while (p)
    {
-      if (!strcmp(name, cur_entry->name))
+      if (!strcmp(name, p->name))
       {
-         return cur_entry->value;
+         return p->value;
       }
+      p = p->next;
    }
    return "";
+
+}
+
+
+/*********************************************************************
+ *
+ * Function    :  free_map
+ *
+ * Description :  Free the memory occupied by a map and its
+ *                depandant strings
+ *
+ * Parameters  :
+ *          1  :  list = list to bee freed
+ *
+ * Returns     :  N/A
+ *
+ *********************************************************************/
+void free_map(struct map *map)
+{
+   struct map *p = map;
+
+   while (p)
+   {
+      free(p->name);
+      free(p->value);
+
+      map = p->next;
+      free(p);
+      p = map;
+   }
+
 }
 
 
