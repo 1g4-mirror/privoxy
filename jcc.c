@@ -1,7 +1,7 @@
-const char jcc_rcs[] = "$Id: jcc.c,v 1.91 2002/04/08 20:35:58 swa Exp $";
+const char jcc_rcs[] = "$Id: jcc.c,v 1.92 2002/05/08 16:00:46 oes Exp $";
 /*********************************************************************
  *
- * File        :  $Source: /cvsroot/ijbswa/current/jcc.c,v $
+ * File        :  $Source: /cvsroot/ijbswa//current/Attic/jcc.c,v $
  *
  * Purpose     :  Main file.  Contains main() method, main loop, and
  *                the main connection-handling function.
@@ -33,6 +33,19 @@ const char jcc_rcs[] = "$Id: jcc.c,v 1.91 2002/04/08 20:35:58 swa Exp $";
  *
  * Revisions   :
  *    $Log: jcc.c,v $
+ *    Revision 1.92  2002/05/08 16:00:46  oes
+ *    Chat's buffer handling:
+ *     - Fixed bug with unchecked out-of-mem conditions
+ *       while reading client request & server headers
+ *     - No longer predict if the buffer limit will be exceeded
+ *       in the next read -- check add_to_iob's new
+ *       return code. If buffer couldn't be extended
+ *       (policy or out-of-mem) while
+ *       - reading from client: abort
+ *       - reading server headers: send error page
+ *       - buffering server body for filter: flush,
+ *         and if that fails: send error page
+ *
  *    Revision 1.91  2002/04/08 20:35:58  swa
  *    fixed JB spelling
  *
@@ -968,14 +981,14 @@ static void chat(struct client_state *csp)
       {
          string_append(&http->cmd, http->path);
       }
-
       string_append(&http->cmd, " ");
       string_append(&http->cmd, http->ver);
 
       if (http->cmd == NULL)
       {
-         log_error(LOG_LEVEL_FATAL, "Out of memory rewiting SSL command");
+         log_error(LOG_LEVEL_FATAL, "Out of memory writing HTTP command");
       }
+      log_error(LOG_LEVEL_HEADER, "New HTTP Request-Line: %s", http->cmd);
    }
    enlist(csp->headers, http->cmd);
 
@@ -1029,14 +1042,18 @@ static void chat(struct client_state *csp)
       enlist(csp->headers, p);
       freez(p);
    }
+
    /*
     * We have a request. Now, check to see if we need to
     * intercept it, i.e. If ..
     */
 
    if (
-       /* a CGI call was detected and answered */
-       (NULL != (rsp = dispatch_cgi(csp)))
+       /* We may not forward the request by rfc2616 sect 14.31 */
+       (NULL != (rsp = direct_response(csp)))
+
+       /* or a CGI call was detected and answered */
+       || (NULL != (rsp = dispatch_cgi(csp)))
 
        /* or we are enabled and... */
        || (IS_ENABLED_AND (
@@ -1077,6 +1094,15 @@ static void chat(struct client_state *csp)
       free_http_response(rsp);
       return;
    }
+
+   hdr = sed(client_patterns, add_client_headers, csp);
+   if (hdr == NULL)
+   {
+      /* FIXME Should handle error properly */
+      log_error(LOG_LEVEL_FATAL, "Out of memory parsing client header");
+   }
+
+   list_remove_all(csp->headers);
 
    log_error(LOG_LEVEL_GPC, "%s%s", http->hostport, http->path);
 
@@ -1126,19 +1152,11 @@ static void chat(struct client_state *csp)
       }
 
       free_http_response(rsp);
+      freez(hdr);
       return;
    }
 
    log_error(LOG_LEVEL_CONNECT, "OK");
-
-   hdr = sed(client_patterns, add_client_headers, csp);
-   if (hdr == NULL)
-   {
-      /* FIXME Should handle error properly */
-      log_error(LOG_LEVEL_FATAL, "Out of memory parsing client header");
-   }
-
-   list_remove_all(csp->headers);
 
    if (fwd->forward_host || (http->ssl == 0))
    {
