@@ -1,7 +1,7 @@
-const char filters_rcs[] = "$Id: filters.c,v 1.57 2002/04/08 20:38:34 swa Exp $";
+const char filters_rcs[] = "$Id: filters.c,v 1.58 2002/04/24 02:11:17 oes Exp $";
 /*********************************************************************
  *
- * File        :  $Source: /cvsroot/ijbswa/current/filters.c,v $
+ * File        :  $Source: /cvsroot/ijbswa/current/Attic/filters.c,v $
  *
  * Purpose     :  Declares functions to parse/crunch headers and pages.
  *                Functions declared include:
@@ -38,6 +38,10 @@ const char filters_rcs[] = "$Id: filters.c,v 1.57 2002/04/08 20:38:34 swa Exp $"
  *
  * Revisions   :
  *    $Log: filters.c,v $
+ *    Revision 1.58  2002/04/24 02:11:17  oes
+ *    Jon's multiple AF patch: url_actions now evaluates rules
+ *    from all AFs.
+ *
  *    Revision 1.57  2002/04/08 20:38:34  swa
  *    fixed JB spelling
  *
@@ -1311,7 +1315,7 @@ char *pcrs_filter_response(struct client_state *csp)
             if ( NULL == b->joblist )
             {
                log_error(LOG_LEVEL_RE_FILTER, "Filter %s has empty joblist. Nothing to do.", b->name);
-               return(NULL);
+               continue;
             }
 
             log_error(LOG_LEVEL_RE_FILTER, "re_filtering %s%s (size %d) with filter %s...",
@@ -1462,7 +1466,12 @@ int remove_chunked_transfer_coding(char *buffer, const size_t size)
          log_error(LOG_LEVEL_ERROR, "Parse error while stripping \"chunked\" transfer coding");
          return(0);
       }
-      newsize += chunksize;
+
+      if ((newsize += chunksize) >= size)
+      {
+         log_error(LOG_LEVEL_ERROR, "Chunksize exceeds buffer in  \"chunked\" transfer coding");
+         return(0);
+      }
       from_p += 2;
 
       memmove(to_p, from_p, (size_t) chunksize);
