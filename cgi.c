@@ -1,7 +1,7 @@
-const char cgi_rcs[] = "$Id: cgi.c,v 1.69 2002/05/14 21:28:40 oes Exp $";
+const char cgi_rcs[] = "$Id: cgi.c,v 1.70 2002/05/19 11:33:20 jongfoster Exp $";
 /*********************************************************************
  *
- * File        :  $Source: /cvsroot/ijbswa/current/cgi.c,v $
+ * File        :  $Source: /cvsroot/ijbswa/current/Attic/cgi.c,v $
  *
  * Purpose     :  Declares functions to intercept request, generate
  *                html or gif answers, and to compose HTTP resonses.
@@ -38,6 +38,18 @@ const char cgi_rcs[] = "$Id: cgi.c,v 1.69 2002/05/14 21:28:40 oes Exp $";
  *
  * Revisions   :
  *    $Log: cgi.c,v $
+ *    Revision 1.70  2002/05/19 11:33:20  jongfoster
+ *    If a CGI error was not handled, and propogated back to
+ *    dispatch_known_cgi(), then it was assumed to be "out of memory".
+ *    This gave a very misleading error message.
+ *
+ *    Now other errors will cause a simple message giving the error
+ *    number and asking the user to report a bug.
+ *
+ *    Bug report:
+ *    http://sourceforge.net/tracker/index.php?func=detail
+ *    &aid=557905&group_id=11118&atid=111118
+ *
  *    Revision 1.69  2002/05/14 21:28:40  oes
  *     - Fixed add_help_link to link to the (now split) actions
  *       part of the config chapter
@@ -786,6 +798,16 @@ static struct map *parse_cgi_parameters(char *argstring)
    if (NULL == (cgi_params = new_map()))
    {
       return NULL;
+   }
+
+   /* 
+    * IE 5 does, of course, violate RFC 2316 Sect 4.1 and sends
+    * the fragment identifier along with the request, so we must
+    * cut it off here, so it won't pollute the CGI params:
+    */
+   if (NULL != (p = strchr(argstring, '#')))
+   {
+      *p = '\0';
    }
 
    pairs = ssplit(argstring, "&", vector, SZ(vector), 1, 1);
