@@ -1,7 +1,7 @@
-const char miscutil_rcs[] = "$Id: miscutil.c,v 1.37 2002/04/26 18:29:43 jongfoster Exp $";
+const char miscutil_rcs[] = "$Id: miscutil.c,v 1.37.2.1 2002/09/25 12:58:51 oes Exp $";
 /*********************************************************************
  *
- * File        :  $Source: /cvsroot/ijbswa//current/Attic/miscutil.c,v $
+ * File        :  $Source: /cvsroot/ijbswa/current/Attic/miscutil.c,v $
  *
  * Purpose     :  zalloc, hash_string, safe_strerror, strcmpic,
  *                strncmpic, chomp, and MinGW32 strdup
@@ -36,6 +36,10 @@ const char miscutil_rcs[] = "$Id: miscutil.c,v 1.37 2002/04/26 18:29:43 jongfost
  *
  * Revisions   :
  *    $Log: miscutil.c,v $
+ *    Revision 1.37.2.1  2002/09/25 12:58:51  oes
+ *    Made strcmpic and strncmpic safe against NULL arguments
+ *    (which are now treated as empty strings).
+ *
  *    Revision 1.37  2002/04/26 18:29:43  jongfoster
  *    Fixing this Visual C++ warning:
  *    miscutil.c(710) : warning C4090: '=' : different 'const' qualifiers
@@ -757,7 +761,6 @@ int simplematch(char *pattern, char *text)
    unsigned i;
    unsigned char charmap[32];
   
-  
    while (*txt)
    {
 
@@ -813,26 +816,31 @@ int simplematch(char *pattern, char *text)
       } /* -END- if Character range specification */
 
 
-      /* Compare: Char match, or char range match*/
+      /* 
+       * Char match, or char range match? 
+       */
       if ((*pat == *txt)  
       || ((*pat == ']') && (charmap[*txt / 8] & (1 << (*txt % 8)))) )
       {
-         /* Sucess, go ahead */
+         /* 
+          * Sucess: Go ahead
+          */
          pat++;
       }
-      else
+      else if (!wildcard)
       {
-         /* In wildcard mode, just try again after failiure */
-         if(wildcard)
-         {
-            pat = fallback;
-         }
-
-         /* Else, bad luck */
-         else
-         {
-            return 1;
-         }
+         /* 
+          * No match && no wildcard: No luck
+          */
+         return 1;
+      }
+      else if (pat != fallback)
+      {
+         /*
+          * Wildcard mode && nonmatch beyond fallback: Rewind pattern
+          */
+         pat = fallback;
+         continue;
       }
       txt++;
    }
