@@ -2,7 +2,7 @@
 #define CONFIG_H_INCLUDED
 /*********************************************************************
  *
- * File        :  $Source: /cvsroot/ijbswa/current/acconfig.h,v $
+ * File        :  $Source: /cvsroot/ijbswa/current/Attic/acconfig.h,v $
  *
  * Purpose     :  This file should be the first thing included in every
  *                .c file.  (Before even system headers).  It contains 
@@ -37,6 +37,12 @@
  *
  * Revisions   :
  *    $Log: acconfig.h,v $
+ *    Revision 1.27  2002/04/25 19:13:57  morcego
+ *    Removed RPM release number declaration on configure.in
+ *    Changed makefile to use given value for RPM_PACKAGEV when on uploading
+ *    targets (will produce an error, explaining who to do it, if no value
+ *    if provided).
+ *
  *    Revision 1.26  2002/04/11 11:00:21  oes
  *    Applied Moritz' fix for socklen_t on Solaris
  *
@@ -386,6 +392,13 @@
  */
 #undef socklen_t
 
+/* Define if pcre.h must be included as <pcre/pcre.h>
+ */
+#undef PCRE_H_IN_SUBDIR
+
+/* Define if pcreposix.h must be included as <pcre/pcreposix.h>
+ */
+#undef PCREPOSIX_H_IN_SUBDIR
 
 @BOTTOM@
 
