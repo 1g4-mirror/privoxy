@@ -1,4 +1,4 @@
-const char jcc_rcs[] = "$Id: jcc.c,v 1.92.2.3 2003/02/28 12:53:06 oes Exp $";
+const char jcc_rcs[] = "$Id: jcc.c,v 1.92.2.4 2003/03/07 03:41:04 david__schmidt Exp $";
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/Attic/jcc.c,v $
@@ -33,6 +33,9 @@ const char jcc_rcs[] = "$Id: jcc.c,v 1.92.2.3 2003/02/28 12:53:06 oes Exp $";
  *
  * Revisions   :
  *    $Log: jcc.c,v $
+ *    Revision 1.92.2.4  2003/03/07 03:41:04  david__schmidt
+ *    Wrapping all *_r functions (the non-_r versions of them) with mutex semaphores for OSX.  Hopefully this will take care of all of those pesky crash reports.
+ *
  *    Revision 1.92.2.3  2003/02/28 12:53:06  oes
  *    Fixed two mostly harmless mem leaks
  *
@@ -2309,9 +2312,20 @@ static void listen_loop(void)
           */
          if (child_id == 0)   /* child */
          {
-            serve(csp);
-            _exit(0);
+            int inherited_toggle_state = g_bToggleIJB;
 
+            serve(csp);
+            /* 
+             * If we've been toggled, tell Mom
+             */
+            if (inherited_toggle_state != g_bToggleIJB)
+            {
+               _exit(17);
+            }
+            else
+            {
+               _exit(0);
+            }
          }
          else if (child_id > 0) /* parent */
          {
@@ -2319,9 +2333,16 @@ static void listen_loop(void)
              * copy of the client socket and the CSP
              * are not used.
              */
-
-#if !defined(_WIN32) && defined(__CYGWIN__)
-            wait( NULL );
+            int child_status;
+#if !defined(_WIN32) && !defined(__CYGWIN__)
+            wait( &child_status );
+            /* 
+             * If the child has been toggled (return code 17), toggle ourselves
+             */
+            if (WIFEXITED(child_status) && (WEXITSTATUS(child_status) == 17))
+            {
+               g_bToggleIJB = !g_bToggleIJB;
+            }
 #endif /* !defined(_WIN32) && defined(__CYGWIN__) */
             close_socket(csp->cfd);
             csp->flags &= ~CSP_FLAG_ACTIVE;
