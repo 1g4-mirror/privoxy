@@ -1,7 +1,7 @@
-const char errlog_rcs[] = "$Id: errlog.c,v 1.39 2002/04/03 17:15:27 gliptak Exp $";
+const char errlog_rcs[] = "$Id: errlog.c,v 1.40 2002/05/22 01:27:27 david__schmidt Exp $";
 /*********************************************************************
  *
- * File        :  $Source: /cvsroot/ijbswa/current/errlog.c,v $
+ * File        :  $Source: /cvsroot/ijbswa//current/Attic/errlog.c,v $
  *
  * Purpose     :  Log errors to a designated destination in an elegant,
  *                printf-like fashion.
@@ -33,6 +33,10 @@ const char errlog_rcs[] = "$Id: errlog.c,v 1.39 2002/04/03 17:15:27 gliptak Exp 
  *
  * Revisions   :
  *    $Log: errlog.c,v $
+ *    Revision 1.40  2002/05/22 01:27:27  david__schmidt
+ *
+ *    Add os2_socket_strerr mirroring w32_socket_strerr.
+ *
  *    Revision 1.39  2002/04/03 17:15:27  gliptak
  *    zero padding thread ids in log
  *
@@ -609,6 +613,10 @@ void log_error(int loglevel, char *fmt, ...)
             break;
          case 's':
             sval = va_arg( ap, char * );
+            if (sval == NULL)
+            {
+               sval = "[null]";
+            }
             oldoutc = outc;
             outc += strlen(sval);
             if (outc < BUFFER_SIZE-1) 
@@ -626,6 +634,10 @@ void log_error(int loglevel, char *fmt, ...)
              */
             ival = va_arg( ap, int );
             sval = va_arg( ap, char * );
+            if (sval == NULL)
+            {
+               sval = "[null]";
+            }
             if (ival < 0)
             {
                ival = 0;
