@@ -1,7 +1,7 @@
-const char urlmatch_rcs[] = "$Id: urlmatch.c,v 1.10.2.1 2002/06/06 19:06:44 jongfoster Exp $";
+const char urlmatch_rcs[] = "$Id: urlmatch.c,v 1.10.2.2 2002/09/25 14:53:15 oes Exp $";
 /*********************************************************************
  *
- * File        :  $Source: /cvsroot/ijbswa//current/Attic/urlmatch.c,v $
+ * File        :  $Source: /cvsroot/ijbswa/current/Attic/urlmatch.c,v $
  *
  * Purpose     :  Declares functions to match URLs against URL
  *                patterns.
@@ -33,6 +33,11 @@ const char urlmatch_rcs[] = "$Id: urlmatch.c,v 1.10.2.1 2002/06/06 19:06:44 jong
  *
  * Revisions   :
  *    $Log: urlmatch.c,v $
+ *    Revision 1.10.2.2  2002/09/25 14:53:15  oes
+ *    Added basic support for OPTIONS and TRACE HTTP methods:
+ *    parse_http_url now recognizes the "*" URI as well as
+ *    the OPTIONS and TRACE method keywords.
+ *
  *    Revision 1.10.2.1  2002/06/06 19:06:44  jongfoster
  *    Adding support for proprietary Microsoft WebDAV extensions
  *
@@ -488,7 +493,9 @@ jb_err parse_http_request(const char *req,
       return JB_ERR_MEMORY;
    }
 
+   free(buf);
    return JB_ERR_OK;
+
 }
 
 
