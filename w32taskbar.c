@@ -1,4 +1,4 @@
-const char w32taskbar_rcs[] = "$Id: w32taskbar.c,v 1.7 2002/03/31 17:19:00 jongfoster Exp $";
+const char w32taskbar_rcs[] = "$Id: w32taskbar.c,v 1.7.2.1 2002/11/20 14:39:32 oes Exp $";
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/Attic/w32taskbar.c,v $
@@ -32,6 +32,10 @@ const char w32taskbar_rcs[] = "$Id: w32taskbar.c,v 1.7 2002/03/31 17:19:00 jongf
  *
  * Revisions   :
  *    $Log: w32taskbar.c,v $
+ *    Revision 1.7.2.1  2002/11/20 14:39:32  oes
+ *    Applied patch by Mattes Dolak which adds re-creation of the win32 taskbar
+ *    icon on reception of the "TaskbarCreated" window message.
+ *
  *    Revision 1.7  2002/03/31 17:19:00  jongfoster
  *    Win32 only: Enabling STRICT to fix a VC++ compile warning.
  *
@@ -280,7 +284,7 @@ LRESULT CALLBACK TrayProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
          if (msg == g_traycreatedmsg)
          {
-            TrayAddIcon(g_hwndTray, 1, g_hiconApp, "Privoxy");
+            TrayAddIcon(g_hwndTrayX, 1, g_hiconApp, "Privoxy");
          }
          break;
    }
