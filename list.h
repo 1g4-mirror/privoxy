@@ -1,9 +1,9 @@
 #ifndef LIST_H_INCLUDED
 #define LIST_H_INCLUDED
-#define LIST_H_VERSION "$Id: list.h,v 1.11 2002/03/24 13:25:43 swa Exp $"
+#define LIST_H_VERSION "$Id: list.h,v 1.12 2002/03/26 22:29:55 swa Exp $"
 /*********************************************************************
  *
- * File        :  $Source: /cvsroot/ijbswa/current/list.h,v $
+ * File        :  $Source: /cvsroot/ijbswa/current/Attic/list.h,v $
  *
  * Purpose     :  Declares functions to handle lists.
  *                Functions declared include:
@@ -36,6 +36,9 @@
  *
  * Revisions   :
  *    $Log: list.h,v $
+ *    Revision 1.12  2002/03/26 22:29:55  swa
+ *    we have a new homepage!
+ *
  *    Revision 1.11  2002/03/24 13:25:43  swa
  *    name change related issues
  *
@@ -141,9 +144,11 @@ extern char * list_to_text(const struct list *the_list);
 extern struct map * new_map  (void);
 extern void         free_map (struct map * the_map);
 
-extern int          map      (struct map * the_map,
+extern jb_err       map      (struct map * the_map,
                               const char * name, int name_needs_copying,
                               const char * value, int value_needs_copying);
+extern jb_err       unmap    (struct map *the_map,
+                              const char *name);
 extern const char * lookup   (const struct map * the_map, const char * name);
 
 
