@@ -1,4 +1,4 @@
-const char jcc_rcs[] = "$Id: jcc.c,v 1.92.2.12 2003/07/11 11:34:19 oes Exp $";
+const char jcc_rcs[] = "$Id: jcc.c,v 1.92.2.13 2003/11/27 19:20:27 oes Exp $";
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/Attic/jcc.c,v $
@@ -33,6 +33,10 @@ const char jcc_rcs[] = "$Id: jcc.c,v 1.92.2.12 2003/07/11 11:34:19 oes Exp $";
  *
  * Revisions   :
  *    $Log: jcc.c,v $
+ *    Revision 1.92.2.13  2003/11/27 19:20:27  oes
+ *    Diagnostics: Now preserve the returncode of pthread_create
+ *    in errno. Closes BR #775721. Thanks to Geoffrey Hausheer.
+ *
  *    Revision 1.92.2.12  2003/07/11 11:34:19  oes
  *    No longer ignore SIGCHLD. Fixes bug #769381
  *
@@ -1747,7 +1751,11 @@ static int32 server_thread(void *data)
 void usage(const char *myname)
 {
    printf("Privoxy version " VERSION " (" HOME_PAGE_URL ")\n"
+#if !defined(unix)
+           "Usage: %s [--help] [--version] [configfile]\n"
+#else
            "Usage: %s [--help] [--version] [--no-daemon] [--pidfile pidfile] [--user user[.group]] [configfile]\n"
+#endif
            "Aborting.\n", myname);
  
    exit(2);
@@ -1808,8 +1816,6 @@ int main(int argc, const char *argv[])
     */
    while (++argc_pos < argc)
    {
-#if !defined(_WIN32) || defined(_WIN_CONSOLE)
-
       if (strcmp(argv[argc_pos], "--help") == 0)
       {
          usage(argv[0]);
@@ -1821,11 +1827,13 @@ int main(int argc, const char *argv[])
          exit(0);
       }
 
-      else if (strcmp(argv[argc_pos], "--no-daemon" ) == 0)
+#if defined(unix)
+
+     else if (strcmp(argv[argc_pos], "--no-daemon" ) == 0)
       {
          no_daemon = 1;
       }
-#if defined(unix)
+
       else if (strcmp(argv[argc_pos], "--pidfile" ) == 0)
       {
          if (++argc_pos == argc) usage(argv[0]);
@@ -1857,9 +1865,10 @@ int main(int argc, const char *argv[])
       {
          do_chroot = 1;
       }
+
 #endif /* defined(unix) */
+
       else
-#endif /* defined(_WIN32) && !defined(_WIN_CONSOLE) */
       {
          configfile = argv[argc_pos];
       }
