@@ -1,4 +1,4 @@
-const char pcrs_rcs[] = "$Id: pcrs.c,v 1.19 2002/03/08 14:47:48 oes Exp $";
+const char pcrs_rcs[] = "$Id: pcrs.c,v 1.19.2.1 2002/08/10 11:23:40 oes Exp $";
 
 /*********************************************************************
  *
@@ -33,6 +33,10 @@ const char pcrs_rcs[] = "$Id: pcrs.c,v 1.19 2002/03/08 14:47:48 oes Exp $";
  *
  * Revisions   :
  *    $Log: pcrs.c,v $
+ *    Revision 1.19.2.1  2002/08/10 11:23:40  oes
+ *    Include prce.h via project.h, where the appropriate
+ *    source will have been selected
+ *
  *    Revision 1.19  2002/03/08 14:47:48  oes
  *    Cosmetics
  *
@@ -915,7 +919,9 @@ int pcrs_execute(pcrs_job *job, char *subject, size_t subject_length, char **res
          if (k != job->substitute->backrefs
              /* ..in legal range.. */
              && job->substitute->backref[k] < PCRS_MAX_SUBMATCHES + 2
-             /* ..and referencing a nonempty match.. */
+              /* ..and referencing a real submatch.. */
+             && job->substitute->backref[k] < matches[i].submatches
+             /* ..that is nonempty.. */
              && matches[i].submatch_length[job->substitute->backref[k]] > 0)
          {
             /* ..copy the submatch that is ref'd. */
