@@ -1,4 +1,4 @@
-const char jbsockets_rcs[] = "$Id: jbsockets.c,v 1.35.2.3 2003/03/07 03:41:04 david__schmidt Exp $";
+const char jbsockets_rcs[] = "$Id: jbsockets.c,v 1.35.2.4 2003/04/04 12:40:20 oes Exp $";
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/Attic/jbsockets.c,v $
@@ -35,6 +35,10 @@ const char jbsockets_rcs[] = "$Id: jbsockets.c,v 1.35.2.3 2003/03/07 03:41:04 da
  *
  * Revisions   :
  *    $Log: jbsockets.c,v $
+ *    Revision 1.35.2.4  2003/04/04 12:40:20  oes
+ *    Made sure the errno set by bind, not close[socket] is used in
+ *    bind_port. Probably fixes bugs #713777, #705562.
+ *
  *    Revision 1.35.2.3  2003/03/07 03:41:04  david__schmidt
  *    Wrapping all *_r functions (the non-_r versions of them) with mutex semaphores for OSX.  Hopefully this will take care of all of those pesky crash reports.
  *
@@ -810,7 +814,13 @@ unsigned long resolve_hostname_to_ip(const char *host)
 #else
       hostp = gethostbyname(host);
 #endif /* def HAVE_GETHOSTBYNAME_R_(6|5|3)_ARGS */
-      if (hostp == NULL)
+      /*
+       * On Mac OSX, if a domain exists but doesn't have a type A
+       * record associated with it, the h_addr member of the struct
+       * hostent returned by gethostbyname is NULL, even if h_length
+       * is 4. Therefore the second test below.
+       */
+      if (hostp == NULL || hostp->h_addr == NULL)
       {
          errno = EINVAL;
          log_error(LOG_LEVEL_ERROR, "could not resolve hostname %s", host);
