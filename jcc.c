@@ -1,4 +1,4 @@
-const char jcc_rcs[] = "$Id: jcc.c,v 1.92.2.9 2003/04/03 15:08:42 oes Exp $";
+const char jcc_rcs[] = "$Id: jcc.c,v 1.92.2.10 2003/05/08 15:13:46 oes Exp $";
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/Attic/jcc.c,v $
@@ -33,6 +33,9 @@ const char jcc_rcs[] = "$Id: jcc.c,v 1.92.2.9 2003/04/03 15:08:42 oes Exp $";
  *
  * Revisions   :
  *    $Log: jcc.c,v $
+ *    Revision 1.92.2.10  2003/05/08 15:13:46  oes
+ *    Cosmetics: Killed a warning, a typo and an allocation left at exit
+ *
  *    Revision 1.92.2.9  2003/04/03 15:08:42  oes
  *    No longer rely on non-POSIX.1 extensions of getcwd().
  *    Fixes bug #711001
@@ -1902,8 +1905,6 @@ int main(int argc, const char *argv[])
    pthread_mutex_init(&gethostbyname_mutex,0);
 #endif /* def OSX_DARWIN */
 
-   pthread_mutex_init(&inet_ntoa_mutex, 0);
-
    /*
     * Unix signal handling
     *
@@ -2503,12 +2504,19 @@ static void listen_loop(void)
 #if defined(unix)
    freez(basedir);
 #endif
+   freez(configfile);
+
+#ifdef FEATURE_COOKIE_JAR
+   if (NULL != config->jar)
+   {
+      fclose(config->jar);
+   }
+#endif
+
 #if defined(_WIN32) && !defined(_WIN_CONSOLE)
    /* Cleanup - remove taskbar icon etc. */
    TermLogWindow();
 #endif
-   freez(configfile);
-
 
    exit(0);
 #endif /* FEATURE_GRACEFUL_TERMINATION */
