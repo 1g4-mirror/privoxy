@@ -1,4 +1,4 @@
-const char w32log_rcs[] = "$Id: w32log.c,v 1.25 2002/04/04 00:36:36 gliptak Exp $";
+const char w32log_rcs[] = "$Id: w32log.c,v 1.25.2.1 2002/08/21 17:59:05 oes Exp $";
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa//current/Attic/w32log.c,v $
@@ -32,6 +32,10 @@ const char w32log_rcs[] = "$Id: w32log.c,v 1.25 2002/04/04 00:36:36 gliptak Exp 
  *
  * Revisions   :
  *    $Log: w32log.c,v $
+ *    Revision 1.25.2.1  2002/08/21 17:59:05  oes
+ *     - "Show Privoxy Window" now a toggle
+ *     - Temp kludge to let user and default action file be edited through win32 GUI (FR 592080)
+ *
  *    Revision 1.25  2002/04/04 00:36:36  gliptak
  *    always use pcre for matching
  *
@@ -1307,6 +1311,7 @@ LRESULT CALLBACK LogWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPara
          return 0;
 
       case WM_SHOWWINDOW:
+         g_bShowLogWindow = wParam;
       case WM_SIZE:
          /* Resize the logging window to fit the new frame */
          if (g_hwndLogBox)
