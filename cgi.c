@@ -1,4 +1,4 @@
-const char cgi_rcs[] = "$Id: cgi.c,v 1.70.2.8 2003/04/29 13:33:51 oes Exp $";
+const char cgi_rcs[] = "$Id: cgi.c,v 1.70.2.9 2003/05/08 15:11:31 oes Exp $";
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/Attic/cgi.c,v $
@@ -38,6 +38,9 @@ const char cgi_rcs[] = "$Id: cgi.c,v 1.70.2.8 2003/04/29 13:33:51 oes Exp $";
  *
  * Revisions   :
  *    $Log: cgi.c,v $
+ *    Revision 1.70.2.9  2003/05/08 15:11:31  oes
+ *    Nit
+ *
  *    Revision 1.70.2.8  2003/04/29 13:33:51  oes
  *    Killed a compiler warning on OSX
  *
@@ -836,12 +839,12 @@ static struct http_response *dispatch_known_cgi(struct client_state * csp,
       if ((d->name == NULL) || (strcmp(path_copy, d->name) == 0))
       {
          /*
-          * If the called CGI is either harmless, or not referred
-          * from an untrusted source, start it.
+          * If the called CGI is either harmless, or referred
+          * from a trusted source, start it.
           */
          if (d->harmless
-             || (NULL == (referrer = grep_cgi_referrer(csp)))
-             || (0 == strncmp(referrer, "http://config.privoxy.org/", 26))
+             || ((NULL != (referrer = grep_cgi_referrer(csp)))
+                 && (0 == strncmp(referrer, "http://config.privoxy.org/", 26)))
              )
          {
             err = (d->handler)(csp, rsp, param_list);
