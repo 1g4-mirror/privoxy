@@ -1,7 +1,7 @@
-const char cgisimple_rcs[] = "$Id: cgisimple.c,v 1.34 2002/04/30 12:06:12 oes Exp $";
+const char cgisimple_rcs[] = "$Id: cgisimple.c,v 1.35.2.1 2002/07/01 17:32:04 morcego Exp $";
 /*********************************************************************
  *
- * File        :  $Source: /cvsroot/ijbswa/current/cgisimple.c,v $
+ * File        :  $Source: /cvsroot/ijbswa/current/Attic/cgisimple.c,v $
  *
  * Purpose     :  Simple CGIs to get information about Privoxy's
  *                status.
@@ -36,6 +36,13 @@ const char cgisimple_rcs[] = "$Id: cgisimple.c,v 1.34 2002/04/30 12:06:12 oes Ex
  *
  * Revisions   :
  *    $Log: cgisimple.c,v $
+ *    Revision 1.35.2.1  2002/07/01 17:32:04  morcego
+ *    Applying patch from Andreas as provided by Hal on the list.
+ *    Message-ID: <20020701121218.V1606@feenix.burgiss.net>
+ *
+ *    Revision 1.35  2002/05/12 21:44:44  jongfoster
+ *    Adding amiga.[ch] revision information, if on an amiga.
+ *
  *    Revision 1.34  2002/04/30 12:06:12  oes
  *    Deleted unused code from default_cgi
  *
@@ -417,7 +424,8 @@ jb_err cgi_show_request(struct client_state *csp,
  *           type : Selects the type of banner between "trans", "logo",
  *                  and "auto". Defaults to "logo" if absent or invalid.
  *                  "auto" means to select as if we were image-blocking.
- *                  (Only the first character really counts).
+ *                  (Only the first character really counts; b and t are
+ *                  equivalent).
  *
  * Returns     :  JB_ERR_OK on success
  *                JB_ERR_MEMORY on out-of-memory error.  
@@ -429,20 +437,24 @@ jb_err cgi_send_banner(struct client_state *csp,
 {
    char imagetype = lookup(parameters, "type")[0];
 
-   if (imagetype == 'a') /* auto */
+   /*
+    * If type is auto, then determine the right thing
+    * to do from the set-image-blocker action
+    */
+   if (imagetype == 'a') 
    {
-      /* Default to pattern */
+      /*
+       * Default to pattern
+       */
       imagetype = 'p';
+
 #ifdef FEATURE_IMAGE_BLOCKING
       if ((csp->action->flags & ACTION_IMAGE_BLOCKER) != 0)
       {
          static const char prefix1[] = CGI_PREFIX "send-banner?type=";
          static const char prefix2[] = "http://" CGI_SITE_1_HOST "/send-banner?type=";
+         const char *p = csp->action->string[ACTION_STRING_IMAGE_BLOCKER];
 
-         /* determine HOW images should be blocked */
-         const char * p = csp->action->string[ACTION_STRING_IMAGE_BLOCKER];
-
-         /* and handle accordingly: */
          if (p == NULL)
          {
             /* Use default - nothing to do here. */
@@ -455,6 +467,11 @@ jb_err cgi_send_banner(struct client_state *csp,
          {
             imagetype = 'p';
          }
+
+         /*
+          * If the action is to call this CGI, determine
+          * the argument:
+          */
          else if (0 == strncmpic(p, prefix1, sizeof(prefix1) - 1))
          {
             imagetype = p[sizeof(prefix1) - 1];
@@ -463,33 +480,62 @@ jb_err cgi_send_banner(struct client_state *csp,
          {
             imagetype = p[sizeof(prefix2) - 1];
          }
+
+         /*
+          * Everything else must (should) be a URL to
+          * redirect to.
+          */
+         else
+         {
+            imagetype = 'r';
+         }
       }
 #endif /* def FEATURE_IMAGE_BLOCKING */
    }
       
-   if ((imagetype == 'b') || (imagetype == 't')) /* blank / transparent */
+   /*
+    * Now imagetype is either the non-auto type we were called with,
+    * or it was auto and has since been determined. In any case, we
+    * can proceed to actually answering the request by sending a redirect
+    * or an image as appropriate:
+    */
+   if (imagetype == 'r') 
    {
-      rsp->body = bindup(image_blank_data, image_blank_length);
-      rsp->content_length = image_blank_length;
-
+      rsp->status = strdup("302 Local Redirect from Privoxy");
+      if (rsp->status == NULL)
+      {
+         return JB_ERR_MEMORY;
+      }
+      if (enlist_unique_header(rsp->headers, "Location",
+                               csp->action->string[ACTION_STRING_IMAGE_BLOCKER]))
+      {
+         return JB_ERR_MEMORY;
+      }
    }
-   else /* pattern */
+   else
    {
-      rsp->body = bindup(image_pattern_data, image_pattern_length);
-      rsp->content_length = image_pattern_length;
-   }   
+      if ((imagetype == 'b') || (imagetype == 't')) 
+      {
+         rsp->body = bindup(image_blank_data, image_blank_length);
+         rsp->content_length = image_blank_length;
+      }
+      else
+      {
+         rsp->body = bindup(image_pattern_data, image_pattern_length);
+         rsp->content_length = image_pattern_length;
+      }
 
-   if (rsp->body == NULL)
-   {
-      return JB_ERR_MEMORY;
+      if (rsp->body == NULL)
+      {
+         return JB_ERR_MEMORY;
+      }
+      if (enlist(rsp->headers, "Content-Type: " BUILTIN_IMAGE_MIMETYPE))
+      {
+         return JB_ERR_MEMORY;
+      }
+
+      rsp->is_static = 1;
    }
-
-   if (enlist(rsp->headers, "Content-Type: " BUILTIN_IMAGE_MIMETYPE))
-   {
-      return JB_ERR_MEMORY;
-   }
-
-   rsp->is_static = 1;
 
    return JB_ERR_OK;
 
