@@ -1,4 +1,4 @@
-const char cgisimple_rcs[] = "$Id: cgisimple.c,v 1.35.2.1 2002/07/01 17:32:04 morcego Exp $";
+const char cgisimple_rcs[] = "$Id: cgisimple.c,v 1.35.2.1 2002/07/04 15:02:38 oes Exp $";
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/Attic/cgisimple.c,v $
@@ -36,6 +36,9 @@ const char cgisimple_rcs[] = "$Id: cgisimple.c,v 1.35.2.1 2002/07/01 17:32:04 mo
  *
  * Revisions   :
  *    $Log: cgisimple.c,v $
+ *    Revision 1.35.2.1  2002/07/04 15:02:38  oes
+ *    Added ability to send redirects to send-banner CGI, so that it can completely mimic the image blocking action if called with type=auto
+ *
  *    Revision 1.35.2.1  2002/07/01 17:32:04  morcego
  *    Applying patch from Andreas as provided by Hal on the list.
  *    Message-ID: <20020701121218.V1606@feenix.burgiss.net>
@@ -870,11 +873,13 @@ jb_err cgi_show_status(struct client_state *csp,
          snprintf(buf, 100, "</td><td class=\"buttons\"><a href=\"/show-status?file=actions&index=%d\">View</a> ", i);
          if (!err) err = string_append(&s, buf);
 
+#ifdef FEATURE_CGI_EDIT_ACTIONS
          if (NULL == strstr(csp->actions_list[i]->filename, "standard.action") && NULL != csp->config->actions_file_short[i])
          {
             snprintf(buf, 100, "<a href=\"/edit-actions-list?f=%s\">Edit</a>", csp->config->actions_file_short[i]);
             if (!err) err = string_append(&s, buf);
          }
+#endif
 
          if (!err) err = string_append(&s, "</td></tr>\n");
       }
