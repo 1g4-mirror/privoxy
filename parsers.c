@@ -1,4 +1,4 @@
-const char parsers_rcs[] = "$Id: parsers.c,v 1.56.2.3 2002/11/10 04:20:02 hal9 Exp $";
+const char parsers_rcs[] = "$Id: parsers.c,v 1.56.2.4 2003/03/07 03:41:05 david__schmidt Exp $";
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/Attic/parsers.c,v $
@@ -40,6 +40,9 @@ const char parsers_rcs[] = "$Id: parsers.c,v 1.56.2.3 2002/11/10 04:20:02 hal9 E
  *
  * Revisions   :
  *    $Log: parsers.c,v $
+ *    Revision 1.56.2.4  2003/03/07 03:41:05  david__schmidt
+ *    Wrapping all *_r functions (the non-_r versions of them) with mutex semaphores for OSX.  Hopefully this will take care of all of those pesky crash reports.
+ *
  *    Revision 1.56.2.3  2002/11/10 04:20:02  hal9
  *    Fix typo: supressed -> suppressed
  *
@@ -1023,14 +1026,20 @@ jb_err client_accept_encoding(struct client_state *csp, char **header)
       log_error(LOG_LEVEL_HEADER, "Suppressed offer to compress content");
 
       freez(*header);
-      if (!strcmpic(csp->http->ver, "HTTP/1.1"))
-      {
-         *header = strdup("Accept-Encoding: identity;q=1.0, *;q=0");
-         if (*header == NULL)
-         {
-            return JB_ERR_MEMORY;
-         }
-      }
+
+      /* Temporarily disable the correct behaviour to
+       * work around a PHP bug. 
+       *
+       * if (!strcmpic(csp->http->ver, "HTTP/1.1"))
+       * {
+       *    *header = strdup("Accept-Encoding: identity;q=1.0, *;q=0");
+       *    if (*header == NULL)
+       *    {
+       *       return JB_ERR_MEMORY;
+       *    }
+       * }
+       * 
+       */
    }
 
    return JB_ERR_OK;
