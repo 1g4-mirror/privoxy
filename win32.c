@@ -1,7 +1,7 @@
-const char win32_rcs[] = "$Id: win32.c,v 1.9 2002/03/31 17:19:00 jongfoster Exp $";
+const char win32_rcs[] = "$Id: win32.c,v 1.9.2.1 2002/08/21 17:59:27 oes Exp $";
 /*********************************************************************
  *
- * File        :  $Source: /cvsroot/ijbswa//current/Attic/win32.c,v $
+ * File        :  $Source: /cvsroot/ijbswa/current/Attic/win32.c,v $
  *
  * Purpose     :  Win32 User Interface initialization and message loop
  *
@@ -31,6 +31,9 @@ const char win32_rcs[] = "$Id: win32.c,v 1.9 2002/03/31 17:19:00 jongfoster Exp 
  *
  * Revisions   :
  *    $Log: win32.c,v $
+ *    Revision 1.9.2.1  2002/08/21 17:59:27  oes
+ *    Sync win32_blurb[] with our standard blurb
+ *
  *    Revision 1.9  2002/03/31 17:19:00  jongfoster
  *    Win32 only: Enabling STRICT to fix a VC++ compile warning.
  *
@@ -99,7 +102,7 @@ const char win32_blurb[] =
 "Based on the Internet Junkbuster by Junkbusters Corp.\n"
 "This is free software; it may be used and copied under the\n"
 "GNU General Public License: http://www.gnu.org/copyleft/gpl.html .\n"
-"This program comes with ABSOLUTELY NO WARRANTY OF ANY KIND.\n"
+"This program comes with ABSOLUTELY NO WARRANTY OF ANY KIND.\n";
 
 #ifdef _WIN_CONSOLE
 
