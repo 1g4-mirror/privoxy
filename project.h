@@ -1,7 +1,7 @@
 #ifndef PROJECT_H_INCLUDED
 #define PROJECT_H_INCLUDED
 /** Version string. */
-#define PROJECT_H_VERSION "$Id: project.h,v 1.72.2.2 2002/11/28 18:15:44 oes Exp $"
+#define PROJECT_H_VERSION "$Id: project.h,v 1.72.2.3 2003/03/11 11:54:37 oes Exp $"
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/Attic/project.h,v $
@@ -37,6 +37,9 @@
  *
  * Revisions   :
  *    $Log: project.h,v $
+ *    Revision 1.72.2.3  2003/03/11 11:54:37  oes
+ *    Introduced RC_FLAG_* flags for use in child process return code
+ *
  *    Revision 1.72.2.2  2002/11/28 18:15:44  oes
  *    Added flag to each cgi_dispatcher that allows or denies
  *    external linking and removed const qualifier from
@@ -1415,7 +1418,7 @@ struct configuration_spec
 #define HOME_PAGE_URL     "http://www.privoxy.org/"
 
 /** URL for the Privoxy user manual. */
-#define USER_MANUAL_URL   HOME_PAGE_URL "/" VERSION "/user-manual/"
+#define USER_MANUAL_URL   HOME_PAGE_URL VERSION "/user-manual/"
 
 /** Prefix for actions help links  (append to USER_MANUAL_URL). */
 #define ACTIONS_HELP_PREFIX "actions-file.html#"
