@@ -1,4 +1,4 @@
-const char jcc_rcs[] = "$Id: jcc.c,v 1.92.2.11 2003/05/14 12:32:02 oes Exp $";
+const char jcc_rcs[] = "$Id: jcc.c,v 1.92.2.12 2003/07/11 11:34:19 oes Exp $";
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/Attic/jcc.c,v $
@@ -33,6 +33,9 @@ const char jcc_rcs[] = "$Id: jcc.c,v 1.92.2.11 2003/05/14 12:32:02 oes Exp $";
  *
  * Revisions   :
  *    $Log: jcc.c,v $
+ *    Revision 1.92.2.12  2003/07/11 11:34:19  oes
+ *    No longer ignore SIGCHLD. Fixes bug #769381
+ *
  *    Revision 1.92.2.11  2003/05/14 12:32:02  oes
  *    Close jarfile on graceful exit, remove stray line
  *
@@ -2315,8 +2318,9 @@ static void listen_loop(void)
 
             pthread_attr_init(&attrs);
             pthread_attr_setdetachstate(&attrs, PTHREAD_CREATE_DETACHED);
-            child_id = (pthread_create(&the_thread, &attrs,
-               (void*)serve, csp) ? -1 : 0);
+            errno = pthread_create(&the_thread, &attrs,
+               (void*)serve, csp);
+            child_id = errno ? -1 : 0;
             pthread_attr_destroy(&attrs);
          }
 #endif
