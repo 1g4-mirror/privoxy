@@ -1,9 +1,9 @@
 #ifndef W32LOG_H_INCLUDED
 #define W32LOG_H_INCLUDED
-#define W32LOG_H_VERSION "$Id: w32log.h,v 1.9 2002/03/24 12:03:47 jongfoster Exp $"
+#define W32LOG_H_VERSION "$Id: w32log.h,v 1.10 2002/03/26 22:57:10 jongfoster Exp $"
 /*********************************************************************
  *
- * File        :  $Source: /cvsroot/ijbswa/current/w32log.h,v $
+ * File        :  $Source: /cvsroot/ijbswa//current/Attic/w32log.h,v $
  *
  * Purpose     :  Functions for creating and destroying the log window,
  *                ouputting strings, processing messages and so on.
@@ -34,6 +34,9 @@
  *
  * Revisions   :
  *    $Log: w32log.h,v $
+ *    Revision 1.10  2002/03/26 22:57:10  jongfoster
+ *    Web server name should begin www.
+ *
  *    Revision 1.9  2002/03/24 12:03:47  jongfoster
  *    Name change
  *
@@ -129,7 +132,8 @@ extern int g_nFontSize;
 
 /* FIXME: this is a kludge */
 
-extern const char * g_actions_file;
+extern const char * g_default_actions_file;
+extern const char * g_user_actions_file;
 extern const char * g_re_filterfile;
 #ifdef FEATURE_TRUST
 extern const char * g_trustfile;
