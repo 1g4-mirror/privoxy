@@ -1,9 +1,9 @@
 #ifndef PARSERS_H_INCLUDED
 #define PARSERS_H_INCLUDED
-#define PARSERS_H_VERSION "$Id: parsers.h,v 1.25 2002/03/26 22:29:55 swa Exp $"
+#define PARSERS_H_VERSION "$Id: parsers.h,v 1.26 2002/05/08 15:59:53 oes Exp $"
 /*********************************************************************
  *
- * File        :  $Source: /cvsroot/ijbswa/current/parsers.h,v $
+ * File        :  $Source: /cvsroot/ijbswa//current/Attic/parsers.h,v $
  *
  * Purpose     :  Declares functions to parse/crunch headers and pages.
  *                Functions declared include:
@@ -43,6 +43,9 @@
  *
  * Revisions   :
  *    $Log: parsers.h,v $
+ *    Revision 1.26  2002/05/08 15:59:53  oes
+ *    Changed add_to_iob signature (now returns jb_err)
+ *
  *    Revision 1.25  2002/03/26 22:29:55  swa
  *    we have a new homepage!
  *
@@ -193,6 +196,9 @@ extern jb_err client_send_cookie     (struct client_state *csp, char **header);
 extern jb_err client_x_forwarded     (struct client_state *csp, char **header);
 extern jb_err client_accept_encoding (struct client_state *csp, char **header);
 extern jb_err client_te              (struct client_state *csp, char **header);
+extern jb_err client_max_forwards    (struct client_state *csp, char **header);
+extern jb_err client_host(struct client_state *csp, char **header);
+
 
 extern jb_err client_host_adder           (struct client_state *csp);
 extern jb_err client_cookie_adder         (struct client_state *csp);
