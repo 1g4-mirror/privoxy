@@ -1,4 +1,4 @@
-const char jcc_rcs[] = "$Id: jcc.c,v 1.92.2.6 2003/03/11 11:55:00 oes Exp $";
+const char jcc_rcs[] = "$Id: jcc.c,v 1.92.2.7 2003/03/17 16:48:59 oes Exp $";
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/Attic/jcc.c,v $
@@ -33,6 +33,9 @@ const char jcc_rcs[] = "$Id: jcc.c,v 1.92.2.6 2003/03/11 11:55:00 oes Exp $";
  *
  * Revisions   :
  *    $Log: jcc.c,v $
+ *    Revision 1.92.2.7  2003/03/17 16:48:59  oes
+ *    Added chroot ability, thanks to patch by Sviatoslav Sviridov
+ *
  *    Revision 1.92.2.6  2003/03/11 11:55:00  oes
  *    Clean-up and extension of improvements for forked mode:
  *     - Child's return code now consists of flags RC_FLAG_*
@@ -2035,13 +2038,18 @@ int main(int argc, const char *argv[])
       }
       if (do_chroot)
       {
-         if (setenv ("HOME", "/", 1) < 0)
+         char putenv_dummy[64];
+
+         strcpy(putenv_dummy, "HOME=/");
+         if (putenv(putenv_dummy) != 0)
          {
-            log_error(LOG_LEVEL_FATAL, "Cannot setenv(): HOME");
-         }
-         if (setenv ("USER", pw->pw_name, 1) < 0)
+            log_error(LOG_LEVEL_FATAL, "Cannot putenv(): HOME");
+         }                
+
+         snprintf(putenv_dummy, 64, "USER=%s", pw->pw_name);
+         if (putenv(putenv_dummy) != 0)
          {
-            log_error(LOG_LEVEL_FATAL, "Cannot setenv(): USER");
+            log_error(LOG_LEVEL_FATAL, "Cannot putenv(): USER");
          }
       }
    }
