@@ -1,18 +1,18 @@
-const char killpopup_rcs[] = "$Id: killpopup.c,v 1.1 2001/05/13 21:57:06 administrator Exp $";
+const char killpopup_rcs[] = "$Id: killpopup.c,v 1.15 2002/03/24 13:25:43 swa Exp $";
 /*********************************************************************
  *
- * File        :  $Source: /home/administrator/cvs/ijb/killpopup.c,v $
+ * File        :  $Source: /cvsroot/ijbswa/current/killpopup.c,v $
  *
  * Purpose     :  Handles the filtering of popups.
  *
  * Copyright   :  Written by and Copyright (C) 2001 the SourceForge
- *                IJBSWA team.  http://ijbswa.sourceforge.net
+ *                Privoxy team. http://www.privoxy.org/
  *
  *                Based on the Internet Junkbuster originally written
- *                by and Copyright (C) 1997 Anonymous Coders and 
+ *                by and Copyright (C) 1997 Anonymous Coders and
  *                Junkbusters Corporation.  http://www.junkbusters.com
  *
- *                This program is free software; you can redistribute it 
+ *                This program is free software; you can redistribute it
  *                and/or modify it under the terms of the GNU General
  *                Public License as published by the Free Software
  *                Foundation; either version 2 of the License, or (at
@@ -32,6 +32,73 @@ const char killpopup_rcs[] = "$Id: killpopup.c,v 1.1 2001/05/13 21:57:06 adminis
  *
  * Revisions   :
  *    $Log: killpopup.c,v $
+ *    Revision 1.15  2002/03/24 13:25:43  swa
+ *    name change related issues
+ *
+ *    Revision 1.14  2002/03/07 03:46:53  oes
+ *    Fixed compiler warnings etc
+ *
+ *    Revision 1.13  2001/11/13 00:16:40  jongfoster
+ *    Replacing references to malloc.h with the standard stdlib.h
+ *    (See ANSI or K&R 2nd Ed)
+ *
+ *    Revision 1.12  2001/10/25 03:40:48  david__schmidt
+ *    Change in porting tactics: OS/2's EMX porting layer doesn't allow multiple
+ *    threads to call select() simultaneously.  So, it's time to do a real, live,
+ *    native OS/2 port.  See defines for __EMX__ (the porting layer) vs. __OS2__
+ *    (native). Both versions will work, but using __OS2__ offers multi-threading.
+ *
+ *    Revision 1.11  2001/10/07 15:42:41  oes
+ *    filter_popups now gets a csp pointer so it can raise the new
+ *      CSP_FLAG_MODIFIED flag.
+ *
+ *    Revision 1.10  2001/09/22 16:34:44  jongfoster
+ *    Removing unneeded #includes
+ *
+ *    Revision 1.9  2001/07/31 14:44:22  oes
+ *    Deleted unused size parameter from filter_popups()
+ *
+ *    Revision 1.8  2001/07/30 22:08:36  jongfoster
+ *    Tidying up #defines:
+ *    - All feature #defines are now of the form FEATURE_xxx
+ *    - Permanently turned off WIN_GUI_EDIT
+ *    - Permanently turned on WEBDAV and SPLIT_PROXY_ARGS
+ *
+ *    Revision 1.7  2001/07/20 19:29:25  haroon
+ *    - In v1.5 forgot to add that I implemented LOG_LEVEL_POPUPS in errlog.c,
+ *      errlog.h and killpopup.c. In that case, it is superfluous to have define for
+ *      POPUP_VERBOSE, so I removed the defines and logging is now done
+ *      via log_error(LOG_LEVEL_POPUPS, ....)
+ *
+ *    Revision 1.6  2001/07/19 19:11:35  haroon
+ *    - Implemented Guy's idea of replacing window.open( with 1;''.concat(
+ *    - Implemented Guy's idea of replacing .resizeTo( with .scrollTo(
+ *
+ *    Revision 1.5  2001/07/18 15:02:52  haroon
+ *    improved nuking of window.open
+ *
+ *    Revision 1.4  2001/06/29 13:29:55  oes
+ *    Added FIXMEs (and didn't repair, hehe)
+ *
+ *    Revision 1.3  2001/05/22 18:56:28  oes
+ *    CRLF -> LF
+ *
+ *    Revision 1.2  2001/05/20 01:21:20  jongfoster
+ *    Version 2.9.4 checkin.
+ *    - Merged popupfile and cookiefile, and added control over PCRS
+ *      filtering, in new "permissionsfile".
+ *    - Implemented LOG_LEVEL_FATAL, so that if there is a configuration
+ *      file error you now get a message box (in the Win32 GUI) rather
+ *      than the program exiting with no explanation.
+ *    - Made killpopup use the PCRS MIME-type checking and HTTP-header
+ *      skipping.
+ *    - Removed tabs from "config"
+ *    - Moved duplicated url parsing code in "loaders.c" to a new funcition.
+ *    - Bumped up version number.
+ *
+ *    Revision 1.1.1.1  2001/05/15 13:58:58  oes
+ *    Initial import of version 2.9.3 source tree
+ *
  *
  *********************************************************************/
 
@@ -42,201 +109,102 @@ const char killpopup_rcs[] = "$Id: killpopup.c,v 1.1 2001/05/13 21:57:06 adminis
 #include <stdlib.h>
 #include <sys/types.h>
 #include <string.h>
-#include <malloc.h>
 #include <errno.h>
 #include <sys/stat.h>
 #include <ctype.h>
 
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(__OS2__)
 #include <unistd.h>
 #endif
 
 #include "project.h"
 #include "killpopup.h"
-#include "jcc.h"
+#include "errlog.h"
 
 const char killpopup_h_rcs[] = KILLPOPUP_H_VERSION;
 
-#ifdef KILLPOPUPS
-
-/* Change these for debug output.  *lots*. */
-/*#define POPUP_VERBOSE 1*/
-/* CHANGED - added the below and shifted the more spammy stuff into it ;-) */
-#undef POPUP_VERY_VERBOSE
-#undef POPUP_VERBOSE
-
+#ifdef FEATURE_KILL_POPUPS
 
 /*********************************************************************
  *
  * Function    :  filter_popups
  *
- * Description :  Filter the block of data that's been read from the server.
- *                IF NECESSARY.
+ * Description :  Filter the block of data that's been read from the server
+ *                for javascript popup code and replace by syntactically
+ *                neutral code of the same size.
+ *                Raise the CSP_FLAG_MODIFIED flag on success.
  *
  * Parameters  :
- *          1  :  csp = Client state
- *          2  :  host_name = hostname of originating web page to
- *                look up on blocklist
- *          3  :  buff = Buffer to scan and modify.  Null terminated.
- *          4  :  size = Buffer size, excluding null terminator.
+ *          1  :  buff = Buffer to scan and modify.  Null terminated.
+ *          2  :  csp = Client state pointer
  *
  * Returns     :  void
  *
  *********************************************************************/
-void filter_popups(struct client_state *csp, char *host_name, char *buff, int size)
+void filter_popups(char *buff, struct client_state *csp)
 {
-   struct popup_settings * data;
-   struct popup_blocklist * cur;
-   int i;
-   int found = 0;
-   char *popup = NULL;
-   char *close = NULL;
+   char *start_p = NULL;
+   char *close_p = NULL;
    char *p     = NULL;
-   char *q     = NULL; /* by BREITENB NEW! */
 
-   if ( (!csp->plist) || ((data = csp->plist->f) == NULL) )
-   {
-      /* Disabled. */
-      return;
-   }
-
-   /* If the hostname is on our list for blocking then mark it
-    * as a host to   block from.  (This may be later changed if the
-    * host is also on the list-to-allow list).
+   /*
+    * replace the window.open( with a harmless JavaScript replacement
+    * (notice the two single quotes)
     */
-
-   for (i=0; (i < 50) && (i < size); i++)   /* avoid scanning binary data! */
+   while ((start_p = strstr(buff, "window.open(")) != NULL)
    {
-      if ((unsigned int)(buff[i])>127)
+      if (start_p)
       {
-#ifdef  POPUP_VERBOSE
-         fprintf(logfp, "I'm not scanning binary stuff! (%i)\n",buff[i]);
-#endif
-         return;
+         strncpy(start_p, "1;''.concat(", 12);
+         log_error(LOG_LEVEL_POPUPS, "Blocked popup window open");
+         csp->flags |= CSP_FLAG_MODIFIED;
       }
    }
 
-
-   for (cur = data->blocked ; cur ; cur = cur->next)
+   /*
+    * replace the .resizeTo( with a harmless JavaScript replacement
+    */
+   while ((start_p = strstr(buff, ".resizeTo(")) != NULL)
    {
-      if ( host_name != 0 )
+      if (start_p)
       {
-         if ( strcmp( cur->host_name, host_name ) == 0 )
-         {
-#ifdef  POPUP_VERBOSE
-            fprintf(logfp, "Blocking %s\n", host_name );
-#endif
-            found = 1;
-         }
+         strncpy(start_p, ".scrollTo(", 10);
+         log_error(LOG_LEVEL_POPUPS, "Blocked popup window resize");
+         csp->flags |= CSP_FLAG_MODIFIED;
       }
    }
 
-   /* Force match if we're supposed to nuke _all_ popups, globally. */
-   if ( kill_all_popups != 0 )
+   /* 
+    * Filter onUnload and onExit
+    */
+   start_p = strstr(buff, "<body");
+   if (!start_p) start_p = strstr(buff, "<BODY");
+   if (!start_p) start_p = strstr(buff, "<Body");
+   if (!start_p) start_p = strstr(buff, "<BOdy");
+   if (start_p)
    {
-#ifdef POPUP_VERBOSE
-      fprintf(logfp, "Indescriminatly nuking popups..\n" );
-#endif
-      found = 1;
-   }
-   /* an exception-from blocking should still be an exception! by BREITENB NEW! */
-
-
-   /*    Now, if its allowed adjust the filtering, so it _doesn't_ happen. */
-   for (cur = data->allowed ; cur ; cur = cur->next)
-   {
-      if ( host_name != 0 )
-      {
-         if ( strcmp( cur->host_name, host_name ) == 0 )
-         {
-#ifdef POPUP_VERBOSE
-            fprintf(logfp, "Reversing block decision for %s\n", host_name );
-#endif
-            found = 0;
-         }
-      }
-   }
-
-   if ( found == 0)
-   {
-#ifdef POPUP_VERBOSE
-      fprintf(logfp, "Allowing %s\n", host_name );
-#endif
-      return;
-   }
-
-   while ((popup = strstr( buff, "window.open(" )) != NULL)
-      /* if ( popup  )  by BREITENB filter ALL popups! NEW! */
-   {
-#ifdef POPUP_VERBOSE
-      fprintf(logfp, "Found start of window open" );
-#endif
-      close = strstr( popup+1, ");" );
-      if ( close )
-      {
-#ifdef POPUP_VERBOSE
-         fprintf(logfp, "Found end of window open" );
-#endif
-         for ( p = popup; p != (close+1); p++ )
-         {
-            *p = ' ';
-         }
-#ifdef POPUP_VERBOSE
-         fprintf(logfp, "Blocked %s\n", host_name );
-#endif
-      }
-      else
-      {
-#ifdef POPUP_VERBOSE
-         fprintf(logfp, "Couldn't find end, turned into comment.  Read boundary?\n" );
-#endif
-         *popup = '/';
-         popup++;
-         *popup = '/';
-      }
-
-
-      q=popup; /* by BREITENB NEW! */
-      while (q>=buff)
-      {
-         if (*q==' ' || *q=='\t')
-            q--;
-         else break;
-      }
-      if (q>=buff)
-      {
-         if (*q=='=') *++q='1';
-         /* result of popup is assigned to a variable! ensure success. hehehe. */
-      }
-   }
-
-   /* Filter all other crap like onUnload onExit etc.  (by BREITENB) NEW!*/
-   popup=strstr( buff, "<body");
-   if (!popup) popup=strstr( buff, "<BODY");
-   if (!popup) popup=strstr( buff, "<Body");
-   if (!popup) popup=strstr( buff, "<BOdy");
-   if (popup)
-   {
-      q=strchr(popup,'>');
-      if (q)
+      close_p = strchr(start_p, '>');
+      if (close_p)
       {
          /* we are now between <body and the ending > */
-         p=strstr(popup, "onUnload");
+         p = strstr(start_p, "onUnload");
          if (p)
          {
-            strncpy(p,"_nU_",4);
+            strncpy(p, "_nU_", 4);
+            csp->flags |= CSP_FLAG_MODIFIED;
          }
-         p=strstr(popup, "onExit");
+         p = strstr(start_p, "onExit");
          if (p)
          {
-            strncpy(p,"_nE_",4);
+            strncpy(p, "_nE_", 4);
+            csp->flags |= CSP_FLAG_MODIFIED;
          }
       }
    }
 
 }
 
-#endif /* def KILLPOPUPS */
+#endif /* def FEATURE_KILL_POPUPS */
 
 /*
   Local Variables:

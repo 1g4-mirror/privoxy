@@ -1,15 +1,15 @@
-#ifndef _W32TASKBAR_H
-#define _W32TASKBAR_H
-#define W32TASKBAR_H_VERSION "$Id: w32taskbar.h,v 1.1 2001/05/13 21:57:07 administrator Exp $"
+#ifndef W32TASKBAR_H_INCLUDED
+#define W32TASKBAR_H_INCLUDED
+#define W32TASKBAR_H_VERSION "$Id: w32taskbar.h,v 1.3 2002/03/24 12:03:47 jongfoster Exp $"
 /*********************************************************************
  *
- * File        :  $Source: /home/administrator/cvs/ijb/w32taskbar.h,v $
+ * File        :  $Source: /cvsroot/ijbswa/current/w32taskbar.h,v $
  *
  * Purpose     :  Functions for creating, setting and destroying the
  *                workspace tray icon
  *
- * Copyright   :  Written by and Copyright (C) 2001 the SourceForge
- *                IJBSWA team.  http://ijbswa.sourceforge.net
+ * Copyright   :  Written by and Copyright (C) 2001-2002 members of
+ *                the Privoxy team.  http://www.privoxy.org/
  *
  *                Written by and Copyright (C) 1999 Adam Lock
  *                <locka@iol.ie>
@@ -34,6 +34,16 @@
  *
  * Revisions   :
  *    $Log: w32taskbar.h,v $
+ *    Revision 1.3  2002/03/24 12:03:47  jongfoster
+ *    Name change
+ *
+ *    Revision 1.2  2001/07/29 18:43:08  jongfoster
+ *    Changing #ifdef _FILENAME_H to FILENAME_H_INCLUDED, to conform to
+ *    ANSI C rules.
+ *
+ *    Revision 1.1.1.1  2001/05/15 13:59:08  oes
+ *    Initial import of version 2.9.3 source tree
+ *
  *
  *********************************************************************/
 
@@ -55,7 +65,7 @@ extern const char w32taskbar_h_rcs[];
 } /* extern "C" */
 #endif
 
-#endif /* ndef _W32TASKBAR_H */
+#endif /* ndef W32TASKBAR_H_INCLUDED */
 
 
 /*

@@ -1,12 +1,12 @@
-const char amiga_rcs[] = "$Id: amiga.c,v 1.1 2001/05/13 21:57:06 administrator Exp $";
+const char amiga_rcs[] = "$Id: amiga.c,v 1.8 2002/03/25 19:32:15 joergs Exp $";
 /*********************************************************************
  *
- * File        :  $Source: /home/administrator/cvs/ijb/jcc.c,v $
+ * File        :  $Source: /cvsroot/ijbswa/current/amiga.c,v $
  *
  * Purpose     :  Amiga-specific declarations.
  *
  * Copyright   :  Written by and Copyright (C) 2001 the SourceForge
- *                IJBSWA team.  http://ijbswa.sourceforge.net
+ *                Privoxy team. http://www.privoxy.org/
  *
  *                This program is free software; you can redistribute it 
  *                and/or modify it under the terms of the GNU General
@@ -27,7 +27,52 @@ const char amiga_rcs[] = "$Id: amiga.c,v 1.1 2001/05/13 21:57:06 administrator E
  *                Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
  * Revisions   :
- *    $Log: jcc.c,v $
+ *    $Log: amiga.c,v $
+ *    Revision 1.8  2002/03/25 19:32:15  joergs
+ *    Name in version string changed from junkbuster to Privoxy.
+ *
+ *    Revision 1.7  2002/03/24 13:25:43  swa
+ *    name change related issues
+ *
+ *    Revision 1.6  2002/03/09 20:03:52  jongfoster
+ *    - Making various functions return int rather than size_t.
+ *      (Undoing a recent change).  Since size_t is unsigned on
+ *      Windows, functions like read_socket that return -1 on
+ *      error cannot return a size_t.
+ *
+ *      THIS WAS A MAJOR BUG - it caused frequent, unpredictable
+ *      crashes, and also frequently caused JB to jump to 100%
+ *      CPU and stay there.  (Because it thought it had just
+ *      read ((unsigned)-1) == 4Gb of data...)
+ *
+ *    - The signature of write_socket has changed, it now simply
+ *      returns success=0/failure=nonzero.
+ *
+ *    - Trying to get rid of a few warnings --with-debug on
+ *      Windows, I've introduced a new type "jb_socket".  This is
+ *      used for the socket file descriptors.  On Windows, this
+ *      is SOCKET (a typedef for unsigned).  Everywhere else, it's
+ *      an int.  The error value can't be -1 any more, so it's
+ *      now JB_INVALID_SOCKET (which is -1 on UNIX, and in
+ *      Windows it maps to the #define INVALID_SOCKET.)
+ *
+ *    - The signature of bind_port has changed.
+ *
+ *    Revision 1.5  2002/03/03 09:18:03  joergs
+ *    Made jumbjuster work on AmigaOS again.
+ *
+ *    Revision 1.4  2001/10/07 15:35:13  oes
+ *    Replaced 6 boolean members of csp with one bitmap (csp->flags)
+ *
+ *    Revision 1.3  2001/09/12 22:54:51  joergs
+ *    Stacksize of main thread increased.
+ *
+ *    Revision 1.2  2001/05/23 00:13:58  joergs
+ *    AmigaOS support fixed.
+ *
+ *    Revision 1.1.1.1  2001/05/15 13:58:46  oes
+ *    Initial import of version 2.9.3 source tree
+ *
  *
  *********************************************************************/
 
@@ -39,12 +84,12 @@ const char amiga_rcs[] = "$Id: amiga.c,v 1.1 2001/05/13 21:57:06 administrator E
 #include <stdio.h>
 #include <signal.h>
 
-#include "amiga.h"
+#include "project.h"
 
-chonst char amiga_h_rcs[] = AMIGA_H_VERSION;
+const char amiga_h_rcs[] = AMIGA_H_VERSION;
 
-unsigned long __stack = 20*1024;
-/* static char ver[] = "$VER: junkbuster " __AMIGAVERSION__ " (" __AMIGADATE__ ")"; */
+unsigned long __stack = 100*1024;
+static char ver[] = "$VER: Privoxy " __AMIGAVERSION__ " (" __AMIGADATE__ ")";
 struct Task *main_task = NULL;
 int childs = 0;
 
@@ -64,22 +109,24 @@ __saveds ULONG server_thread(void)
    {
       SetErrnoPtr(&(UserData.eno),sizeof(int));
       local_csp->cfd=ObtainSocket(local_csp->cfd, AF_INET, SOCK_STREAM, 0);
-      if(-1!=local_csp->cfd)
+      if(JB_INVALID_SOCKET!=local_csp->cfd)
       {
          Signal(main_task,SIGF_SINGLE);
          serve((struct client_state *) local_csp);
       } else {
-         local_csp->active = 0;
+         local_csp->flags &= ~CSP_FLAG_ACTIVE;
          Signal(main_task,SIGF_SINGLE);
       }
       CloseLibrary(SocketBase);
    } else {
-      local_csp->active = 0;
+      local_csp->flags &= ~CSP_FLAG_ACTIVE;
       Signal(main_task,SIGF_SINGLE);
    }
    childs--;
    return 0;
 }
+
+static BPTR olddir;
 
 void amiga_exit(void)
 {
@@ -87,6 +134,7 @@ void amiga_exit(void)
    {
       CloseLibrary(SocketBase);
    }
+   CurrentDir(olddir);
 }
 
 static struct SignalSemaphore memsem;
@@ -114,12 +162,13 @@ void InitAmiga(void)
    InitSemaphore(&memsem);
    memsemptr = &memsem;
 
+   olddir=CurrentDir(GetProgramDir());
    atexit(amiga_exit);
 }
 
 #ifdef __GNUC__
 #ifdef libnix
-/* multitaskingsafe libnix replacements */
+/* multithreadingsafe libnix replacements */
 static void *memPool=NULL;
 
 void *malloc (size_t s)
@@ -228,7 +277,7 @@ ADD2EXIT(__memCleanUp,-50);
 #error No libnix and no ixemul!?
 #endif /* libnix */
 #else
-#error Only GCC is supported, multitasking safe malloc/free required.
+#error Only GCC is supported, multithreading safe malloc/free required.
 #endif /* __GNUC__ */
 
 #endif /* def AMIGA */

@@ -1,21 +1,21 @@
-const char loaders_rcs[] = "$Id: loaders.c,v 1.1 2001/05/13 21:57:06 administrator Exp $";
+const char loaders_rcs[] = "$Id: loaders.c,v 1.49 2002/04/19 16:53:25 jongfoster Exp $";
 /*********************************************************************
  *
- * File        :  $Source: /home/administrator/cvs/ijb/loaders.c,v $
+ * File        :  $Source: /cvsroot/ijbswa/current/loaders.c,v $
  *
  * Purpose     :  Functions to load and unload the various
  *                configuration files.  Also contains code to manage
- *                the list of active loaders, and to automatically 
+ *                the list of active loaders, and to automatically
  *                unload files that are no longer in use.
  *
  * Copyright   :  Written by and Copyright (C) 2001 the SourceForge
- *                IJBSWA team.  http://ijbswa.sourceforge.net
+ *                Privoxy team. http://www.privoxy.org/
  *
  *                Based on the Internet Junkbuster originally written
- *                by and Copyright (C) 1997 Anonymous Coders and 
+ *                by and Copyright (C) 1997 Anonymous Coders and
  *                Junkbusters Corporation.  http://www.junkbusters.com
  *
- *                This program is free software; you can redistribute it 
+ *                This program is free software; you can redistribute it
  *                and/or modify it under the terms of the GNU General
  *                Public License as published by the Free Software
  *                Foundation; either version 2 of the License, or (at
@@ -35,6 +35,232 @@ const char loaders_rcs[] = "$Id: loaders.c,v 1.1 2001/05/13 21:57:06 administrat
  *
  * Revisions   :
  *    $Log: loaders.c,v $
+ *    Revision 1.49  2002/04/19 16:53:25  jongfoster
+ *    Optimize away a function call by using an equivalent macro
+ *
+ *    Revision 1.48  2002/04/05 00:56:09  gliptak
+ *    Correcting typo to clean up on realloc failure
+ *
+ *    Revision 1.47  2002/03/26 22:29:55  swa
+ *    we have a new homepage!
+ *
+ *    Revision 1.46  2002/03/24 13:25:43  swa
+ *    name change related issues
+ *
+ *    Revision 1.45  2002/03/16 23:54:06  jongfoster
+ *    Adding graceful termination feature, to help look for memory leaks.
+ *    If you enable this (which, by design, has to be done by hand
+ *    editing config.h) and then go to http://i.j.b/die, then the program
+ *    will exit cleanly after the *next* request.  It should free all the
+ *    memory that was used.
+ *
+ *    Revision 1.44  2002/03/16 21:51:00  jongfoster
+ *    Fixing free(NULL).
+ *
+ *    Revision 1.43  2002/03/16 20:28:34  oes
+ *    Added descriptions to the filters so users will know what they select in the cgi editor
+ *
+ *    Revision 1.42  2002/03/13 00:27:05  jongfoster
+ *    Killing warnings
+ *
+ *    Revision 1.41  2002/03/12 01:42:50  oes
+ *    Introduced modular filters
+ *
+ *    Revision 1.40  2002/03/08 17:46:04  jongfoster
+ *    Fixing int/size_t warnings
+ *
+ *    Revision 1.39  2002/03/07 03:46:17  oes
+ *    Fixed compiler warnings
+ *
+ *    Revision 1.38  2002/03/06 22:54:35  jongfoster
+ *    Automated function-comment nitpicking.
+ *
+ *    Revision 1.37  2002/03/03 15:07:49  oes
+ *    Re-enabled automatic config reloading
+ *
+ *    Revision 1.36  2002/01/22 23:46:18  jongfoster
+ *    Moving edit_read_line() and simple_read_line() to loaders.c, and
+ *    extending them to support reading MS-DOS, Mac and UNIX style files
+ *    on all platforms.
+ *
+ *    Modifying read_config_line() (without changing it's prototype) to
+ *    be a trivial wrapper for edit_read_line().  This means that we have
+ *    one function to read a line and handle comments, which is common
+ *    between the initialization code and the edit interface.
+ *
+ *    Revision 1.35  2002/01/17 21:03:08  jongfoster
+ *    Moving all our URL and URL pattern parsing code to urlmatch.c.
+ *
+ *    Renaming free_url to free_url_spec, since it frees a struct url_spec.
+ *
+ *    Revision 1.34  2001/12/30 14:07:32  steudten
+ *    - Add signal handling (unix)
+ *    - Add SIGHUP handler (unix)
+ *    - Add creation of pidfile (unix)
+ *    - Add action 'top' in rc file (RH)
+ *    - Add entry 'SIGNALS' to manpage
+ *    - Add exit message to logfile (unix)
+ *
+ *    Revision 1.33  2001/11/13 00:16:38  jongfoster
+ *    Replacing references to malloc.h with the standard stdlib.h
+ *    (See ANSI or K&R 2nd Ed)
+ *
+ *    Revision 1.32  2001/11/07 00:02:13  steudten
+ *    Add line number in error output for lineparsing for
+ *    actionsfile and configfile.
+ *    Special handling for CLF added.
+ *
+ *    Revision 1.31  2001/10/26 17:39:01  oes
+ *    Removed csp->referrer
+ *    Moved ijb_isspace and ijb_tolower to project.h
+ *
+ *    Revision 1.30  2001/10/25 03:40:48  david__schmidt
+ *    Change in porting tactics: OS/2's EMX porting layer doesn't allow multiple
+ *    threads to call select() simultaneously.  So, it's time to do a real, live,
+ *    native OS/2 port.  See defines for __EMX__ (the porting layer) vs. __OS2__
+ *    (native). Both versions will work, but using __OS2__ offers multi-threading.
+ *
+ *    Revision 1.29  2001/10/23 21:38:53  jongfoster
+ *    Adding error-checking to create_url_spec()
+ *
+ *    Revision 1.28  2001/10/07 15:40:39  oes
+ *    Replaced 6 boolean members of csp with one bitmap (csp->flags)
+ *
+ *    Revision 1.27  2001/09/22 16:36:59  jongfoster
+ *    Removing unused parameter fs from read_config_line()
+ *
+ *    Revision 1.26  2001/09/22 14:05:22  jongfoster
+ *    Bugfix: Multiple escaped "#" characters in a configuration
+ *    file are now permitted.
+ *    Also removing 3 unused headers.
+ *
+ *    Revision 1.25  2001/09/13 22:44:03  jongfoster
+ *    Adding {} to an if statement
+ *
+ *    Revision 1.24  2001/07/30 22:08:36  jongfoster
+ *    Tidying up #defines:
+ *    - All feature #defines are now of the form FEATURE_xxx
+ *    - Permanently turned off WIN_GUI_EDIT
+ *    - Permanently turned on WEBDAV and SPLIT_PROXY_ARGS
+ *
+ *    Revision 1.23  2001/07/20 15:51:54  oes
+ *    Fixed indentation of prepocessor commands
+ *
+ *    Revision 1.22  2001/07/20 15:16:17  haroon
+ *    - per Guy's suggestion, added a while loop in sweep() to catch not just
+ *      the last inactive CSP but all other consecutive inactive CSPs after that
+ *      as well
+ *
+ *    Revision 1.21  2001/07/18 17:26:24  oes
+ *    Changed to conform to new pcrs interface
+ *
+ *    Revision 1.20  2001/07/17 13:07:01  oes
+ *    Fixed segv when last line in config files
+ *     lacked a terminating (\r)\n
+ *
+ *    Revision 1.19  2001/07/13 14:01:54  oes
+ *    Removed all #ifdef PCRS
+ *
+ *    Revision 1.18  2001/06/29 21:45:41  oes
+ *    Indentation, CRLF->LF, Tab-> Space
+ *
+ *    Revision 1.17  2001/06/29 13:31:51  oes
+ *    Various adaptions
+ *
+ *    Revision 1.16  2001/06/09 10:55:28  jongfoster
+ *    Changing BUFSIZ ==> BUFFER_SIZE
+ *
+ *    Revision 1.15  2001/06/07 23:14:14  jongfoster
+ *    Removing ACL and forward file loaders - these
+ *    files have been merged into the config file.
+ *    Cosmetic: Moving unloader funcs next to their
+ *    respective loader funcs
+ *
+ *    Revision 1.14  2001/06/01 03:27:04  oes
+ *    Fixed line continuation problem
+ *
+ *    Revision 1.13  2001/05/31 21:28:49  jongfoster
+ *    Removed all permissionsfile code - it's now called the actions
+ *    file, and (almost) all the code is in actions.c
+ *
+ *    Revision 1.12  2001/05/31 17:32:31  oes
+ *
+ *     - Enhanced domain part globbing with infix and prefix asterisk
+ *       matching and optional unanchored operation
+ *
+ *    Revision 1.11  2001/05/29 23:25:24  oes
+ *
+ *     - load_config_line() and load_permissions_file() now use chomp()
+ *
+ *    Revision 1.10  2001/05/29 09:50:24  jongfoster
+ *    Unified blocklist/imagelist/permissionslist.
+ *    File format is still under discussion, but the internal changes
+ *    are (mostly) done.
+ *
+ *    Also modified interceptor behaviour:
+ *    - We now intercept all URLs beginning with one of the following
+ *      prefixes (and *only* these prefixes):
+ *        * http://i.j.b/
+ *        * http://ijbswa.sf.net/config/
+ *        * http://ijbswa.sourceforge.net/config/
+ *    - New interceptors "home page" - go to http://i.j.b/ to see it.
+ *    - Internal changes so that intercepted and fast redirect pages
+ *      are not replaced with an image.
+ *    - Interceptors now have the option to send a binary page direct
+ *      to the client. (i.e. ijb-send-banner uses this)
+ *    - Implemented show-url-info interceptor.  (Which is why I needed
+ *      the above interceptors changes - a typical URL is
+ *      "http://i.j.b/show-url-info?url=www.somesite.com/banner.gif".
+ *      The previous mechanism would not have intercepted that, and
+ *      if it had been intercepted then it then it would have replaced
+ *      it with an image.)
+ *
+ *    Revision 1.9  2001/05/26 17:12:07  jongfoster
+ *    Fatal errors loading configuration files now give better error messages.
+ *
+ *    Revision 1.8  2001/05/26 00:55:20  jongfoster
+ *    Removing duplicated code.  load_forwardfile() now uses create_url_spec()
+ *
+ *    Revision 1.7  2001/05/26 00:28:36  jongfoster
+ *    Automatic reloading of config file.
+ *    Removed obsolete SIGHUP support (Unix) and Reload menu option (Win32).
+ *    Most of the global variables have been moved to a new
+ *    struct configuration_spec, accessed through csp->config->globalname
+ *    Most of the globals remaining are used by the Win32 GUI.
+ *
+ *    Revision 1.6  2001/05/23 12:27:33  oes
+ *
+ *    Fixed ugly indentation of my last changes
+ *
+ *    Revision 1.5  2001/05/23 10:39:05  oes
+ *    - Added support for escaping the comment character
+ *      in config files by a backslash
+ *    - Added support for line continuation in config
+ *      files
+ *    - Fixed a buffer overflow bug with long config lines
+ *
+ *    Revision 1.4  2001/05/22 18:56:28  oes
+ *    CRLF -> LF
+ *
+ *    Revision 1.3  2001/05/20 01:21:20  jongfoster
+ *    Version 2.9.4 checkin.
+ *    - Merged popupfile and cookiefile, and added control over PCRS
+ *      filtering, in new "permissionsfile".
+ *    - Implemented LOG_LEVEL_FATAL, so that if there is a configuration
+ *      file error you now get a message box (in the Win32 GUI) rather
+ *      than the program exiting with no explanation.
+ *    - Made killpopup use the PCRS MIME-type checking and HTTP-header
+ *      skipping.
+ *    - Removed tabs from "config"
+ *    - Moved duplicated url parsing code in "loaders.c" to a new funcition.
+ *    - Bumped up version number.
+ *
+ *    Revision 1.2  2001/05/17 23:01:01  oes
+ *     - Cleaned CRLF's from the sources and related files
+ *
+ *    Revision 1.1.1.1  2001/05/15 13:58:59  oes
+ *    Initial import of version 2.9.3 source tree
+ *
  *
  *********************************************************************/
 
@@ -45,74 +271,39 @@ const char loaders_rcs[] = "$Id: loaders.c,v 1.1 2001/05/13 21:57:06 administrat
 #include <stdlib.h>
 #include <sys/types.h>
 #include <string.h>
-#include <malloc.h>
 #include <errno.h>
 #include <sys/stat.h>
 #include <ctype.h>
+#include <assert.h>
 
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(__OS2__)
 #include <unistd.h>
 #endif
 
 #include "project.h"
+#include "list.h"
 #include "loaders.h"
-#include "encode.h"
 #include "filters.h"
 #include "parsers.h"
 #include "jcc.h"
-#include "ssplit.h"
 #include "miscutil.h"
 #include "errlog.h"
-#include "gateway.h"
-
-#ifndef SPLIT_PROXY_ARGS
-/* For strsav */
-#include "showargs.h"
-#endif /* ndef SPLIT_PROXY_ARGS */
+#include "actions.h"
+#include "urlmatch.h"
 
 const char loaders_h_rcs[] = LOADERS_H_VERSION;
-
-/* Fix a problem with Solaris.  There should be no effect on other
- * platforms.
- * Solaris's isspace() is a macro which uses it's argument directly
- * as an array index.  Therefore we need to make sure that high-bit
- * characters generate +ve values, and ideally we also want to make
- * the argument match the declared parameter type of "int".
- */
-#define ijb_isspace(__X) isspace((int)(unsigned char)(__X))
-
-
-#define NLOADERS 8
-static int (*loaders[NLOADERS])(struct client_state *);
-
 
 /*
  * Currently active files.
  * These are also entered in the main linked list of files.
  */
-static struct file_list *current_blockfile      = NULL;
-static struct file_list *current_cookiefile     = NULL;
-static struct file_list *current_forwardfile    = NULL;
 
-#ifdef ACL_FILES
-static struct file_list *current_aclfile        = NULL;
-#endif /* def ACL_FILES */
-
-#ifdef USE_IMAGE_LIST
-static struct file_list *current_imagefile      = NULL;
-#endif /* def USE_IMAGE_LIST */
-
-#ifdef KILLPOPUPS
-static struct file_list * current_popupfile     = NULL;
-#endif /* def KILLPOPUPS */
-
-#ifdef TRUST_FILES
+#ifdef FEATURE_TRUST
 static struct file_list *current_trustfile      = NULL;
-#endif /* def TRUST_FILES */
+#endif /* def FEATURE_TRUST */
 
-#ifdef PCRS
 static struct file_list *current_re_filterfile  = NULL;
-#endif /* def PCRS */
+
 
 
 /*********************************************************************
@@ -143,6 +334,7 @@ void sweep(void)
 {
    struct file_list *fl, *nfl;
    struct client_state *csp, *ncsp;
+   int i;
 
    /* clear all of the file's active flags */
    for ( fl = files->next; NULL != fl; fl = fl->next )
@@ -150,103 +342,88 @@ void sweep(void)
       fl->active = 0;
    }
 
-   for (csp = clients; csp && (ncsp = csp->next) ; csp = csp->next)
+   for (csp = clients; csp && (NULL != (ncsp = csp->next)) ; csp = csp->next)
    {
-      if (ncsp->active)
+      if (ncsp->flags & CSP_FLAG_ACTIVE)
       {
          /* mark this client's files as active */
 
-         if (ncsp->blist)     /* block files */
+         /*
+          * Always have a configuration file.
+          * (Also note the slightly non-standard extra
+          * indirection here.)
+          */
+         ncsp->config->config_file_list->active = 1;
+
+         for (i = 0; i < MAX_ACTION_FILES; i++)
          {
-            ncsp->blist->active = 1;
+            if (ncsp->actions_list[i])     /* actions files */
+            {
+               ncsp->actions_list[i]->active = 1;
+            }
          }
 
-         if (ncsp->clist)     /* cookie files */
-         {
-            ncsp->clist->active = 1;
-         }
-
-         /* FIXME: These were left out of the "10" release.  Should they be here? */
-         if (ncsp->flist)     /* forward files */
-         {
-            ncsp->flist->active = 1;
-         }
-
-#ifdef ACL_FILES
-         if (ncsp->alist)     /* acl files */
-         {
-            ncsp->alist->active = 1;
-         }
-#endif /* def ACL_FILES */
-
-#ifdef USE_IMAGE_LIST
-         if (ncsp->ilist)     /* image files */
-         {
-            ncsp->ilist->active = 1;
-         }
-#endif /* def USE_IMAGE_LIST */
-
-#ifdef KILLPOPUPS
-         if (ncsp->plist)     /* killpopup files */
-         {
-            ncsp->plist->active = 1;
-         }
-#endif /* def KILLPOPUPS */
-
-#ifdef PCRS
-         if (ncsp->rlist)     /* perl re files */
+         if (ncsp->rlist)     /* pcrsjob files */
          {
             ncsp->rlist->active = 1;
          }
-#endif /* def PCRS */
 
-#ifdef TRUST_FILES
+#ifdef FEATURE_TRUST
          if (ncsp->tlist)     /* trust files */
          {
             ncsp->tlist->active = 1;
          }
-#endif /* def TRUST_FILES */
+#endif /* def FEATURE_TRUST */
 
       }
       else
+      /*
+       * this client is not active, release its resources
+       * and the ones of all inactive clients that might
+       * follow it
+       */
       {
-         /* this client one is not active, release its resources */
-         csp->next = ncsp->next;
-
-         freez(ncsp->ip_addr_str);
-         freez(ncsp->referrer);
-         freez(ncsp->x_forwarded);
-         freez(ncsp->ip_addr_str);
-         freez(ncsp->iob->buf);
-
-         free_http_request(ncsp->http);
-
-         destroy_list(ncsp->headers);
-         destroy_list(ncsp->cookie_list);
-
-#ifdef STATISTICS
-         urls_read++;
-         if (ncsp->rejected)
+         while (!(ncsp->flags & CSP_FLAG_ACTIVE))
          {
-            urls_rejected++;
-         }
-#endif /* def STATISTICS */
+            csp->next = ncsp->next;
 
-         freez(ncsp);
+            freez(ncsp->ip_addr_str);
+            freez(ncsp->my_ip_addr_str);
+            freez(ncsp->my_hostname);
+            freez(ncsp->x_forwarded);
+            freez(ncsp->iob->buf);
+
+            free_http_request(ncsp->http);
+
+            destroy_list(ncsp->headers);
+            destroy_list(ncsp->cookie_list);
+
+            free_current_action(ncsp->action);
+
+#ifdef FEATURE_STATISTICS
+            urls_read++;
+            if (ncsp->flags & CSP_FLAG_REJECTED)
+            {
+               urls_rejected++;
+            }
+#endif /* def FEATURE_STATISTICS */
+
+            freez(ncsp);
+
+            /* are there any more in sequence after it? */
+            if( (ncsp = csp->next) == NULL)
+               break;
+         }
       }
    }
 
-   for (fl = files; fl && (nfl = fl->next) ; fl = fl->next)
+   for (fl = files; fl && ((nfl = fl->next) != NULL) ; fl = fl->next)
    {
       if ( ( 0 == nfl->active ) && ( NULL != nfl->unloader ) )
       {
          fl->next = nfl->next;
 
          (nfl->unloader)(nfl->f);
-
-#ifndef SPLIT_PROXY_ARGS
-         freez(nfl->proxy_args);
-#endif /* ndef SPLIT_PROXY_ARGS */
 
          freez(nfl->filename);
 
@@ -259,287 +436,16 @@ void sweep(void)
 
 /*********************************************************************
  *
- * Function    :  unload_url
- *
- * Description :  Called from the "unloaders".  Freez the url
- *                structure elements.
- *
- * Parameters  :
- *          1  :  url = pointer to a url_spec structure.
- *
- * Returns     :  N/A
- *
- *********************************************************************/
-static void unload_url(struct url_spec *url)
-{
-   if (url == NULL) return;
-
-   freez(url->spec);
-   freez(url->domain);
-   freez(url->dbuf);
-   freez(url->dvec);
-   freez(url->path);
-#ifdef REGEX
-   if (url->preg)
-   {
-      regfree(url->preg);
-      freez(url->preg);
-   }
-#endif
-
-}
-
-
-#ifdef ACL_FILES
-/*********************************************************************
- *
- * Function    :  unload_aclfile
- *
- * Description :  Unloads an aclfile.
- *
- * Parameters  :
- *          1  :  f = the data structure associated with the aclfile.
- *
- * Returns     :  N/A
- *
- *********************************************************************/
-static void unload_aclfile(void *f)
-{
-   struct access_control_list *b = (struct access_control_list *)f;
-   if (b == NULL) return;
-
-   unload_aclfile(b->next);
-
-   freez(b);
-
-}
-#endif /* def ACL_FILES */
-
-/*********************************************************************
- *
- * Function    :  unload_blockfile
- *
- * Description :  Unloads a blockfile.
- *
- * Parameters  :
- *          1  :  f = the data structure associated with the blockfile.
- *
- * Returns     :  N/A
- *
- *********************************************************************/
-static void unload_blockfile(void *f)
-{
-   struct block_spec *b = (struct block_spec *)f;
-   if (b == NULL) return;
-
-   unload_blockfile(b->next);
-
-   unload_url(b->url);
-
-   freez(b);
-
-}
-
-
-#ifdef USE_IMAGE_LIST
-/*********************************************************************
- *
- * Function    :  unload_imagefile
- *
- * Description :  Unloads an imagefile.
- *
- * Parameters  :
- *          1  :  f = the data structure associated with the imagefile.
- *
- * Returns     :  N/A
- *
- *********************************************************************/
-static void unload_imagefile(void *f)
-{
-   struct block_spec *b = (struct block_spec *)f;
-   if (b == NULL) return;
-
-   unload_imagefile(b->next);
-
-   unload_url(b->url);
-
-   freez(b);
-
-}
-#endif /* def USE_IMAGE_LIST */
-
-
-/*********************************************************************
- *
- * Function    :  unload_cookiefile
- *
- * Description :  Unloads a cookiefile.
- *
- * Parameters  :
- *          1  :  f = the data structure associated with the cookiefile.
- *
- * Returns     :  N/A
- *
- *********************************************************************/
-static void unload_cookiefile(void *f)
-{
-   struct cookie_spec *b = (struct cookie_spec *)f;
-   if (b == NULL) return;
-
-   unload_cookiefile(b->next);
-
-   unload_url(b->url);
-
-   freez(b);
-
-}
-
-
-#ifdef TRUST_FILES
-/*********************************************************************
- *
- * Function    :  unload_trustfile
- *
- * Description :  Unloads a trustfile.
- *
- * Parameters  :
- *          1  :  f = the data structure associated with the trustfile.
- *
- * Returns     :  N/A
- *
- *********************************************************************/
-static void unload_trustfile(void *f)
-{
-   struct block_spec *b = (struct block_spec *)f;
-   if (b == NULL) return;
-
-   unload_trustfile(b->next);
-
-   unload_url(b->url);
-
-   freez(b);
-
-}
-#endif /* def TRUST_FILES */
-
-
-/*********************************************************************
- *
- * Function    :  unload_forwardfile
- *
- * Description :  Unloads a forwardfile.
- *
- * Parameters  :
- *          1  :  f = the data structure associated with the forwardfile.
- *
- * Returns     :  N/A
- *
- *********************************************************************/
-static void unload_forwardfile(void *f)
-{
-   struct forward_spec *b = (struct forward_spec *)f;
-   if (b == NULL) return;
-
-   unload_forwardfile(b->next);
-
-   unload_url(b->url);
-
-   freez(b->gw->gateway_host);
-   freez(b->gw->forward_host);
-
-   freez(b);
-
-}
-
-
-#ifdef PCRS
-/*********************************************************************
- *
- * Function    :  unload_re_filterfile
- *
- * Description :  Unload the re_filter list.
- *
- * Parameters  :
- *          1  :  f = the data structure associated with the filterfile.
- *
- * Returns     :  N/A
- *
- *********************************************************************/
-static void unload_re_filterfile(void *f)
-{
-   pcrs_job *joblist;
-   struct re_filterfile_spec *b = (struct re_filterfile_spec *)f;
-
-   if (b == NULL) return;
-
-   destroy_list(b->patterns);
-
-   joblist = b->joblist;
-   while ( NULL != (joblist = pcrs_free_job(joblist)) ) {}
-
-   freez(b);
-
-}
-#endif /* def PCRS */
-
-
-#ifdef KILLPOPUPS
-/*********************************************************************
- *
- * Function    :  unload_popupfile
- *
- * Description :  Free the lists of blocked, and allowed popup sites.
- *
- * Parameters  :
- *          1  :  csp = Current client state (buffers, headers, etc...)
- *
- * Returns     :  N/A
- *
- *********************************************************************/
-static void unload_popupfile(void * b)
-{
-   struct popup_settings * data = (struct popup_settings *) b;
-   struct popup_blocklist * cur = NULL;
-   struct popup_blocklist * temp= NULL;
-
-   /* Free the blocked list. */
-   cur = data->blocked;
-   while (cur != NULL)
-   {
-      temp = cur->next;
-      freez (cur->host_name);
-      free  (cur);
-      cur  = temp;
-   }
-   data->blocked = NULL;
-
-   /* Free the allowed list. */
-   cur = data->allowed;
-   while (cur != NULL)
-   {
-      temp = cur->next;
-      freez (cur->host_name);
-      free  (cur);
-      cur  = temp;
-   }
-   data->allowed = NULL;
-
-}
-#endif /* def KILLPOPUPS */
-
-
-/*********************************************************************
- *
  * Function    :  check_file_changed
  *
  * Description :  Helper function to check if a file needs reloading.
  *                If "current" is still current, return it.  Otherwise
- *                allocates a new (zeroed) "struct file_list", fills 
+ *                allocates a new (zeroed) "struct file_list", fills
  *                in the disk file name and timestamp, and returns it.
  *
  * Parameters  :
  *          1  :  current = The file_list currently being used - will
- *                          be checked to see if it is out of date. 
+ *                          be checked to see if it is out of date.
  *                          May be NULL (which is treated as out of
  *                          date).
  *          2  :  filename = Name of file to check.
@@ -547,19 +453,16 @@ static void unload_popupfile(void * b)
  *                           This will be set to NULL, OR a struct
  *                           file_list newly allocated on the
  *                           heap, with the filename and lastmodified
- *                           fields filled, standard header giving file
- *                           name in proxy_args, and all others zeroed.
- *                           (proxy_args is only filled in if
- *                           SPLIT_PROXY_ARGS and !suppress_blocklists).
+ *                           fields filled, and all others zeroed.
  *
  * Returns     :  If file unchanged: 0 (and sets newfl == NULL)
  *                If file changed: 1 and sets newfl != NULL
  *                On error: 1 and sets newfl == NULL
  *
  *********************************************************************/
-static int check_file_changed(const struct file_list * current,
-                              const char * filename,
-                              struct file_list ** newfl)
+int check_file_changed(const struct file_list * current,
+                       const char * filename,
+                       struct file_list ** newfl)
 {
    struct file_list *fs;
    struct stat statbuf[1];
@@ -580,7 +483,6 @@ static int check_file_changed(const struct file_list * current,
    }
 
    fs = (struct file_list *)zalloc(sizeof(struct file_list));
-
    if (fs == NULL)
    {
       /* Out of memory error */
@@ -596,25 +498,421 @@ static int check_file_changed(const struct file_list * current,
       freez (fs);
       return 1;
    }
-
-#ifndef SPLIT_PROXY_ARGS
-   if (!suppress_blocklists)
-   {
-      char * p = html_encode(filename);
-      if (p)
-      {
-         fs->proxy_args = strsav(fs->proxy_args, "<h2>The file `");
-         fs->proxy_args = strsav(fs->proxy_args, p);
-         fs->proxy_args = strsav(fs->proxy_args, 
-            "' contains the following patterns</h2>\n");
-         freez(p);
-      }
-      fs->proxy_args = strsav(fs->proxy_args, "<pre>");
-   }
-#endif /* ndef SPLIT_PROXY_ARGS */
-
    *newfl = fs;
    return 1;
+}
+
+
+/*********************************************************************
+ *
+ * Function    :  simple_read_line
+ *
+ * Description :  Read a single line from a file and return it.
+ *                This is basically a version of fgets() that malloc()s
+ *                it's own line buffer.  Note that the buffer will
+ *                always be a multiple of BUFFER_SIZE bytes long.
+ *                Therefore if you are going to keep the string for
+ *                an extended period of time, you should probably
+ *                strdup() it and free() the original, to save memory.
+ *
+ *
+ * Parameters  :
+ *          1  :  dest = destination for newly malloc'd pointer to
+ *                line data.  Will be set to NULL on error.
+ *          2  :  fp = File to read from
+ *          3  :  newline = Standard for newlines in the file.
+ *                Will be unchanged if it's value on input is not
+ *                NEWLINE_UNKNOWN.
+ *                On output, may be changed from NEWLINE_UNKNOWN to
+ *                actual convention in file.
+ *
+ * Returns     :  JB_ERR_OK     on success
+ *                JB_ERR_MEMORY on out-of-memory
+ *                JB_ERR_FILE   on EOF.
+ *
+ *********************************************************************/
+jb_err simple_read_line(FILE *fp, char **dest, int *newline)
+{
+   size_t len = 0;
+   size_t buflen = BUFFER_SIZE;
+   char * buf;
+   char * p;
+   int ch;
+   int realnewline = NEWLINE_UNKNOWN;
+
+   if (NULL == (buf = malloc(buflen)))
+   {
+      return JB_ERR_MEMORY;
+   }
+
+   p = buf;
+
+/*
+ * Character codes.  If you have a wierd compiler and the following are
+ * incorrect, you also need to fix NEWLINE() in loaders.h
+ */
+#define CHAR_CR '\r' /* ASCII 13 */
+#define CHAR_LF '\n' /* ASCII 10 */
+
+   for (;;)
+   {
+      ch = getc(fp);
+      if (ch == EOF)
+      {
+         if (len > 0)
+         {
+            *p = '\0';
+            *dest = buf;
+            return JB_ERR_OK;
+         }
+         else
+         {
+            free(buf);
+            *dest = NULL;
+            return JB_ERR_FILE;
+         }
+      }
+      else if (ch == CHAR_CR)
+      {
+         ch = getc(fp);
+         if (ch == CHAR_LF)
+         {
+            if (*newline == NEWLINE_UNKNOWN)
+            {
+               *newline = NEWLINE_DOS;
+            }
+         }
+         else
+         {
+            if (ch != EOF)
+            {
+               ungetc(ch, fp);
+            }
+            if (*newline == NEWLINE_UNKNOWN)
+            {
+               *newline = NEWLINE_MAC;
+            }
+         }
+         *p = '\0';
+         *dest = buf;
+         if (*newline == NEWLINE_UNKNOWN)
+         {
+            *newline = realnewline;
+         }
+         return JB_ERR_OK;
+      }
+      else if (ch == CHAR_LF)
+      {
+         *p = '\0';
+         *dest = buf;
+         if (*newline == NEWLINE_UNKNOWN)
+         {
+            *newline = NEWLINE_UNIX;
+         }
+         return JB_ERR_OK;
+      }
+      else if (ch == 0)
+      {
+         *p = '\0';
+         *dest = buf;
+         return JB_ERR_OK;
+      }
+
+      *p++ = ch;
+
+      if (++len >= buflen)
+      {
+         buflen += BUFFER_SIZE;
+         if (NULL == (p = realloc(buf, buflen)))
+         {
+            free(buf);
+            return JB_ERR_MEMORY;
+         }
+         buf = p;
+         p = buf + len;
+      }
+   }
+}
+
+
+/*********************************************************************
+ *
+ * Function    :  edit_read_line
+ *
+ * Description :  Read a single non-empty line from a file and return
+ *                it.  Trims comments, leading and trailing whitespace
+ *                and respects escaping of newline and comment char.
+ *                Provides the line in 2 alternative forms: raw and
+ *                preprocessed.
+ *                - raw is the raw data read from the file.  If the
+ *                  line is not modified, then this should be written
+ *                  to the new file.
+ *                - prefix is any comments and blank lines that were
+ *                  read from the file.  If the line is modified, then
+ *                  this should be written out to the file followed
+ *                  by the modified data.  (If this string is non-empty
+ *                  then it will have a newline at the end).
+ *                - data is the actual data that will be parsed
+ *                  further by appropriate routines.
+ *                On EOF, the 3 strings will all be set to NULL and
+ *                0 will be returned.
+ *
+ * Parameters  :
+ *          1  :  fp = File to read from
+ *          2  :  raw_out = destination for newly malloc'd pointer to
+ *                raw line data.  May be NULL if you don't want it.
+ *          3  :  prefix_out = destination for newly malloc'd pointer to
+ *                comments.  May be NULL if you don't want it.
+ *          4  :  data_out = destination for newly malloc'd pointer to
+ *                line data with comments and leading/trailing spaces
+ *                removed, and line continuation performed.  May be
+ *                NULL if you don't want it.
+ *          5  :  newline = Standard for newlines in the file.
+ *                On input, set to value to use or NEWLINE_UNKNOWN.
+ *                On output, may be changed from NEWLINE_UNKNOWN to
+ *                actual convention in file.  May be NULL if you
+ *                don't want it.
+ *          6  :  line_number = Line number in file.  In "lines" as
+ *                reported by a text editor, not lines containing data.
+ *
+ * Returns     :  JB_ERR_OK     on success
+ *                JB_ERR_MEMORY on out-of-memory
+ *                JB_ERR_FILE   on EOF.
+ *
+ *********************************************************************/
+jb_err edit_read_line(FILE *fp,
+                      char **raw_out,
+                      char **prefix_out,
+                      char **data_out,
+                      int *newline,
+                      unsigned long *line_number)
+{
+   char *p;          /* Temporary pointer   */
+   char *linebuf;    /* Line read from file */
+   char *linestart;  /* Start of linebuf, usually first non-whitespace char */
+   int contflag = 0; /* Nonzero for line continuation - i.e. line ends '\' */
+   int is_empty = 1; /* Flag if not got any data yet */
+   char *raw    = NULL; /* String to be stored in raw_out    */
+   char *prefix = NULL; /* String to be stored in prefix_out */
+   char *data   = NULL; /* String to be stored in data_out   */
+   int scrapnewline;    /* Used for (*newline) if newline==NULL */
+   jb_err rval = JB_ERR_OK;
+
+   assert(fp);
+   assert(raw_out || data_out);
+   assert(newline == NULL
+       || *newline == NEWLINE_UNKNOWN
+       || *newline == NEWLINE_UNIX
+       || *newline == NEWLINE_DOS
+       || *newline == NEWLINE_MAC);
+
+   if (newline == NULL)
+   {
+      scrapnewline = NEWLINE_UNKNOWN;
+      newline = &scrapnewline;
+   }
+
+   /* Set output parameters to NULL */
+   if (raw_out)
+   {
+      *raw_out    = NULL;
+   }
+   if (prefix_out)
+   {
+      *prefix_out = NULL;
+   }
+   if (data_out)
+   {
+      *data_out   = NULL;
+   }
+
+   /* Set string variables to new, empty strings. */
+
+   if (raw_out)
+   {
+      if ((raw = malloc(1)) == NULL)
+      {
+         return JB_ERR_MEMORY;
+      }
+      *raw = '\0';
+   }
+   if (prefix_out)
+   {
+      if ((prefix = malloc(1)) == NULL)
+      {
+         freez(raw);
+         return JB_ERR_MEMORY;
+      }
+      *prefix = '\0';
+   }
+   if (data_out)
+   {
+      if ((data = malloc(1)) == NULL)
+      {
+         freez(raw);
+         freez(prefix);
+         return JB_ERR_MEMORY;
+      }
+      *data = '\0';
+   }
+
+   /* Main loop.  Loop while we need more data & it's not EOF. */
+
+   while ( (contflag || is_empty)
+        && (JB_ERR_OK == (rval = simple_read_line(fp, &linebuf, newline))))
+   {
+      if (line_number)
+      {
+         (*line_number)++;
+      }
+      if (raw)
+      {
+         string_append(&raw,linebuf);
+         if (string_append(&raw,NEWLINE(*newline)))
+         {
+            freez(prefix);
+            freez(data);
+            free(linebuf);
+            return JB_ERR_MEMORY;
+         }
+      }
+
+      /* Line continuation? Trim escape and set flag. */
+      p = linebuf + strlen(linebuf) - 1;
+      contflag = ((*linebuf != '\0') && (*p == '\\'));
+      if (contflag)
+      {
+         *p = '\0';
+      }
+
+      /* Trim leading spaces if we're at the start of the line */
+      linestart = linebuf;
+      if (*data == '\0')
+      {
+         /* Trim leading spaces */
+         while (*linestart && isspace((int)(unsigned char)*linestart))
+         {
+            linestart++;
+         }
+      }
+
+      /* Handle comment characters. */
+      p = linestart;
+      while ((p = strchr(p, '#')) != NULL)
+      {
+         /* Found a comment char.. */
+         if ((p != linebuf) && (*(p-1) == '\\'))
+         {
+            /* ..and it's escaped, left-shift the line over the escape. */
+            char *q = p - 1;
+            while ((*q = *(q + 1)) != '\0')
+            {
+               q++;
+            }
+            /* Now scan from just after the "#". */
+         }
+         else
+         {
+            /* Real comment.  Save it... */
+            if (p == linestart)
+            {
+               /* Special case:  Line only contains a comment, so all the
+                * previous whitespace is considered part of the comment.
+                * Undo the whitespace skipping, if any.
+                */
+               linestart = linebuf;
+               p = linestart;
+            }
+            if (prefix)
+            {
+               string_append(&prefix,p);
+               if (string_append(&prefix, NEWLINE(*newline)))
+               {
+                  freez(raw);
+                  freez(data);
+                  free(linebuf);
+                  return JB_ERR_MEMORY;
+               }
+            }
+
+            /* ... and chop off the rest of the line */
+            *p = '\0';
+         }
+      } /* END while (there's a # character) */
+
+      /* Write to the buffer */
+      if (*linestart)
+      {
+         is_empty = 0;
+         if (data)
+         {
+            if (string_append(&data, linestart))
+            {
+               freez(raw);
+               freez(prefix);
+               free(linebuf);
+               return JB_ERR_MEMORY;
+            }
+         }
+      }
+
+      free(linebuf);
+   } /* END while(we need more data) */
+
+   /* Handle simple_read_line() errors - ignore EOF */
+   if ((rval != JB_ERR_OK) && (rval != JB_ERR_FILE))
+   {
+      freez(raw);
+      freez(prefix);
+      freez(data);
+      return rval;
+   }
+
+   if (raw ? (*raw == '\0') : is_empty)
+   {
+      /* EOF and no data there.  (Definition of "data" depends on whether
+       * the caller cares about "raw" or just "data").
+       */
+
+      freez(raw);
+      freez(prefix);
+      freez(data);
+
+      return JB_ERR_FILE;
+   }
+   else
+   {
+      /* Got at least some data */
+
+      /* Remove trailing whitespace */
+      chomp(data);
+
+      if (raw_out)
+      {
+         *raw_out    = raw;
+      }
+      else
+      {
+         freez(raw);
+      }
+      if (prefix_out)
+      {
+         *prefix_out = prefix;
+      }
+      else
+      {
+         freez(prefix);
+      }
+      if (data_out)
+      {
+         *data_out   = data;
+      }
+      else
+      {
+         freez(data);
+      }
+      return JB_ERR_OK;
+   }
 }
 
 
@@ -623,839 +921,99 @@ static int check_file_changed(const struct file_list * current,
  * Function    :  read_config_line
  *
  * Description :  Read a single non-empty line from a file and return
- *                it.  Trims comments, leading and trailing whitespace.
- *                Also wites the file to fs->proxy_args.
+ *                it.  Trims comments, leading and trailing whitespace
+ *                and respects escaping of newline and comment char.
  *
  * Parameters  :
  *          1  :  buf = Buffer to use.
  *          2  :  buflen = Size of buffer in bytes.
  *          3  :  fp = File to read from
- *          4  :  fs = File will be written to fs->proxy_args.  May
- *                be NULL to disable this feature.
+ *          4  :  linenum = linenumber in file
  *
  * Returns     :  NULL on EOF or error
  *                Otherwise, returns buf.
  *
  *********************************************************************/
-char *read_config_line(char *buf, int buflen, FILE *fp, struct file_list *fs)
+char *read_config_line(char *buf, size_t buflen, FILE *fp, unsigned long *linenum)
 {
-   char *p, *q;
-   char linebuf[BUFSIZ];
-
-   while (fgets(linebuf, sizeof(linebuf), fp))
+   jb_err err;
+   char *buf2 = NULL;
+   err = edit_read_line(fp, NULL, NULL, &buf2, NULL, linenum);
+   if (err)
    {
-#ifndef SPLIT_PROXY_ARGS
-      if (fs && !suppress_blocklists)
+      if (err == JB_ERR_MEMORY)
       {
-         char *html_line = html_encode(linebuf);
-         if (html_line != NULL)
-         {
-            fs->proxy_args = strsav(fs->proxy_args, html_line);
-            freez(html_line);
-         }
-         fs->proxy_args = strsav(fs->proxy_args, "<br>");
+         log_error(LOG_LEVEL_FATAL, "Out of memory loading a config file");
       }
-#endif /* ndef SPLIT_PROXY_ARGS */
-
-      /* Trim off newline and any comment */
-      if ((p = strpbrk(linebuf, "\r\n#")) != NULL)
-      {
-         *p = '\0';
-      }
-      
-      /* Trim leading whitespace */
-      p = linebuf;
-      while (*p && ijb_isspace(*p))
-      {
-         *p++;
-      }
-
-      if (*p)
-      {
-         /* There is something other than whitespace on the line. */
-
-         /* Move the data to the start of buf */
-         if (p != linebuf)
-         {
-            /* strcpy that can cope with overlap. */
-            q = linebuf;
-            while ((*q++ = *p++) != '\0')
-            {
-               /* Do nothing */
-            }
-         }
-
-         /* Trim trailing whitespace */
-         p = linebuf + strlen(linebuf) - 1;
-
-         /*
-          * Note: the (p >= retval) below is paranoia, it's not really needed.
-          * When p == retval then ijb_isspace(*p) will be false and we'll drop
-          * out of the loop.
-          */
-         while ((p >= linebuf) && ijb_isspace(*p))
-         {
-            p--;
-         }
-         p[1] = '\0';
-
-         /* More paranoia.  This if statement is always true. */
-         if (*linebuf)
-         {
-            strcpy(buf, linebuf);
-            return buf;
-         }
-      }
+      return NULL;
    }
-
-   /* EOF */
-   return NULL;
+   else
+   {
+      assert(buf2);
+      assert(strlen(buf2) + 1U < buflen);
+      strncpy(buf, buf2, buflen - 1);
+      free(buf2);
+      buf[buflen - 1] = '\0';
+      return buf;
+   }
 }
 
 
-#ifdef ACL_FILES
+#ifdef FEATURE_TRUST
 /*********************************************************************
  *
- * Function    :  load_aclfile
+ * Function    :  unload_trustfile
  *
- * Description :  Read and parse an aclfile and add to files list.
+ * Description :  Unloads a trustfile.
  *
  * Parameters  :
- *          1  :  csp = Current client state (buffers, headers, etc...)
+ *          1  :  f = the data structure associated with the trustfile.
  *
- * Returns     :  0 => Ok, everything else is an error.
+ * Returns     :  N/A
  *
  *********************************************************************/
-int load_aclfile(struct client_state *csp)
+static void unload_trustfile(void *f)
 {
-   FILE *fp;
-   char buf[BUFSIZ], *v[3], *p;
-   int i;
-   struct access_control_list *a, *bl;
-   struct file_list *fs;
+   struct block_spec *cur = (struct block_spec *)f;
+   struct block_spec *next;
 
-   if (!check_file_changed(current_aclfile, aclfile, &fs))
+   while (cur != NULL)
    {
-      /* No need to load */
-      if (csp)
-      {
-         csp->alist = current_aclfile;
-      }
-      return(0);
+      next = cur->next;
+
+      free_url_spec(cur->url);
+      free(cur);
+
+      cur = next;
    }
-   if (!fs)
-   {
-      goto load_aclfile_error;
-   }
-
-   fs->f = bl = (struct access_control_list *)zalloc(sizeof(*bl));
-   if (bl == NULL)
-   {
-      freez(fs->filename);
-      freez(fs);
-      goto load_aclfile_error;
-   }
-
-   fp = fopen(aclfile, "r");
-
-   if (fp == NULL)
-   {
-      goto load_aclfile_error;
-   }
-
-   while (read_config_line(buf, sizeof(buf), fp, fs) != NULL)
-   {
-      i = ssplit(buf, " \t", v, SZ(v), 1, 1);
-
-      /* allocate a new node */
-      a = (struct access_control_list *) zalloc(sizeof(*a));
-
-      if (a == NULL)
-      {
-         fclose(fp);
-         freez(fs->f);
-         freez(fs->filename);
-         freez(fs);
-         goto load_aclfile_error;
-      }
-
-      /* add it to the list */
-      a->next  = bl->next;
-      bl->next = a;
-
-      switch (i)
-      {
-         case 3:
-            if (acl_addr(v[2], a->dst) < 0)
-            {
-               goto load_aclfile_error;
-            }
-            /* no break */
-
-         case 2:
-            if (acl_addr(v[1], a->src) < 0)
-            {
-               goto load_aclfile_error;
-            }
-
-            p = v[0];
-            if (strcmpic(p, "permit") == 0)
-            {
-               a->action = ACL_PERMIT;
-               break;
-            }
-
-            if (strcmpic(p, "deny") == 0)
-            {
-               a->action = ACL_DENY;
-               break;
-            }
-            /* no break */
-
-         default:
-            goto load_aclfile_error;
-      }
-   }
-
-   fclose(fp);
-
-#ifndef SPLIT_PROXY_ARGS
-   if (!suppress_blocklists)
-   {
-      fs->proxy_args = strsav(fs->proxy_args, "</pre>");
-   }
-#endif /* ndef SPLIT_PROXY_ARGS */
-
-   if (current_aclfile)
-   {
-      current_aclfile->unloader = unload_aclfile;
-   }
-
-   fs->next = files->next;
-   files->next = fs;
-   current_aclfile = fs;
-
-   if (csp)
-   {
-      csp->alist = fs;
-   }
-
-   return(0);
-
-load_aclfile_error:
-   log_error(LOG_LEVEL_ERROR, "can't load access control list %s: %E", aclfile);
-   return(-1);
 
 }
-#endif /* def ACL_FILES */
 
 
+#ifdef FEATURE_GRACEFUL_TERMINATION
 /*********************************************************************
  *
- * Function    :  load_blockfile
+ * Function    :  unload_current_trust_file
  *
- * Description :  Read and parse a blockfile and add to files list.
+ * Description :  Unloads current trust file - reset to state at
+ *                beginning of program.
  *
- * Parameters  :
- *          1  :  csp = Current client state (buffers, headers, etc...)
+ * Parameters  :  None
  *
- * Returns     :  0 => Ok, everything else is an error.
- *
- *********************************************************************/
-int load_blockfile(struct client_state *csp)
-{
-   FILE *fp;
-
-   struct block_spec *b, *bl;
-   char  buf[BUFSIZ], *p, *q;
-   int port, reject;
-   struct file_list *fs;
-   struct url_spec url[1];
-
-   if (!check_file_changed(current_blockfile, blockfile, &fs))
-   {
-      /* No need to load */
-      if (csp)
-      {
-         csp->blist = current_blockfile;
-      }
-      return(0);
-   }
-   if (!fs)
-   {
-      goto load_blockfile_error;
-   }
-
-   fs->f = bl = (struct block_spec *) zalloc(sizeof(*bl));
-   if (bl == NULL)
-   {
-      goto load_blockfile_error;
-   }
-
-   if ((fp = fopen(blockfile, "r")) == NULL)
-   {
-      goto load_blockfile_error;
-   }
-
-   while (read_config_line(buf, sizeof(buf), fp, fs) != NULL)
-   {
-      reject = 1;
-
-      if (*buf == '~')
-      {
-         reject = 0;
-         p = buf;
-         q = p+1;
-         while ((*p++ = *q++))
-         {
-            /* nop */
-         }
-      }
-
-      /* skip lines containing only ~ */
-      if (*buf == '\0')
-      {
-         continue;
-      }
-
-      /* allocate a new node */
-      if (((b = zalloc(sizeof(*b))) == NULL)
-#ifdef REGEX
-          || ((b->url->preg = zalloc(sizeof(*b->url->preg))) == NULL)
-#endif
-      )
-      {
-         fclose(fp);
-         goto load_blockfile_error;
-      }
-
-      /* add it to the list */
-      b->next  = bl->next;
-      bl->next = b;
-
-      /* save a copy of the orignal specification */
-      if ((b->url->spec = strdup(buf)) == NULL)
-      {
-         fclose(fp);
-         goto load_blockfile_error;
-      }
-
-      b->reject = reject;
-
-      if ((p = strchr(buf, '/')))
-      {
-         b->url->path    = strdup(p);
-         b->url->pathlen = strlen(b->url->path);
-         *p = '\0';
-      }
-      else
-      {
-         b->url->path    = NULL;
-         b->url->pathlen = 0;
-      }
-#ifdef REGEX
-      if (b->url->path)
-      {
-         int errcode;
-         char rebuf[BUFSIZ];
-
-         sprintf(rebuf, "^(%s)", b->url->path);
-
-         errcode = regcomp(b->url->preg, rebuf,
-               (REG_EXTENDED|REG_NOSUB|REG_ICASE));
-
-         if (errcode)
-         {
-            size_t errlen =
-               regerror(errcode,
-                  b->url->preg, buf, sizeof(buf));
-
-            buf[errlen] = '\0';
-
-            log_error(LOG_LEVEL_ERROR, "error compiling %s: %s\n",
-                    b->url->spec, buf);
-            fclose(fp);
-            goto load_blockfile_error;
-         }
-      }
-      else
-      {
-         freez(b->url->preg);
-      }
-#endif
-      if ((p = strchr(buf, ':')) == NULL)
-      {
-         port = 0;
-      }
-      else
-      {
-         *p++ = '\0';
-         port = atoi(p);
-      }
-
-      b->url->port = port;
-
-      if ((b->url->domain = strdup(buf)) == NULL)
-      {
-         fclose(fp);
-         goto load_blockfile_error;
-      }
-
-      /* split domain into components */
-      *url = dsplit(b->url->domain);
-      b->url->dbuf = url->dbuf;
-      b->url->dcnt = url->dcnt;
-      b->url->dvec = url->dvec;
-   }
-
-   fclose(fp);
-
-#ifndef SPLIT_PROXY_ARGS
-   if (!suppress_blocklists)
-   {
-      fs->proxy_args = strsav(fs->proxy_args, "</pre>");
-   }
-#endif /* ndef SPLIT_PROXY_ARGS */
-
-   /* the old one is now obsolete */
-   if (current_blockfile)
-   {
-      current_blockfile->unloader = unload_blockfile;
-   }
-
-   fs->next    = files->next;
-   files->next = fs;
-   current_blockfile = fs;
-
-   if (csp)
-   {
-      csp->blist = fs;
-   }
-
-   return(0);
-
-load_blockfile_error:
-   log_error(LOG_LEVEL_ERROR, "can't load blockfile '%s': %E", blockfile);
-   return(-1);
-
-}
-
-
-#ifdef USE_IMAGE_LIST
-/*********************************************************************
- *
- * Function    :  load_imagefile
- *
- * Description :  Read and parse an imagefile and add to files list.
- *
- * Parameters  :
- *          1  :  csp = Current client state (buffers, headers, etc...)
- *
- * Returns     :  0 => Ok, everything else is an error.
+ * Returns     :  N/A
  *
  *********************************************************************/
-int load_imagefile(struct client_state *csp)
+void unload_current_trust_file(void)
 {
-   FILE *fp;
-
-   struct block_spec *b, *bl;
-   char  buf[BUFSIZ], *p, *q;
-   int port, reject;
-   struct file_list *fs;
-   struct url_spec url[1];
-
-   if (!check_file_changed(current_imagefile, imagefile, &fs))
+   if (current_trustfile)
    {
-      /* No need to load */
-      if (csp)
-      {
-         csp->ilist = current_imagefile;
-      }
-      return(0);
+      current_trustfile->unloader = unload_trustfile;
+      current_trustfile = NULL;
    }
-   if (!fs)
-   {
-      goto load_imagefile_error;
-   }
-
-   fs->f = bl = (struct block_spec *)zalloc(sizeof(*bl));
-   if (bl == NULL)
-   {
-      goto load_imagefile_error;
-   }
-
-   if ((fp = fopen(imagefile, "r")) == NULL)
-   {
-      goto load_imagefile_error;
-   }
-
-   while (read_config_line(buf, sizeof(buf), fp, fs) != NULL)
-   {
-      reject = 1;
-
-      if (*buf == '~')
-      {
-         reject = 0;
-         p = buf;
-         q = p+1;
-         while ((*p++ = *q++))
-         {
-            /* nop */
-         }
-      }
-
-      /* skip lines containing only ~ */
-      if (*buf == '\0')
-      {
-         continue;
-      }
-
-      /* allocate a new node */
-      if (((b = zalloc(sizeof(*b))) == NULL)
-#ifdef REGEX
-      || ((b->url->preg = zalloc(sizeof(*b->url->preg))) == NULL)
-#endif
-      )
-      {
-         fclose(fp);
-         goto load_imagefile_error;
-      }
-
-      /* add it to the list */
-      b->next  = bl->next;
-      bl->next = b;
-
-      /* save a copy of the orignal specification */
-      if ((b->url->spec = strdup(buf)) == NULL)
-      {
-         fclose(fp);
-         goto load_imagefile_error;
-      }
-
-      b->reject = reject;
-
-      if ((p = strchr(buf, '/')))
-      {
-         b->url->path    = strdup(p);
-         b->url->pathlen = strlen(b->url->path);
-         *p = '\0';
-      }
-      else
-      {
-         b->url->path    = NULL;
-         b->url->pathlen = 0;
-      }
-#ifdef REGEX
-      if (b->url->path)
-      {
-         int errcode;
-         char rebuf[BUFSIZ];
-
-         sprintf(rebuf, "^(%s)", b->url->path);
-
-         errcode = regcomp(b->url->preg, rebuf,
-               (REG_EXTENDED|REG_NOSUB|REG_ICASE));
-
-         if (errcode)
-         {
-            size_t errlen =
-               regerror(errcode,
-                  b->url->preg, buf, sizeof(buf));
-
-            buf[errlen] = '\0';
-
-            log_error(LOG_LEVEL_ERROR, "error compiling %s: %s",
-                    b->url->spec, buf);
-            fclose(fp);
-            goto load_imagefile_error;
-         }
-      }
-      else
-      {
-         freez(b->url->preg);
-      }
-#endif
-      if ((p = strchr(buf, ':')) == NULL)
-      {
-         port = 0;
-      }
-      else
-      {
-         *p++ = '\0';
-         port = atoi(p);
-      }
-
-      b->url->port = port;
-
-      if ((b->url->domain = strdup(buf)) == NULL)
-      {
-         fclose(fp);
-         goto load_imagefile_error;
-      }
-
-      /* split domain into components */
-      *url = dsplit(b->url->domain);
-      b->url->dbuf = url->dbuf;
-      b->url->dcnt = url->dcnt;
-      b->url->dvec = url->dvec;
-   }
-#ifndef SPLIT_PROXY_ARGS
-   if (!suppress_blocklists)
-      fs->proxy_args = strsav(fs->proxy_args, "</pre>");
-#endif /* ndef SPLIT_PROXY_ARGS */
-
-   fclose(fp);
-
-#ifndef SPLIT_PROXY_ARGS
-   if (!suppress_blocklists)
-   {
-      fs->proxy_args = strsav(fs->proxy_args, "</pre>");
-   }
-#endif /* ndef SPLIT_PROXY_ARGS */
-
-   /* the old one is now obsolete */
-   if (current_imagefile)
-   {
-      current_imagefile->unloader = unload_imagefile;
-   }
-
-   fs->next    = files->next;
-   files->next = fs;
-   current_imagefile = fs;
-
-   if (csp)
-   {
-      csp->ilist = fs;
-   }
-
-   return(0);
-
-load_imagefile_error:
-   log_error(LOG_LEVEL_ERROR, "can't load imagefile '%s': %E", imagefile);
-   return(-1);
-
 }
-#endif /* def USE_IMAGE_LIST */
+#endif /* FEATURE_GRACEFUL_TERMINATION */
 
 
-/*********************************************************************
- *
- * Function    :  load_cookiefile
- *
- * Description :  Read and parse a cookiefile and add to files list.
- *
- * Parameters  :
- *          1  :  csp = Current client state (buffers, headers, etc...)
- *
- * Returns     :  0 => Ok, everything else is an error.
- *
- *********************************************************************/
-int load_cookiefile(struct client_state *csp)
-{
-   FILE *fp;
-
-   struct cookie_spec *b, *bl;
-   char  buf[BUFSIZ], *p, *q;
-   int port, user_cookie, server_cookie;
-   struct file_list *fs;
-   struct url_spec url[1];
-
-   if (!check_file_changed(current_cookiefile, cookiefile, &fs))
-   {
-      /* No need to load */
-      if (csp)
-      {
-         csp->clist = current_cookiefile;
-      }
-      return(0);
-   }
-   if (!fs)
-   {
-      goto load_cookie_error;
-   }
-
-   fs->f = bl = (struct cookie_spec   *)zalloc(sizeof(*bl));
-   if (bl == NULL)
-   {
-      goto load_cookie_error;
-   }
-
-   if ((fp = fopen(cookiefile, "r")) == NULL)
-   {
-      goto load_cookie_error;
-   }
-
-   while (read_config_line(buf, sizeof(buf), fp, fs) != NULL)
-   {
-      p = buf;
-
-      switch ((int)*p)
-      {
-         case '>':
-            server_cookie = 0;
-            user_cookie   = 1;
-            p++;
-            break;
-
-         case '<':
-            server_cookie = 1;
-            user_cookie   = 0;
-            p++;
-            break;
-
-         case '~':
-            server_cookie = 0;
-            user_cookie   = 0;
-            p++;
-            break;
-
-         default:
-            server_cookie = 1;
-            user_cookie   = 1;
-            break;
-      }
-
-      /*
-       * Elide any of the "special" chars from the
-       * front of the pattern
-       */
-      q = buf;
-      if (p > q) while ((*q++ = *p++))
-      {
-         /* nop */
-      }
-
-      /* skip lines containing only "special" chars */
-      if (*buf == '\0')
-      {
-         continue;
-      }
-
-      /* allocate a new node */
-      if (((b = zalloc(sizeof(*b))) == NULL)
-#ifdef REGEX
-      || ((b->url->preg = zalloc(sizeof(*b->url->preg))) == NULL)
-#endif
-      )
-      {
-         fclose(fp);
-         goto load_cookie_error;
-      }
-
-      /* add it to the list */
-      b->next  = bl->next;
-      bl->next = b;
-
-      /* save a copy of the orignal specification */
-      if ((b->url->spec = strdup(buf)) == NULL)
-      {
-         fclose(fp);
-         goto load_cookie_error;
-      }
-
-      b->send_user_cookie     = user_cookie;
-      b->accept_server_cookie = server_cookie;
-
-      if ((p = strchr(buf, '/')))
-      {
-         b->url->path    = strdup(p);
-         b->url->pathlen = strlen(b->url->path);
-         *p = '\0';
-      }
-      else
-      {
-         b->url->path    = NULL;
-         b->url->pathlen = 0;
-      }
-#ifdef REGEX
-      if (b->url->path)
-      {
-         int errcode;
-         char rebuf[BUFSIZ];
-
-         sprintf(rebuf, "^(%s)", b->url->path);
-
-         errcode = regcomp(b->url->preg, rebuf,
-               (REG_EXTENDED|REG_NOSUB|REG_ICASE));
-         if (errcode)
-         {
-            size_t errlen =
-               regerror(errcode,
-                  b->url->preg, buf, sizeof(buf));
-
-            buf[errlen] = '\0';
-
-            log_error(LOG_LEVEL_ERROR, "error compiling %s: %s",
-                    b->url->spec, buf);
-            fclose(fp);
-            goto load_cookie_error;
-         }
-      }
-      else
-      {
-         freez(b->url->preg);
-      }
-#endif
-      if ((p = strchr(buf, ':')) == NULL)
-      {
-         port = 0;
-      }
-      else
-      {
-         *p++ = '\0';
-         port = atoi(p);
-      }
-
-      b->url->port = port;
-
-      if ((b->url->domain = strdup(buf)) == NULL)
-      {
-         fclose(fp);
-         goto load_cookie_error;
-      }
-
-      /* split domain into components */
-
-      *url = dsplit(b->url->domain);
-      b->url->dbuf = url->dbuf;
-      b->url->dcnt = url->dcnt;
-      b->url->dvec = url->dvec;
-   }
-
-   fclose(fp);
-
-#ifndef SPLIT_PROXY_ARGS
-   if (!suppress_blocklists)
-   {
-      fs->proxy_args = strsav(fs->proxy_args, "</pre>");
-   }
-#endif /* ndef SPLIT_PROXY_ARGS */
-
-   /* the old one is now obsolete */
-   if (current_cookiefile)
-   {
-      current_cookiefile->unloader = unload_cookiefile;
-   }
-
-   fs->next    = files->next;
-   files->next = fs;
-   current_cookiefile = fs;
-
-   if (csp)
-   {
-      csp->clist = fs;
-   }
-
-   return(0);
-
-load_cookie_error:
-   log_error(LOG_LEVEL_ERROR, "can't load cookiefile '%s': %E", cookiefile);
-   return(-1);
-
-}
-
-
-#ifdef TRUST_FILES
 /*********************************************************************
  *
  * Function    :  load_trustfile
@@ -1475,12 +1033,12 @@ int load_trustfile(struct client_state *csp)
    struct block_spec *b, *bl;
    struct url_spec **tl;
 
-   char  buf[BUFSIZ], *p, *q;
-   int port, reject, trusted;
+   char  buf[BUFFER_SIZE], *p, *q;
+   int reject, trusted;
    struct file_list *fs;
-   struct url_spec url[1];
+   unsigned long linenum = 0;
 
-   if (!check_file_changed(current_trustfile, trustfile, &fs))
+   if (!check_file_changed(current_trustfile, csp->config->trustfile, &fs))
    {
       /* No need to load */
       if (csp)
@@ -1500,14 +1058,14 @@ int load_trustfile(struct client_state *csp)
       goto load_trustfile_error;
    }
 
-   if ((fp = fopen(trustfile, "r")) == NULL)
+   if ((fp = fopen(csp->config->trustfile, "r")) == NULL)
    {
       goto load_trustfile_error;
    }
 
-   tl = trust_list;
+   tl = csp->config->trust_list;
 
-   while (read_config_line(buf, sizeof(buf), fp, fs) != NULL)
+   while (read_config_line(buf, sizeof(buf), fp, &linenum) != NULL)
    {
       trusted = 0;
       reject  = 1;
@@ -1523,7 +1081,7 @@ int load_trustfile(struct client_state *csp)
          reject = 0;
          p = buf;
          q = p+1;
-         while ((*p++ = *q++))
+         while ((*p++ = *q++) != '\0')
          {
             /* nop */
          }
@@ -1536,11 +1094,7 @@ int load_trustfile(struct client_state *csp)
       }
 
       /* allocate a new node */
-      if (((b = zalloc(sizeof(*b))) == NULL)
-#ifdef REGEX
-      || ((b->url->preg = zalloc(sizeof(*b->url->preg))) == NULL)
-#endif
-      )
+      if ((b = zalloc(sizeof(*b))) == NULL)
       {
          fclose(fp);
          goto load_trustfile_error;
@@ -1550,79 +1104,14 @@ int load_trustfile(struct client_state *csp)
       b->next  = bl->next;
       bl->next = b;
 
-      /* save a copy of the orignal specification */
-      if ((b->url->spec = strdup(buf)) == NULL)
-      {
-         fclose(fp);
-         goto load_trustfile_error;
-      }
-
       b->reject = reject;
 
-      if ((p = strchr(buf, '/')))
-      {
-         b->url->path    = strdup(p);
-         b->url->pathlen = strlen(b->url->path);
-         *p = '\0';
-      }
-      else
-      {
-         b->url->path    = NULL;
-         b->url->pathlen = 0;
-      }
-#ifdef REGEX
-      if (b->url->path)
-      {
-         int errcode;
-         char rebuf[BUFSIZ];
-
-         sprintf(rebuf, "^(%s)", b->url->path);
-
-         errcode = regcomp(b->url->preg, rebuf,
-               (REG_EXTENDED|REG_NOSUB|REG_ICASE));
-
-         if (errcode)
-         {
-            size_t errlen =
-               regerror(errcode,
-                  b->url->preg, buf, sizeof(buf));
-
-            buf[errlen] = '\0';
-
-            log_error(LOG_LEVEL_ERROR, "error compiling %s: %s",
-                    b->url->spec, buf);
-            fclose(fp);
-            goto load_trustfile_error;
-         }
-      }
-      else
-      {
-         freez(b->url->preg);
-      }
-#endif
-      if ((p = strchr(buf, ':')) == NULL)
-      {
-         port = 0;
-      }
-      else
-      {
-         *p++ = '\0';
-         port = atoi(p);
-      }
-
-      b->url->port = port;
-
-      if ((b->url->domain = strdup(buf)) == NULL)
+      /* Save the URL pattern */
+      if (create_url_spec(b->url, buf))
       {
          fclose(fp);
          goto load_trustfile_error;
       }
-
-      /* split domain into components */
-      *url = dsplit(b->url->domain);
-      b->url->dbuf = url->dbuf;
-      b->url->dcnt = url->dcnt;
-      b->url->dvec = url->dvec;
 
       /*
        * save a pointer to URL's spec in the list of trusted URL's, too
@@ -1630,19 +1119,13 @@ int load_trustfile(struct client_state *csp)
       if (trusted)
       {
          *tl++ = b->url;
+         /* FIXME BUFFER OVERFLOW if >=64 entries */
       }
    }
 
    *tl = NULL;
 
    fclose(fp);
-
-#ifndef SPLIT_PROXY_ARGS
-   if (!suppress_blocklists)
-   {
-      fs->proxy_args = strsav(fs->proxy_args, "</pre>");
-   }
-#endif /* ndef SPLIT_PROXY_ARGS */
 
    /* the old one is now obsolete */
    if (current_trustfile)
@@ -1662,289 +1145,80 @@ int load_trustfile(struct client_state *csp)
    return(0);
 
 load_trustfile_error:
-   log_error(LOG_LEVEL_ERROR, "can't load trustfile '%s': %E", trustfile);
+   log_error(LOG_LEVEL_FATAL, "can't load trustfile '%s': %E",
+             csp->config->trustfile);
    return(-1);
 
 }
-#endif /* def TRUST_FILES */
+#endif /* def FEATURE_TRUST */
 
 
 /*********************************************************************
  *
- * Function    :  load_forwardfile
+ * Function    :  unload_re_filterfile
  *
- * Description :  Read and parse a forwardfile and add to files list.
+ * Description :  Unload the re_filter list by freeing all chained
+ *                re_filterfile specs and their data.
  *
  * Parameters  :
- *          1  :  csp = Current client state (buffers, headers, etc...)
+ *          1  :  f = the data structure associated with the filterfile.
  *
- * Returns     :  0 => Ok, everything else is an error.
+ * Returns     :  N/A
  *
  *********************************************************************/
-int load_forwardfile(struct client_state *csp)
+static void unload_re_filterfile(void *f)
 {
-   FILE *fp;
+   struct re_filterfile_spec *a, *b = (struct re_filterfile_spec *)f;
 
-   struct forward_spec *b, *bl;
-   char  buf[BUFSIZ], *p, *q, *tmp;
-   char  *vec[4];
-   int port, n, reject;
-   struct file_list *fs;
-   const struct gateway *gw;
-   struct url_spec url[1];
+   while (b != NULL)
+   {
+      a = b->next;
 
-   if (!check_file_changed(current_forwardfile, forwardfile, &fs))
-   {
-      /* No need to load */
-      if (csp)
-      {
-         csp->flist = current_forwardfile;
-      }
-      return(0);
-   }
-   if (!fs)
-   {
-      goto load_forwardfile_error;
+      destroy_list(b->patterns);
+      pcrs_free_joblist(b->joblist);
+      freez(b->name);
+      freez(b->description);
+      freez(b);
+
+      b = a;
    }
 
-   fs->f = bl = (struct forward_spec  *)zalloc(sizeof(*bl));
-
-   if ((fs == NULL) || (bl == NULL))
-   {
-      goto load_forwardfile_error;
-   }
-
-   if ((fp = fopen(forwardfile, "r")) == NULL)
-   {
-      goto load_forwardfile_error;
-   }
-
-   tmp = NULL;
-
-   while (read_config_line(buf, sizeof(buf), fp, fs) != NULL)
-   {
-      freez(tmp);
-
-      tmp = strdup(buf);
-
-      n = ssplit(tmp, " \t", vec, SZ(vec), 1, 1);
-
-      if (n != 4)
-      {
-         log_error(LOG_LEVEL_ERROR, "error in forwardfile: %s", buf);
-         continue;
-      }
-
-      strcpy(buf, vec[0]);
-
-      reject = 1;
-
-      if (*buf == '~')
-      {
-         reject = 0;
-         p = buf;
-         q = p+1;
-         while ((*p++ = *q++))
-         {
-            /* nop */
-         }
-      }
-
-      /* skip lines containing only ~ */
-      if (*buf == '\0')
-      {
-         continue;
-      }
-
-      /* allocate a new node */
-      if (((b = zalloc(sizeof(*b))) == NULL)
-#ifdef REGEX
-      || ((b->url->preg = zalloc(sizeof(*b->url->preg))) == NULL)
-#endif
-      )
-      {
-         fclose(fp);
-         goto load_forwardfile_error;
-      }
-
-      /* add it to the list */
-      b->next  = bl->next;
-      bl->next = b;
-
-      /* save a copy of the orignal specification */
-      if ((b->url->spec = strdup(buf)) == NULL)
-      {
-         fclose(fp);
-         goto load_forwardfile_error;
-      }
-
-      b->reject = reject;
-
-      if ((p = strchr(buf, '/')))
-      {
-         b->url->path    = strdup(p);
-         b->url->pathlen = strlen(b->url->path);
-         *p = '\0';
-      }
-      else
-      {
-         b->url->path    = NULL;
-         b->url->pathlen = 0;
-      }
-#ifdef REGEX
-      if (b->url->path)
-      {
-         int errcode;
-         char rebuf[BUFSIZ];
-
-         sprintf(rebuf, "^(%s)", b->url->path);
-
-         errcode = regcomp(b->url->preg, rebuf,
-               (REG_EXTENDED|REG_NOSUB|REG_ICASE));
-
-         if (errcode)
-         {
-            size_t errlen = regerror(errcode, b->url->preg, buf, sizeof(buf));
-
-            buf[errlen] = '\0';
-
-            log_error(LOG_LEVEL_ERROR, "error compiling %s: %s",
-                    b->url->spec, buf);
-            fclose(fp);
-            goto load_forwardfile_error;
-         }
-      }
-      else
-      {
-         freez(b->url->preg);
-      }
-#endif
-      if ((p = strchr(buf, ':')) == NULL)
-      {
-         port = 0;
-      }
-      else
-      {
-         *p++ = '\0';
-         port = atoi(p);
-      }
-
-      b->url->port = port;
-
-      if ((b->url->domain = strdup(buf)) == NULL)
-      {
-         fclose(fp);
-         goto load_forwardfile_error;
-      }
-
-      /* split domain into components */
-      *url = dsplit(b->url->domain);
-      b->url->dbuf = url->dbuf;
-      b->url->dcnt = url->dcnt;
-      b->url->dvec = url->dvec;
-
-      /* now parse the gateway specs */
-
-      p = vec[2];
-
-      for (gw = gateways; gw->name; gw++)
-      {
-         if (strcmp(gw->name, p) == 0)
-         {
-            break;
-         }
-      }
-
-      if (gw->name == NULL)
-      {
-         goto load_forwardfile_error;
-      }
-
-      /* save this as the gateway type */
-      *b->gw = *gw;
-
-      /* now parse the gateway host[:port] spec */
-      p = vec[3];
-
-      if (strcmp(p, ".") != 0)
-      {
-         b->gw->gateway_host = strdup(p);
-
-         if ((p = strchr(b->gw->gateway_host, ':')))
-         {
-            *p++ = '\0';
-            b->gw->gateway_port = atoi(p);
-         }
-
-         if (b->gw->gateway_port <= 0)
-         {
-            goto load_forwardfile_error;
-         }
-      }
-
-      /* now parse the forwarding spec */
-      p = vec[1];
-
-      if (strcmp(p, ".") != 0)
-      {
-         b->gw->forward_host = strdup(p);
-
-         if ((p = strchr(b->gw->forward_host, ':')))
-         {
-            *p++ = '\0';
-            b->gw->forward_port = atoi(p);
-         }
-
-         if (b->gw->forward_port <= 0)
-         {
-            b->gw->forward_port = 8000;
-         }
-      }
-   }
-
-   freez(tmp);
-
-   fclose(fp);
-
-#ifndef SPLIT_PROXY_ARGS
-   if (!suppress_blocklists)
-   {
-      fs->proxy_args = strsav(fs->proxy_args, "</pre>");
-   }
-#endif /* ndef SPLIT_PROXY_ARGS */
-
-   /* the old one is now obsolete */
-   if (current_forwardfile)
-   {
-      current_forwardfile->unloader = unload_forwardfile;
-   }
-
-   fs->next    = files->next;
-   files->next = fs;
-   current_forwardfile = fs;
-
-   if (csp)
-   {
-      csp->flist = fs;
-   }
-
-   return(0);
-
-load_forwardfile_error:
-   log_error(LOG_LEVEL_ERROR, "can't load forwardfile '%s': %E", forwardfile);
-   return(-1);
-
+   return;
 }
 
 
-#ifdef PCRS
+#ifdef FEATURE_GRACEFUL_TERMINATION
+/*********************************************************************
+ *
+ * Function    :  unload_current_re_filterfile
+ *
+ * Description :  Unloads current re_filter file - reset to state at
+ *                beginning of program.
+ *
+ * Parameters  :  None
+ *
+ * Returns     :  N/A
+ *
+ *********************************************************************/
+void unload_current_re_filterfile(void)
+{
+   if (current_re_filterfile)
+   {
+      current_re_filterfile->unloader = unload_re_filterfile;
+      current_re_filterfile = NULL;
+   }
+}
+#endif
+
+
 /*********************************************************************
  *
  * Function    :  load_re_filterfile
  *
- * Description :  Load the re_filterfile. Each non-comment, non-empty
- *                line is instantly added to the joblist, which is
- *                a chained list of pcrs_job structs.
+ * Description :  Load the re_filterfile. 
+ *                Generate a chained list of re_filterfile_spec's from
+ *                the "FILTER: " blocks, compiling all their substitutions
+ *                into chained lists of pcrs_job structs.
  *
  * Parameters  :
  *          1  :  csp = Current client state (buffers, headers, etc...)
@@ -1956,19 +1230,19 @@ int load_re_filterfile(struct client_state *csp)
 {
    FILE *fp;
 
-   struct re_filterfile_spec *bl;
+   struct re_filterfile_spec *new_bl, *bl = NULL;
    struct file_list *fs;
 
-   char  buf[BUFSIZ];
+   char  buf[BUFFER_SIZE];
    int error;
+   unsigned long linenum = 0;
    pcrs_job *dummy;
 
-#ifndef SPLIT_PROXY_ARGS
-   char *p;
-#endif /* ndef SPLIT_PROXY_ARGS */
-   if (!check_file_changed(current_re_filterfile, re_filterfile, &fs))
+   /*
+    * No need to reload if unchanged
+    */
+   if (!check_file_changed(current_re_filterfile, csp->config->re_filterfile, &fs))
    {
-      /* No need to load */
       if (csp)
       {
          csp->rlist = current_re_filterfile;
@@ -1980,53 +1254,105 @@ int load_re_filterfile(struct client_state *csp)
       goto load_re_filterfile_error;
    }
 
-   fs->f = bl = (struct re_filterfile_spec  *)zalloc(sizeof(*bl));
-   if (bl == NULL)
+   /* 
+    * Open the file or fail
+    */
+   if ((fp = fopen(csp->config->re_filterfile, "r")) == NULL)
    {
       goto load_re_filterfile_error;
    }
 
-   /* Open the file or fail */
-   if ((fp = fopen(re_filterfile, "r")) == NULL)
+   /* 
+    * Read line by line
+    */
+   while (read_config_line(buf, sizeof(buf), fp, &linenum) != NULL)
    {
-      goto load_re_filterfile_error;
-   }
-
-   /* Read line by line */
-   while (read_config_line(buf, sizeof(buf), fp, fs) != NULL)
-   {
-      enlist( bl->patterns, buf );
-
-      /* We have a meaningful line -> make it a job */
-      if ((dummy = pcrs_make_job(buf, &error)) == NULL)
+      /*
+       * If this is the head of a new filter block, make it a
+       * re_filterfile spec of its own and chain it to the list:
+       */
+      if (strncmp(buf, "FILTER:", 7) == 0)
       {
-         log_error(LOG_LEVEL_REF, 
-               "Adding re_filter job %s failed with error %d.", buf, error);
+         new_bl = (struct re_filterfile_spec  *)zalloc(sizeof(*bl));
+         if (new_bl == NULL)
+         {
+            goto load_re_filterfile_error;
+         }
+
+         new_bl->name = chomp(buf + 7);
+
+         if (NULL != (new_bl->description = strchr(new_bl->name, ' ')))
+         {
+            *new_bl->description++ = '\0';
+            new_bl->description = strdup(chomp(new_bl->description));
+         }
+         else
+         {
+            new_bl->description = strdup("No description available for this filter");
+         }
+
+         new_bl->name = strdup(chomp(new_bl->name));
+         
+         /*
+          * If this is the first filter block, chain it
+          * to the file_list rather than its (nonexistant)
+          * predecessor
+          */
+         if (fs->f == NULL)
+         {
+            fs->f = new_bl;
+         }
+         else
+         {
+            bl->next = new_bl;
+         }
+         bl = new_bl;
+
+         log_error(LOG_LEVEL_RE_FILTER, "Reading in filter \"%s\" (\"%s\")", bl->name, bl->description);
+
          continue;
+      }
+
+      /* 
+       * Else, save the expression, make it a pcrs_job
+       * and chain it into the current filter's joblist 
+       */
+      if (bl != NULL)
+      {
+         enlist(bl->patterns, buf);
+
+         if ((dummy = pcrs_compile_command(buf, &error)) == NULL)
+         {
+            log_error(LOG_LEVEL_RE_FILTER,
+                      "Adding re_filter job %s to filter %s failed with error %d.", buf, bl->name, error);
+            continue;
+         }
+         else
+         {
+            dummy->next = bl->joblist;
+            bl->joblist = dummy;
+            log_error(LOG_LEVEL_RE_FILTER, "Adding re_filter job %s to filter %s succeeded.", buf, bl->name);
+         }
       }
       else
       {
-         dummy->next = bl->joblist;
-         bl->joblist = dummy;
-         log_error(LOG_LEVEL_REF, "Adding re_filter job %s succeeded.", buf);
+         log_error(LOG_LEVEL_ERROR, "Ignoring job %s outside filter block in %s, line %d", buf, csp->config->re_filterfile, linenum);
       }
    }
 
    fclose(fp);
 
-#ifndef SPLIT_PROXY_ARGS
-   if (!suppress_blocklists)
-   {
-      fs->proxy_args = strsav(fs->proxy_args, "</pre>");
-   }
-#endif /* ndef SPLIT_PROXY_ARGS */
-
-   /* the old one is now obsolete */
+   /* 
+    * Schedule the now-obsolete old data for unloading
+    */
    if ( NULL != current_re_filterfile )
    {
       current_re_filterfile->unloader = unload_re_filterfile;
    }
 
+   /*
+    * Chain this file into the global list of loaded files
+    */
    fs->next    = files->next;
    files->next = fs;
    current_re_filterfile = fs;
@@ -2039,132 +1365,11 @@ int load_re_filterfile(struct client_state *csp)
    return( 0 );
 
 load_re_filterfile_error:
-   log_error(LOG_LEVEL_ERROR, "can't load re_filterfile '%s': %E", re_filterfile);
+   log_error(LOG_LEVEL_FATAL, "can't load re_filterfile '%s': %E",
+             csp->config->re_filterfile);
    return(-1);
 
 }
-#endif /* def PCRS */
-
-
-#ifdef KILLPOPUPS
-/*********************************************************************
- *
- * Function    :  load_popupfile
- *
- * Description :  Load, and parse the popup blocklist.
- *
- * Parameters  :
- *          1  :  csp = Current client state (buffers, headers, etc...)
- *
- * Returns     :  0 => success, else there was an error.
- *
- *********************************************************************/
-int load_popupfile(struct client_state *csp)
-{
-   FILE *fp;
-   char  buf[BUFSIZ], *p, *q;
-   struct popup_blocklist *entry = NULL;
-   struct popup_settings * data;
-   struct file_list *fs;
-   p = buf;
-   q = buf;
-
-   if (!check_file_changed(current_popupfile, popupfile, &fs))
-   {
-      /* No need to load */
-      if (csp)
-      {
-         csp->plist = current_popupfile;
-      }
-      return(0);
-   }
-   if (!fs)
-   {
-      goto load_popupfile_error;
-   }
-
-   fs->f = data = (struct popup_settings  *)zalloc(sizeof(*data));
-   if (data == NULL)
-   {
-      goto load_popupfile_error;
-   }
-
-   if ((fp = fopen(popupfile, "r")) == NULL)
-   {
-      goto load_popupfile_error;
-   }
-
-   while (read_config_line(buf, sizeof(buf), fp, fs) != NULL)
-   {
-      entry = (struct popup_blocklist*)zalloc(sizeof(struct popup_blocklist));
-      if (!entry)
-      {
-         fclose( fp );
-         goto load_popupfile_error;
-      }
-
-      /* Handle allowed hosts. */
-      if ( *buf == '~' )
-      {
-         /* Rememeber: skip the tilde */
-         entry->host_name = strdup( buf + 1 );
-         if (!entry->host_name)
-         {
-            fclose( fp );
-            goto load_popupfile_error;
-         }
-
-         entry->next = data->allowed;
-         data->allowed = entry;
-      }
-      else
-      {
-         /* Blocked host */
-         entry->host_name = strdup( buf );
-         if (!entry->host_name)
-         {
-            fclose( fp );
-            goto load_popupfile_error;
-         }
-
-         entry->next = data->blocked;
-         data->blocked = entry;
-      }
-   }
-
-   fclose( fp );
-
-#ifndef SPLIT_PROXY_ARGS
-   if (!suppress_blocklists)
-   {
-      fs->proxy_args = strsav(fs->proxy_args, "</pre>");
-   }
-#endif /* ndef SPLIT_PROXY_ARGS */
-
-   /* the old one is now obsolete */
-   if ( NULL != current_popupfile )
-   {
-      current_popupfile->unloader = unload_popupfile;
-   }
-
-   fs->next    = files->next;
-   files->next = fs;
-   current_popupfile = fs;
-
-   if (csp)
-   {
-      csp->plist = fs;
-   }
-
-   return( 0 );
-
-load_popupfile_error:
-   log_error(LOG_LEVEL_ERROR, "can't load popupfile '%s': %E", popupfile);
-   return(-1);
-
-}
-#endif /* def KILLPOPUPS */
-
 
 
 /*********************************************************************
@@ -2177,19 +1382,21 @@ load_popupfile_error:
  * Parameters  :
  *          1  :  loader = pointer to a function that can parse and load
  *                the appropriate config file.
+ *          2  :  config = The configuration_spec to add the loader to.
  *
  * Returns     :  N/A
  *
  *********************************************************************/
-void add_loader(int (*loader)(struct client_state *))
+void add_loader(int (*loader)(struct client_state *),
+                struct configuration_spec * config)
 {
    int i;
 
    for (i=0; i < NLOADERS; i++)
    {
-      if (loaders[i] == NULL)
+      if (config->loaders[i] == NULL)
       {
-         loaders[i] = loader;
+         config->loaders[i] = loader;
          break;
       }
    }
@@ -2208,6 +1415,8 @@ void add_loader(int (*loader)(struct client_state *))
  *
  * Parameters  :
  *          1  :  csp = Current client state (buffers, headers, etc...)
+ *                      Must be non-null.  Reads: "csp->config"
+ *                      Writes: various data members.
  *
  * Returns     :  0 => Ok, everything else is an error.
  *
@@ -2219,31 +1428,14 @@ int run_loader(struct client_state *csp)
 
    for (i=0; i < NLOADERS; i++)
    {
-      if (loaders[i] == NULL)
+      if (csp->config->loaders[i] == NULL)
       {
          break;
       }
-      ret |= (loaders[i])(csp);
+      ret |= (csp->config->loaders[i])(csp);
    }
    return(ret);
 
-}
-
-
-/*********************************************************************
- *
- * Function    :  remove_all_loaders
- *
- * Description :  Remove all loaders from the list.
- *
- * Parameters  :  N/A
- *
- * Returns     :  N/A
- *
- *********************************************************************/
-void remove_all_loaders(void)
-{
-   memset( loaders, 0, sizeof( loaders ) );
 }
 
 

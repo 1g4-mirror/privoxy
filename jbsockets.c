@@ -1,15 +1,15 @@
-const char jbsockets_rcs[] = "$Id: jbsockets.c,v 1.1 2001/05/13 21:57:06 administrator Exp $";
+const char jbsockets_rcs[] = "$Id: jbsockets.c,v 1.34 2002/04/08 20:31:41 swa Exp $";
 /*********************************************************************
  *
- * File        :  $Source: /home/administrator/cvs/ijb/jbsockets.c,v $
+ * File        :  $Source: /cvsroot/ijbswa/current/jbsockets.c,v $
  *
  * Purpose     :  Contains wrappers for system-specific sockets code,
- *                so that the rest of JunkBuster can be more
+ *                so that the rest of Junkbuster can be more
  *                OS-independent.  Contains #ifdefs to make this work
  *                on many platforms.
  *
  * Copyright   :  Written by and Copyright (C) 2001 the SourceForge
- *                IJBSWA team.  http://ijbswa.sourceforge.net
+ *                Privoxy team. http://www.privoxy.org/
  *
  *                Based on the Internet Junkbuster originally written
  *                by and Copyright (C) 1997 Anonymous Coders and 
@@ -35,6 +35,144 @@ const char jbsockets_rcs[] = "$Id: jbsockets.c,v 1.1 2001/05/13 21:57:06 adminis
  *
  * Revisions   :
  *    $Log: jbsockets.c,v $
+ *    Revision 1.34  2002/04/08 20:31:41  swa
+ *    fixed JB spelling
+ *
+ *    Revision 1.33  2002/04/03 16:02:18  gliptak
+ *    Correcting compile warning with older gcc
+ *
+ *    Revision 1.32  2002/03/31 17:18:59  jongfoster
+ *    Win32 only: Enabling STRICT to fix a VC++ compile warning.
+ *
+ *    Revision 1.31  2002/03/29 03:33:13  david__schmidt
+ *    Fix Mac OSX compiler warnings
+ *
+ *    Revision 1.30  2002/03/27 14:32:43  david__schmidt
+ *    More compiler warning message maintenance
+ *
+ *    Revision 1.29  2002/03/26 22:29:54  swa
+ *    we have a new homepage!
+ *
+ *    Revision 1.28  2002/03/24 13:25:43  swa
+ *    name change related issues
+ *
+ *    Revision 1.27  2002/03/13 00:27:05  jongfoster
+ *    Killing warnings
+ *
+ *    Revision 1.26  2002/03/11 22:07:02  david__schmidt
+ *    OS/2 port maintenance:
+ *    - Fixed EMX build - it had decayed a little
+ *    - Fixed inexplicable crash during FD_ZERO - must be due to a bad macro.
+ *      substituted a memset for now.
+ *
+ *    Revision 1.25  2002/03/09 20:03:52  jongfoster
+ *    - Making various functions return int rather than size_t.
+ *      (Undoing a recent change).  Since size_t is unsigned on
+ *      Windows, functions like read_socket that return -1 on
+ *      error cannot return a size_t.
+ *
+ *      THIS WAS A MAJOR BUG - it caused frequent, unpredictable
+ *      crashes, and also frequently caused JB to jump to 100%
+ *      CPU and stay there.  (Because it thought it had just
+ *      read ((unsigned)-1) == 4Gb of data...)
+ *
+ *    - The signature of write_socket has changed, it now simply
+ *      returns success=0/failure=nonzero.
+ *
+ *    - Trying to get rid of a few warnings --with-debug on
+ *      Windows, I've introduced a new type "jb_socket".  This is
+ *      used for the socket file descriptors.  On Windows, this
+ *      is SOCKET (a typedef for unsigned).  Everywhere else, it's
+ *      an int.  The error value can't be -1 any more, so it's
+ *      now JB_INVALID_SOCKET (which is -1 on UNIX, and in
+ *      Windows it maps to the #define INVALID_SOCKET.)
+ *
+ *    - The signature of bind_port has changed.
+ *
+ *    Revision 1.24  2002/03/07 03:51:36  oes
+ *     - Improved handling of failed DNS lookups
+ *     - Fixed compiler warnings etc
+ *
+ *    Revision 1.23  2002/03/05 00:36:01  jongfoster
+ *    Fixing bug 514988 - unable to restart Junkbuster
+ *
+ *    Revision 1.22  2002/03/04 02:08:02  david__schmidt
+ *    Enable web editing of actions file on OS/2 (it had been broken all this time!)
+ *
+ *    Revision 1.21  2002/01/09 14:32:33  oes
+ *    Added support for gethostbyname_r and gethostbyaddr_r.
+ *
+ *    Revision 1.20  2001/11/16 00:48:48  jongfoster
+ *    Enabling duplicate-socket detection for all platforms, not
+ *    just Win32.
+ *
+ *    Revision 1.19  2001/10/25 03:40:47  david__schmidt
+ *    Change in porting tactics: OS/2's EMX porting layer doesn't allow multiple
+ *    threads to call select() simultaneously.  So, it's time to do a real, live,
+ *    native OS/2 port.  See defines for __EMX__ (the porting layer) vs. __OS2__
+ *    (native). Both versions will work, but using __OS2__ offers multi-threading.
+ *
+ *    Revision 1.18  2001/09/21 23:02:02  david__schmidt
+ *    Cleaning up 2 compiler warnings on OS/2.
+ *
+ *    Revision 1.17  2001/09/13 20:11:46  jongfoster
+ *    Fixing 2 compiler warnings under Win32
+ *
+ *    Revision 1.16  2001/07/30 22:08:36  jongfoster
+ *    Tidying up #defines:
+ *    - All feature #defines are now of the form FEATURE_xxx
+ *    - Permanently turned off WIN_GUI_EDIT
+ *    - Permanently turned on WEBDAV and SPLIT_PROXY_ARGS
+ *
+ *    Revision 1.15  2001/07/29 17:40:43  jongfoster
+ *    Fixed compiler warning by adding a cast
+ *
+ *    Revision 1.14  2001/07/18 13:47:59  oes
+ *    Eliminated dirty hack for getsockbyname()
+ *
+ *    Revision 1.13  2001/07/15 13:56:57  jongfoster
+ *    Removing unused local variable.
+ *
+ *    Revision 1.12  2001/07/01 17:04:11  oes
+ *    Bugfix: accept_connection no longer uses the obsolete hstrerror() function
+ *
+ *    Revision 1.11  2001/06/29 21:45:41  oes
+ *    Indentation, CRLF->LF, Tab-> Space
+ *
+ *    Revision 1.10  2001/06/29 13:29:15  oes
+ *    - Added remote (server) host IP to csp->http->host_ip_addr_str
+ *    - Added detection of local socket IP and fqdn
+ *    - Removed logentry from cancelled commit
+ *
+ *    Revision 1.9  2001/06/07 23:06:09  jongfoster
+ *    The host parameter to connect_to() is now const.
+ *
+ *    Revision 1.8  2001/06/03 19:12:07  oes
+ *    filled comment
+ *
+ *    Revision 1.7  2001/05/28 16:14:00  jongfoster
+ *    Fixing bug in LOG_LEVEL_LOG
+ *
+ *    Revision 1.6  2001/05/26 17:28:32  jongfoster
+ *    Fixed LOG_LEVEL_LOG
+ *
+ *    Revision 1.5  2001/05/26 15:26:15  jongfoster
+ *    ACL feature now provides more security by immediately dropping
+ *    connections from untrusted hosts.
+ *
+ *    Revision 1.4  2001/05/26 00:37:42  jongfoster
+ *    Cosmetic indentation correction.
+ *
+ *    Revision 1.3  2001/05/25 21:57:54  jongfoster
+ *    Now gives a warning under Windows if you try to bind
+ *    it to a port that's already in use.
+ *
+ *    Revision 1.2  2001/05/17 23:01:01  oes
+ *     - Cleaned CRLF's from the sources and related files
+ *
+ *    Revision 1.1.1.1  2001/05/15 13:58:54  oes
+ *    Initial import of version 2.9.3 source tree
+ *
  *
  *********************************************************************/
 
@@ -50,13 +188,18 @@ const char jbsockets_rcs[] = "$Id: jbsockets.c,v 1.1 2001/05/13 21:57:06 adminis
 
 #ifdef _WIN32
 
+#ifndef STRICT
+#define STRICT
+#endif
 #include <windows.h>
 #include <sys/timeb.h>
 #include <io.h>
 
 #else
 
+#ifndef __OS2__
 #include <unistd.h>
+#endif
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <sys/ioctl.h>
@@ -65,9 +208,18 @@ const char jbsockets_rcs[] = "$Id: jbsockets.c,v 1.1 2001/05/13 21:57:06 adminis
 
 #ifndef __BEOS__
 #include <netinet/tcp.h>
+#ifndef __OS2__
 #include <arpa/inet.h>
+#endif
 #else
 #include <socket.h>
+#endif
+
+#if defined(__EMX__) || defined (__OS2__)
+#include <sys/select.h>  /* OS/2/EMX needs a little help with select */
+#ifdef __OS2__
+#include <nerrno.h>
+#endif
 #endif
 
 #endif
@@ -75,6 +227,7 @@ const char jbsockets_rcs[] = "$Id: jbsockets.c,v 1.1 2001/05/13 21:57:06 adminis
 #include "project.h"
 #include "jbsockets.h"
 #include "filters.h"
+#include "errlog.h"
 
 const char jbsockets_h_rcs[] = JBSOCKETS_H_VERSION;
 
@@ -92,59 +245,72 @@ const char jbsockets_h_rcs[] = JBSOCKETS_H_VERSION;
  *          3  :  csp = Current client state (buffers, headers, etc...)
  *                      Not modified, only used for source IP and ACL.
  *
- * Returns     :  -1 => failure, else it is the socket file descriptor.
+ * Returns     :  JB_INVALID_SOCKET => failure, else it is the socket
+ *                file descriptor.
  *
  *********************************************************************/
-int connect_to(char *host, int portnum, struct client_state *csp)
+jb_socket connect_to(const char *host, int portnum, struct client_state *csp)
 {
    struct sockaddr_in inaddr;
-   int   fd, addr;
+   jb_socket fd;
+   int addr;
    fd_set wfds;
    struct timeval tv[1];
 #if !defined(_WIN32) && !defined(__BEOS__) && !defined(AMIGA)
    int   flags;
 #endif /* !defined(_WIN32) && !defined(__BEOS__) && !defined(AMIGA) */
 
-#ifdef ACL_FILES
-   struct access_control_addr src[1], dst[1];
-#endif /* def ACL_FILES */
+#ifdef FEATURE_ACL
+   struct access_control_addr dst[1];
+#endif /* def FEATURE_ACL */
 
    memset((char *)&inaddr, 0, sizeof inaddr);
 
-   if ((addr = resolve_hostname_to_ip(host)) == -1)
+   if ((addr = resolve_hostname_to_ip(host)) == INADDR_NONE)
    {
-      return(-1);
+      csp->http->host_ip_addr_str = strdup("unknown");
+      return(JB_INVALID_SOCKET);
    }
 
-#ifdef ACL_FILES
-   src->addr = csp->ip_addr_long;
-   src->port = 0;
-
-   dst->addr = ntohl(addr);
+#ifdef FEATURE_ACL
+   dst->addr = ntohl((unsigned long) addr);
    dst->port = portnum;
 
-   if (block_acl(src, dst, csp))
+   if (block_acl(dst, csp))
    {
+#ifdef __OS2__
+      errno = SOCEPERM;
+#else
       errno = EPERM;
-      return(-1);
+#endif
+      return(JB_INVALID_SOCKET);
    }
-#endif /* def ACL_FILES */
+#endif /* def FEATURE_ACL */
 
    inaddr.sin_addr.s_addr = addr;
    inaddr.sin_family      = AF_INET;
+   csp->http->host_ip_addr_str = strdup(inet_ntoa(inaddr.sin_addr));
 
+#ifndef _WIN32
    if (sizeof(inaddr.sin_port) == sizeof(short))
+#endif /* ndef _WIN32 */
    {
-      inaddr.sin_port = htons((short)portnum);
+      inaddr.sin_port = htons((unsigned short) portnum);
    }
+#ifndef _WIN32
    else
    {
-      inaddr.sin_port = htonl(portnum);
+      inaddr.sin_port = htonl((unsigned long)portnum);
    }
+#endif /* ndef _WIN32 */
 
+#ifdef _WIN32
+   if ((fd = socket(inaddr.sin_family, SOCK_STREAM, 0)) == JB_INVALID_SOCKET)
+#else
    if ((fd = socket(inaddr.sin_family, SOCK_STREAM, 0)) < 0)
+#endif
    {
-      return(-1);
+      return(JB_INVALID_SOCKET);
    }
 
 #ifdef TCP_NODELAY
@@ -154,39 +320,45 @@ int connect_to(char *host, int portnum, struct client_state *csp)
    }
 #endif /* def TCP_NODELAY */
 
-#if !defined(_WIN32) && !defined(__BEOS__) && !defined(AMIGA)
+#if !defined(_WIN32) && !defined(__BEOS__) && !defined(AMIGA) && !defined(__OS2__)
    if ((flags = fcntl(fd, F_GETFL, 0)) != -1)
    {
       flags |= O_NDELAY;
       fcntl(fd, F_SETFL, flags);
    }
-#endif /* !defined(_WIN32) && !defined(__BEOS__) && !defined(AMIGA) */
+#endif /* !defined(_WIN32) && !defined(__BEOS__) && !defined(AMIGA) && !defined(__OS2__) */
 
-   while (connect(fd, (struct sockaddr *) & inaddr, sizeof inaddr) == -1)
+   while (connect(fd, (struct sockaddr *) & inaddr, sizeof inaddr) == JB_INVALID_SOCKET)
    {
 #ifdef _WIN32
       if (errno == WSAEINPROGRESS)
+#elif __OS2__ 
+      if (sock_errno() == EINPROGRESS)
 #else /* ifndef _WIN32 */
       if (errno == EINPROGRESS)
-#endif /* ndef _WIN32 */
+#endif /* ndef _WIN32 || __OS2__ */
       {
          break;
       }
 
+#ifdef __OS2__ 
+      if (sock_errno() != EINTR)
+#else
       if (errno != EINTR)
+#endif /* __OS2__ */
       {
          close_socket(fd);
-         return(-1);
+         return(JB_INVALID_SOCKET);
       }
    }
 
-#if !defined(_WIN32) && !defined(__BEOS__) && !defined(AMIGA)
+#if !defined(_WIN32) && !defined(__BEOS__) && !defined(AMIGA) && !defined(__OS2__)
    if (flags != -1)
    {
       flags &= ~O_NDELAY;
       fcntl(fd, F_SETFL, flags);
    }
-#endif /* !defined(_WIN32) && !defined(__BEOS__) && !defined(AMIGA) */
+#endif /* !defined(_WIN32) && !defined(__BEOS__) && !defined(AMIGA) && !defined(__OS2__) */
 
    /* wait for connection to complete */
    FD_ZERO(&wfds);
@@ -195,10 +367,11 @@ int connect_to(char *host, int portnum, struct client_state *csp)
    tv->tv_sec  = 30;
    tv->tv_usec = 0;
 
-   if (select(fd + 1, NULL, &wfds, NULL, tv) <= 0)
+   /* MS Windows uses int, not SOCKET, for the 1st arg of select(). Wierd! */
+   if (select((int)fd + 1, NULL, &wfds, NULL, tv) <= 0)
    {
       close_socket(fd);
-      return(-1);
+      return(JB_INVALID_SOCKET);
    }
    return(fd);
 
@@ -216,22 +389,51 @@ int connect_to(char *host, int portnum, struct client_state *csp)
  *          2  :  buf = pointer to data to be written.
  *          3  :  len = length of data to be written to the socket "fd".
  *
- * Returns     :  Win32: If no error occurs, returns the total number of
- *                bytes sent, which can be less than the number
- *                indicated by len. Otherwise, returns (-1).
- *                Unix: ??? (Please fill me in!)
+ * Returns     :  0 on success (entire buffer sent).
+ *                nonzero on error.
  *
  *********************************************************************/
-int write_socket(int fd, const char *buf, int len)
+int write_socket(jb_socket fd, const char *buf, size_t len)
 {
-   if (len <= 0) return(0);
+   if (len == 0)
+   {
+      return 0;
+   }
 
-   /* if (DEBUG(LOG)) fwrite(buf, n, 1, logfp); */
+   if (len < 0)
+   {
+      return 1;
+   }
 
-#if defined(_WIN32) || defined(__BEOS__) || defined(AMIGA)
-   return( send(fd, buf, len, 0));
+   log_error(LOG_LEVEL_LOG, "%N", len, buf);
+
+#if defined(_WIN32)
+   return (send(fd, buf, (int)len, 0) != (int)len);
+#elif defined(__BEOS__) || defined(AMIGA)
+   return (send(fd, buf, len, 0) != len);
+#elif defined(__OS2__)
+   /*
+    * Break the data up into SOCKET_SEND_MAX chunks for sending...
+    * OS/2 seemed to complain when the chunks were too large.
+    */
+#define SOCKET_SEND_MAX 65000
+   {
+      int write_len = 0, send_len, send_rc = 0, i = 0;
+      while ((i < len) && (send_rc != -1))
+      {
+         if ((i + SOCKET_SEND_MAX) > len)
+            send_len = len - i;
+         else
+            send_len = SOCKET_SEND_MAX;
+         send_rc = send(fd,(char*)buf + i, send_len, 0);
+         if (send_rc == -1)
+            return 1;
+         i = i + send_len;
+      }
+      return 0;
+   }
 #else
-   return( write(fd, buf, len));
+   return (write(fd, buf, len) != len);
 #endif
 
 }
@@ -255,24 +457,26 @@ int write_socket(int fd, const char *buf, int len)
  *                smaller than the number of bytes requested; this may hap-
  *                pen for example because fewer bytes are actually available
  *                right now (maybe because we were close to end-of-file, or
- *                because we are reading from a pipe, or from a terminal),
- *                or because read() was interrupted by a signal.  On error,
+ *                because we are reading from a pipe, or from a terminal,
+ *                or because read() was interrupted by a signal).  On error,
  *                -1 is returned, and errno is set appropriately.  In this
  *                case it is left unspecified whether the file position (if
  *                any) changes.
  *
  *********************************************************************/
-int read_socket(int fd, char *buf, int len)
+int read_socket(jb_socket fd, char *buf, int len)
 {
    if (len <= 0)
    {
       return(0);
    }
 
-#if defined(_WIN32) || defined(__BEOS__) || defined(AMIGA)
-   return( recv(fd, buf, len, 0));
+#if defined(_WIN32)
+   return(recv(fd, buf, len, 0));
+#elif defined(__BEOS__) || defined(AMIGA) || defined(__OS2__)
+   return(recv(fd, buf, (size_t)len, 0));
 #else
-   return( read(fd, buf, len));
+   return(read(fd, buf, (size_t)len));
 #endif
 }
 
@@ -289,12 +493,14 @@ int read_socket(int fd, char *buf, int len)
  * Returns     :  void
  *
  *********************************************************************/
-void close_socket(int fd)
+void close_socket(jb_socket fd)
 {
 #if defined(_WIN32) || defined(__BEOS__)
    closesocket(fd);
 #elif defined(AMIGA)
    CloseSocket(fd); 
+#elif defined(__OS2__)
+   soclose(fd);
 #else
    close(fd);
 #endif
@@ -312,39 +518,72 @@ void close_socket(int fd)
  * Parameters  :
  *          1  :  hostnam = TCP/IP address to bind/listen to
  *          2  :  portnum = port to listen on
+ *          3  :  pfd = pointer used to return file descriptor.
  *
- * Returns     :  if success, return file descriptor
- *                if failure, returns -2 if address is in use, otherwise -1
- *
+ * Returns     :  if success, returns 0 and sets *pfd.
+ *                if failure, returns -3 if address is in use,
+ *                                    -2 if address unresolvable,
+ *                                    -1 otherwise
  *********************************************************************/
-int bind_port(const char *hostnam, int portnum)
+int bind_port(const char *hostnam, int portnum, jb_socket *pfd)
 {
    struct sockaddr_in inaddr;
-   int fd;
+   jb_socket fd;
+#ifndef _WIN32
    int one = 1;
+#endif /* ndef _WIN32 */
+
+   *pfd = JB_INVALID_SOCKET;
 
    memset((char *)&inaddr, '\0', sizeof inaddr);
 
    inaddr.sin_family      = AF_INET;
    inaddr.sin_addr.s_addr = resolve_hostname_to_ip(hostnam);
 
-   if (sizeof(inaddr.sin_port) == sizeof(short))
+   if (inaddr.sin_addr.s_addr == INADDR_NONE)
    {
-      inaddr.sin_port = htons((short)portnum);
+      return(-2);
    }
+
+#ifndef _WIN32
+   if (sizeof(inaddr.sin_port) == sizeof(short))
+#endif /* ndef _WIN32 */
+   {
+      inaddr.sin_port = htons((unsigned short) portnum);
+   }
+#ifndef _WIN32
    else
    {
-      inaddr.sin_port = htonl(portnum);
+      inaddr.sin_port = htonl((unsigned long) portnum);
    }
+#endif /* ndef _WIN32 */
 
    fd = socket(AF_INET, SOCK_STREAM, 0);
 
+#ifdef _WIN32
+   if (fd == JB_INVALID_SOCKET)
+#else
    if (fd < 0)
+#endif
    {
       return(-1);
    }
 
+#ifndef _WIN32
+   /*
+    * This is not needed for Win32 - in fact, it stops
+    * duplicate instances of Junkbuster from being caught.
+    *
+    * On UNIX, we assume the user is sensible enough not
+    * to start Junkbuster multiple times on the same IP.
+    * Without this, stopping and restarting Junkbuster
+    * from a script fails.
+    * Note: SO_REUSEADDR is meant to only take over
+    * sockets which are *not* in listen state in Linux,
+    * e.g. sockets in TIME_WAIT. YMMV.
+    */
    setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char *)&one, sizeof(one));
+#endif /* ndef _WIN32 */
 
    if (bind (fd, (struct sockaddr *)&inaddr, sizeof(inaddr)) < 0)
    {
@@ -355,7 +594,7 @@ int bind_port(const char *hostnam, int portnum)
       if (errno == EADDRINUSE)
 #endif
       {
-         return(-2);
+         return(-3);
       }
       else
       {
@@ -371,7 +610,8 @@ int bind_port(const char *hostnam, int portnum)
       }
    }
 
-   return fd;
+   *pfd = fd;
+   return 0;
 
 }
 
@@ -392,28 +632,93 @@ int bind_port(const char *hostnam, int portnum)
  *                On an error it returns 0 (FALSE).
  *
  *********************************************************************/
-int accept_connection(struct client_state * csp, int fd)
+int accept_connection(struct client_state * csp, jb_socket fd)
 {
-   struct sockaddr raddr;
-   struct sockaddr_in *rap = (struct sockaddr_in *) &raddr;
-   int   afd, raddrlen;
+   struct sockaddr_in client, server;
+   struct hostent *host = NULL;
+   jb_socket afd;
+#if defined(_WIN32) || defined(__OS2__) || defined(__APPLE_CC__) || defined(AMIGA)
+   /* Wierdness - fix a warning. */
+   int c_length, s_length;
+#else
+   socklen_t c_length, s_length;
+#endif
+#if defined(HAVE_GETHOSTBYADDR_R_8_ARGS) ||  defined(HAVE_GETHOSTBYADDR_R_7_ARGS) || defined(HAVE_GETHOSTBYADDR_R_5_ARGS)
+   struct hostent result;
+#if defined(HAVE_GETHOSTBYADDR_R_5_ARGS)
+   struct hostent_data hdata;
+#else
+   char hbuf[HOSTENT_BUFFER_SIZE];
+   int thd_err;
+#endif /* def HAVE_GETHOSTBYADDR_R_5_ARGS */
+#endif /* def HAVE_GETHOSTBYADDR_R_(8|7|5)_ARGS */
 
-   raddrlen = sizeof raddr;
+   c_length = s_length = sizeof(client);
+
+#ifdef _WIN32
+   afd = accept (fd, (struct sockaddr *) &client, &c_length);
+   if (afd == JB_INVALID_SOCKET)
+   {
+      return 0;
+   }
+#else
    do
    {
-      afd = accept (fd, &raddr, &raddrlen);
+      afd = accept (fd, (struct sockaddr *) &client, &c_length);
    } while (afd < 1 && errno == EINTR);
-
    if (afd < 0)
    {
       return 0;
    }
+#endif
+
+   /* 
+    * Determine the IP-Adress that the client used to reach us
+    * and the hostname associated with that address
+    */
+   if (!getsockname(afd, (struct sockaddr *) &server, &s_length))
+   {
+      csp->my_ip_addr_str = strdup(inet_ntoa(server.sin_addr));
+#if defined(HAVE_GETHOSTBYADDR_R_8_ARGS)
+      gethostbyaddr_r((const char *)&server.sin_addr,
+                      sizeof(server.sin_addr), AF_INET,
+                      &result, hbuf, HOSTENT_BUFFER_SIZE,
+                      &host, &thd_err);
+#elif defined(HAVE_GETHOSTBYADDR_R_7_ARGS)
+      host = gethostbyaddr_r((const char *)&server.sin_addr,
+                      sizeof(server.sin_addr), AF_INET,
+                      &result, hbuf, HOSTENT_BUFFER_SIZE, &thd_err);
+#elif defined(HAVE_GETHOSTBYADDR_R_5_ARGS)
+      if (0 == gethostbyaddr_r((const char *)&server.sin_addr,
+                               sizeof(server.sin_addr), AF_INET,
+                               &result, &hdata))
+      {
+         host = &result;
+      }
+      else
+      {
+         host = NULL;
+      }
+#else
+      host = gethostbyaddr((const char *)&server.sin_addr, 
+                           sizeof(server.sin_addr), AF_INET);
+#endif
+      if (host == NULL)
+      {
+         log_error(LOG_LEVEL_ERROR, "Unable to get my own hostname: %E\n");
+      }
+      else
+      {
+         csp->my_hostname = strdup(host->h_name);
+      }
+   }
 
    csp->cfd    = afd;
-   csp->ip_addr_str  = strdup(inet_ntoa(rap->sin_addr));
-   csp->ip_addr_long = ntohl(rap->sin_addr.s_addr);
+   csp->ip_addr_str  = strdup(inet_ntoa(client.sin_addr));
+   csp->ip_addr_long = ntohl(client.sin_addr.s_addr);
 
    return 1;
+
 }
 
 
@@ -427,13 +732,22 @@ int accept_connection(struct client_state * csp, int fd)
  * Parameters  :
  *          1  :  host = hostname to resolve
  *
- * Returns     :  -1 => failure, INADDR_ANY or tcp/ip address if succesful.
+ * Returns     :  INADDR_NONE => failure, INADDR_ANY or tcp/ip address if succesful.
  *
  *********************************************************************/
-int resolve_hostname_to_ip(const char *host)
+unsigned long resolve_hostname_to_ip(const char *host)
 {
    struct sockaddr_in inaddr;
    struct hostent *hostp;
+#if defined(HAVE_GETHOSTBYNAME_R_6_ARGS) || defined(HAVE_GETHOSTBYNAME_R_5_ARGS) || defined(HAVE_GETHOSTBYNAME_R_3_ARGS)
+   struct hostent result;
+#if defined(HAVE_GETHOSTBYNAME_R_6_ARGS) || defined(HAVE_GETHOSTBYNAME_R_5_ARGS)
+   char hbuf[HOSTENT_BUFFER_SIZE];
+   int thd_err;
+#else /* defined(HAVE_GETHOSTBYNAME_R_3_ARGS) */
+   struct hostent_data hdata;
+#endif /* def HAVE_GETHOSTBYNAME_R_(6|5)_ARGS */
+#endif /* def HAVE_GETHOSTBYNAME_R_(6|5|3)_ARGS */
 
    if ((host == NULL) || (*host == '\0'))
    {
@@ -444,10 +758,29 @@ int resolve_hostname_to_ip(const char *host)
 
    if ((inaddr.sin_addr.s_addr = inet_addr(host)) == -1)
    {
-      if ((hostp = gethostbyname(host)) == NULL)
+#if defined(HAVE_GETHOSTBYNAME_R_6_ARGS)
+      gethostbyname_r(host, &result, hbuf,
+                      HOSTENT_BUFFER_SIZE, &hostp, &thd_err);
+#elif defined(HAVE_GETHOSTBYNAME_R_5_ARGS)
+      hostp = gethostbyname_r(host, &result, hbuf,
+                      HOSTENT_BUFFER_SIZE, &thd_err);
+#elif defined(HAVE_GETHOSTBYNAME_R_3_ARGS)
+      if (0 == gethostbyname_r(host, &result, &hdata))
+      {
+         hostp = &result;
+      }
+      else
+      {
+         hostp = NULL;
+      }
+#else
+      hostp = gethostbyname(host);
+#endif /* def HAVE_GETHOSTBYNAME_R_(6|5|3)_ARGS */
+      if (hostp == NULL)
       {
          errno = EINVAL;
-         return(-1);
+         log_error(LOG_LEVEL_ERROR, "could not resolve hostname %s", host);
+         return(INADDR_NONE);
       }
       if (hostp->h_addrtype != AF_INET)
       {
@@ -455,8 +788,9 @@ int resolve_hostname_to_ip(const char *host)
          errno = WSAEPROTOTYPE;
 #else
          errno = EPROTOTYPE;
-#endif
-         return(-1);
+#endif 
+         log_error(LOG_LEVEL_ERROR, "hostname %s resolves to unknown address type.", host);
+         return(INADDR_NONE);
       }
       memcpy(
          (char *) &inaddr.sin_addr,

@@ -1,12 +1,12 @@
-const char win32_rcs[] = "$Id: win32.c,v 1.1 2001/05/13 21:57:07 administrator Exp $";
+const char win32_rcs[] = "$Id: win32.c,v 1.8 2002/03/26 22:57:10 jongfoster Exp $";
 /*********************************************************************
  *
- * File        :  $Source: /home/administrator/cvs/ijb/win32.c,v $
+ * File        :  $Source: /cvsroot/ijbswa/current/win32.c,v $
  *
  * Purpose     :  Win32 User Interface initialization and message loop
  *
- * Copyright   :  Written by and Copyright (C) 2001 the SourceForge
- *                IJBSWA team.  http://ijbswa.sourceforge.net
+ * Copyright   :  Written by and Copyright (C) 2001-2002 members of
+ *                the Privoxy team.  http://www.privoxy.org/
  *
  *                Written by and Copyright (C) 1999 Adam Lock
  *                <locka@iol.ie>
@@ -31,6 +31,31 @@ const char win32_rcs[] = "$Id: win32.c,v 1.1 2001/05/13 21:57:07 administrator E
  *
  * Revisions   :
  *    $Log: win32.c,v $
+ *    Revision 1.8  2002/03/26 22:57:10  jongfoster
+ *    Web server name should begin www.
+ *
+ *    Revision 1.7  2002/03/24 12:03:47  jongfoster
+ *    Name change
+ *
+ *    Revision 1.6  2002/03/16 21:53:28  jongfoster
+ *    VC++ Heap debug option
+ *
+ *    Revision 1.5  2002/03/04 23:47:30  jongfoster
+ *    - Rewritten, simpler command-line pre-parser
+ *    - not using raise(SIGINT) any more
+ *
+ *    Revision 1.4  2001/11/30 21:29:33  jongfoster
+ *    Fixing a warning
+ *
+ *    Revision 1.3  2001/11/16 00:46:31  jongfoster
+ *    Fixing compiler warnings
+ *
+ *    Revision 1.2  2001/07/29 19:32:00  jongfoster
+ *    Renaming _main() [mingw32 only] to real_main(), for ANSI compliance.
+ *
+ *    Revision 1.1.1.1  2001/05/15 13:59:08  oes
+ *    Initial import of version 2.9.3 source tree
+ *
  *
  *********************************************************************/
 
@@ -43,30 +68,39 @@ const char win32_rcs[] = "$Id: win32.c,v 1.1 2001/05/13 21:57:07 administrator E
 
 #include "project.h"
 #include "jcc.h"
+#include "miscutil.h"
 
 /* Uncomment this if you want to build Win32 as a console app */
 /* #define _WIN_CONSOLE */
 
+#ifndef STRICT
+#define STRICT
+#endif
 #include <windows.h>
 
 #include <stdarg.h>
 #include <process.h>
+
+#if defined(_WIN32) && defined(_MSC_VER) && defined(_DEBUG)
+/* Visual C++ Heap debugging */
+#include <crtdbg.h>
+#endif /* defined(_WIN32) && defined(_MSC_VER) && defined(_DEBUG) */
 
 #include "win32.h"
 
 const char win32_h_rcs[] = WIN32_H_VERSION;
 
 const char win32_blurb[] =
-"Internet Junkbuster Proxy(TM) Version " VERSION " for Windows is Copyright (C) 1997-8\n"
-"by Junkbusters Corp.  This is free software; it may be used and copied under\n"
-"the GNU General Public License: http://www.gnu.org/copyleft/gpl.html .\n"
+"Privoxy version " VERSION " for Windows\n"
+"Copyright (C) 2000-2002 by members of the Privoxy Team\n"
+"Copyright (C) 1997-8 by Junkbusters Corp.\n"
+"This is free software; it may be used and copied under the\n"
+"GNU General Public License: http://www.gnu.org/copyleft/gpl.html .\n"
 "This program comes with ABSOLUTELY NO WARRANTY OF ANY KIND.\n"
 "\n"
 "For information about how to to configure the proxy and your browser, see\n"
-"        " REDIRECT_URL "win\n"
-"\n"
-"The Internet Junkbuster Proxy(TM) is running and ready to serve!\n"
-"";
+"        " HOME_PAGE_URL "\n"
+"\n";
 
 #ifdef _WIN_CONSOLE
 
@@ -89,12 +123,12 @@ static void  __cdecl UserInterfaceThread(void *);
  * Description :  M$ Windows "main" routine:
  *                parse the `lpCmdLine' param into main's argc and argv variables,
  *                start the user interface thread (for the systray window), and
- *                call main (i.e. patch execution into normal IJB startup).
+ *                call main (i.e. patch execution into normal startup).
  *
  * Parameters  :
- *          1  :  hInstance = instance handle of this IJB execution
- *          2  :  hPrevInstance = instance handle of previous IJB execution
- *          3  :  lpCmdLine = command line string which started IJB
+ *          1  :  hInstance = instance handle of this execution
+ *          2  :  hPrevInstance = instance handle of previous execution
+ *          3  :  lpCmdLine = command line string which started us
  *          4  :  nCmdShow = window show value (MIN, MAX, NORMAL, etc...)
  *
  * Returns     :  `main' never returns, so WinMain will also never return.
@@ -102,56 +136,64 @@ static void  __cdecl UserInterfaceThread(void *);
  *********************************************************************/
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-   int argc = 0;
    int i;
    int res;
-   char **argv = NULL;
-   char *pszArgs = NULL;
-   char *pszLastTok;
+   int argc = 1;
+   const char *argv[3];
    char szModule[MAX_PATH+1];
 #ifndef _WIN_CONSOLE
    HANDLE hInitCompleteEvent = NULL;
 #endif
 
-   /* Split command line into arguments */
-   pszArgs = (char *)malloc(strlen(lpCmdLine) + 1);
-   strcpy(pszArgs, lpCmdLine);
 
-   GetModuleFileName(hInstance, szModule, MAX_PATH);
+#if defined(_WIN32) && defined(_MSC_VER) && defined(_DEBUG)
+#if 0
+   /* Visual C++ Heap debugging */
 
-   /* Count number of spaces */
-   argc = 1;
-   if (strlen(pszArgs) > 0)
+   /* Get current flag*/
+   int tmpFlag = _CrtSetDbgFlag( _CRTDBG_REPORT_FLAG );
+
+   /* Turn on leak-checking bit */
+   tmpFlag |= _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF | _CRTDBG_CHECK_ALWAYS_DF;
+
+   /* Turn off CRT block checking bit */
+   tmpFlag &= ~(_CRTDBG_CHECK_CRT_DF | _CRTDBG_DELAY_FREE_MEM_DF);
+
+   /* Set flag to the new value */
+   _CrtSetDbgFlag( tmpFlag );
+#endif
+#endif /* defined(_WIN32) && defined(_MSC_VER) && defined(_DEBUG) */
+
+   /*
+    * Cheat in parsing the command line.  We only ever have at most one
+    * paramater, which may optionally be specified inside double quotes.
+    */
+
+   if (lpCmdLine != NULL)
    {
-      pszLastTok = pszArgs;
-      do
+      /* Make writable copy */
+      lpCmdLine = strdup(lpCmdLine);
+   }
+   if (lpCmdLine != NULL)
+   {
+      chomp(lpCmdLine);
+      i = strlen(lpCmdLine);
+      if ((i >= 2) && (lpCmdLine[0] == '\"') && (lpCmdLine[i - 1] == '\"'))
       {
-         argc++;
-         pszLastTok = strchr(pszLastTok+1, ' ');
-      } while (pszLastTok);
+         lpCmdLine[i - 1] = '\0';
+         lpCmdLine++;
+      }
+      if (lpCmdLine[0] == '\0')
+      {
+         lpCmdLine = NULL;
+      }
    }
 
-   /* Allocate array of strings */
-   argv = (char **)malloc(sizeof(char *) * argc);
-
-   /* step through command line replacing spaces with zeros, initialise array */
+   GetModuleFileName(hInstance, szModule, MAX_PATH);
    argv[0] = szModule;
-   i = 1;
-   pszLastTok = pszArgs;
-   do
-   {
-      argv[i] = pszLastTok;
-      pszLastTok = strchr(pszLastTok+1, ' ');
-      if (pszLastTok)
-      {
-         while (*pszLastTok != '\0' && *pszLastTok == ' ')
-         {
-            *pszLastTok = '\0';
-            pszLastTok++;
-         }
-      }
-      i++;
-   } while (pszLastTok && *pszLastTok != '\0');
+   argv[1] = lpCmdLine;
+   argv[2] = NULL;
+   argc = ((lpCmdLine != NULL) ? 2 : 1);
 
 #ifndef _WIN_CONSOLE
    /* Create a user-interface thread and wait for it to initialise */
@@ -164,14 +206,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 #endif
 
 #ifdef __MINGW32__
-   res = _main( argc, argv );
+   res = real_main( argc, argv );
 #else
    res = main( argc, argv );
 #endif
-
-   /* Cleanup */
-   free(argv);
-   free(pszArgs);
 
    return res;
 
@@ -206,7 +244,7 @@ void InitWin32(void)
    if (WSAStartup(wVersionRequested, &wsaData) != 0)
    {
 #ifndef _WIN_CONSOLE
-      MessageBox(NULL, "Cannot initialize WinSock library", "Internet JunkBuster Error", 
+      MessageBox(NULL, "Cannot initialize WinSock library", "Privoxy Error", 
          MB_OK | MB_ICONERROR | MB_TASKMODAL | MB_SETFOREGROUND | MB_TOPMOST);  
 #endif
       exit(1);
@@ -230,7 +268,7 @@ void InitWin32(void)
  * Description :  User interface thread.  WinMain will wait for us to set
  *                the hInitCompleteEvent before patching over to `main'.
  *                This ensures the systray window is active before beginning
- *                IJB operations.
+ *                operations.
  *
  * Parameters  :
  *          1  :  pData = pointer to `hInitCompleteEvent'.
@@ -258,7 +296,7 @@ static void __cdecl UserInterfaceThread(void *pData)
    TermLogWindow();
 
    /* Time to die... */
-   raise(SIGINT);
+   exit(0);
 
 }
 

@@ -1,15 +1,15 @@
-#ifndef _JCC_H
-#define _JCC_H
-#define JCC_H_VERSION "$Id: jcc.h,v 1.1 2001/05/13 21:57:06 administrator Exp $"
+#ifndef JCC_H_INCLUDED
+#define JCC_H_INCLUDED
+#define JCC_H_VERSION "$Id: jcc.h,v 1.11 2002/03/24 13:25:43 swa Exp $"
 /*********************************************************************
  *
- * File        :  $Source: /home/administrator/cvs/ijb/jcc.h,v $
+ * File        :  $Source: /cvsroot/ijbswa/current/jcc.h,v $
  *
  * Purpose     :  Main file.  Contains main() method, main loop, and 
  *                the main connection-handling function.
  *
  * Copyright   :  Written by and Copyright (C) 2001 the SourceForge
- *                IJBSWA team.  http://ijbswa.sourceforge.net
+ *                Privoxy team. http://www.privoxy.org/
  *
  *                Based on the Internet Junkbuster originally written
  *                by and Copyright (C) 1997 Anonymous Coders and 
@@ -35,46 +35,90 @@
  *
  * Revisions   :
  *    $Log: jcc.h,v $
+ *    Revision 1.11  2002/03/24 13:25:43  swa
+ *    name change related issues
+ *
+ *    Revision 1.10  2002/03/16 23:54:06  jongfoster
+ *    Adding graceful termination feature, to help look for memory leaks.
+ *    If you enable this (which, by design, has to be done by hand
+ *    editing config.h) and then go to http://i.j.b/die, then the program
+ *    will exit cleanly after the *next* request.  It should free all the
+ *    memory that was used.
+ *
+ *    Revision 1.9  2002/03/07 03:52:44  oes
+ *    Set logging to tty for --no-daemon mode
+ *
+ *    Revision 1.8  2002/03/04 18:19:49  oes
+ *    Added extern const char *pidfile
+ *
+ *    Revision 1.7  2001/11/05 21:41:43  steudten
+ *    Add changes to be a real daemon just for unix os.
+ *    (change cwd to /, detach from controlling tty, set
+ *    process group and session leader to the own process.
+ *    Add DBG() Macro.
+ *    Add some fatal-error log message for failed malloc().
+ *    Add '-d' if compiled with 'configure --with-debug' to
+ *    enable debug output.
+ *
+ *    Revision 1.6  2001/07/30 22:08:36  jongfoster
+ *    Tidying up #defines:
+ *    - All feature #defines are now of the form FEATURE_xxx
+ *    - Permanently turned off WIN_GUI_EDIT
+ *    - Permanently turned on WEBDAV and SPLIT_PROXY_ARGS
+ *
+ *    Revision 1.5  2001/07/29 19:32:00  jongfoster
+ *    Renaming _main() [mingw32 only] to real_main(), for ANSI compliance.
+ *
+ *    Revision 1.4  2001/07/29 18:58:15  jongfoster
+ *    Removing nested #includes, adding forward declarations for needed
+ *    structures, and changing the #define _FILENAME_H to FILENAME_H_INCLUDED.
+ *
+ *    Revision 1.3  2001/07/18 12:31:58  oes
+ *    moved #define freez from jcc.h to project.h
+ *
+ *    Revision 1.2  2001/05/31 21:24:47  jongfoster
+ *    Changed "permission" to "action" throughout.
+ *    Removed DEFAULT_USER_AGENT - it must now be specified manually.
+ *    Moved vanilla wafer check into chat(), since we must now
+ *    decide whether or not to add it based on the URL.
+ *
+ *    Revision 1.1.1.1  2001/05/15 13:58:56  oes
+ *    Initial import of version 2.9.3 source tree
+ *
  *
  *********************************************************************/
 
-
-/* Declare struct FILE for vars and funcs. */
-#include <stdio.h>
-
-/* All of our project's data types. */
-#include "project.h"
-
-#include "loadcfg.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define freez(X)  if(X) free(X); X = NULL
-
+struct client_state;
+struct file_list;
 
 /* Global variables */
 
-
-#ifdef STATISTICS
+#ifdef FEATURE_STATISTICS
 extern int urls_read;
 extern int urls_rejected;
-#endif /*def STATISTICS*/
+#endif /*def FEATURE_STATISTICS*/
 
 extern struct client_state clients[];
-
 extern struct file_list    files[];
 
-/* Global constants */
+#ifdef unix
+extern const char *pidfile;
+#endif
+extern int no_daemon;
 
-extern const char DEFAULT_USER_AGENT[];
-
+#ifdef FEATURE_GRACEFUL_TERMINATION
+extern int g_terminate;
+#endif
 
 /* Functions */
 
 #ifdef __MINGW32__
-int _main(int argc, const char *argv[]);
+int real_main(int argc, const char *argv[]);
 #else
 int main(int argc, const char *argv[]);
 #endif
@@ -87,7 +131,7 @@ extern const char jcc_h_rcs[];
 } /* extern "C" */
 #endif
 
-#endif /* ndef _JCC_H */
+#endif /* ndef JCC_H_INCLUDED */
 
 /*
   Local Variables:

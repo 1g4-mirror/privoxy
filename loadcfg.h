@@ -1,9 +1,9 @@
-#ifndef _LOADCFG_H
-#define _LOADCFG_H
-#define LOADCFG_H_VERSION "$Id: loadcfg.h,v 1.1 2001/05/13 21:57:06 administrator Exp $"
+#ifndef LOADCFG_H_INCLUDED
+#define LOADCFG_H_INCLUDED
+#define LOADCFG_H_VERSION "$Id: loadcfg.h,v 1.10 2002/03/24 13:25:43 swa Exp $"
 /*********************************************************************
  *
- * File        :  $Source: /home/administrator/cvs/ijb/loadcfg.h,v $
+ * File        :  $Source: /cvsroot/ijbswa/current/loadcfg.h,v $
  *
  * Purpose     :  Loads settings from the configuration file into
  *                global variables.  This file contains both the 
@@ -11,7 +11,7 @@
  *                variables it writes to.
  *
  * Copyright   :  Written by and Copyright (C) 2001 the SourceForge
- *                IJBSWA team.  http://ijbswa.sourceforge.net
+ *                Privoxy team. http://www.privoxy.org/
  *
  *                Based on the Internet Junkbuster originally written
  *                by and Copyright (C) 1997 Anonymous Coders and 
@@ -37,106 +37,123 @@
  *
  * Revisions   :
  *    $Log: loadcfg.h,v $
+ *    Revision 1.10  2002/03/24 13:25:43  swa
+ *    name change related issues
+ *
+ *    Revision 1.9  2002/03/16 23:54:06  jongfoster
+ *    Adding graceful termination feature, to help look for memory leaks.
+ *    If you enable this (which, by design, has to be done by hand
+ *    editing config.h) and then go to http://i.j.b/die, then the program
+ *    will exit cleanly after the *next* request.  It should free all the
+ *    memory that was used.
+ *
+ *    Revision 1.8  2001/12/30 14:07:32  steudten
+ *    - Add signal handling (unix)
+ *    - Add SIGHUP handler (unix)
+ *    - Add creation of pidfile (unix)
+ *    - Add action 'top' in rc file (RH)
+ *    - Add entry 'SIGNALS' to manpage
+ *    - Add exit message to logfile (unix)
+ *
+ *    Revision 1.7  2001/07/30 22:08:36  jongfoster
+ *    Tidying up #defines:
+ *    - All feature #defines are now of the form FEATURE_xxx
+ *    - Permanently turned off WIN_GUI_EDIT
+ *    - Permanently turned on WEBDAV and SPLIT_PROXY_ARGS
+ *
+ *    Revision 1.6  2001/07/29 18:58:15  jongfoster
+ *    Removing nested #includes, adding forward declarations for needed
+ *    structures, and changing the #define _FILENAME_H to FILENAME_H_INCLUDED.
+ *
+ *    Revision 1.5  2001/05/26 00:28:36  jongfoster
+ *    Automatic reloading of config file.
+ *    Removed obsolete SIGHUP support (Unix) and Reload menu option (Win32).
+ *    Most of the global variables have been moved to a new
+ *    struct configuration_spec, accessed through csp->config->globalname
+ *    Most of the globals remaining are used by the Win32 GUI.
+ *
+ *    Revision 1.4  2001/05/22 18:46:04  oes
+ *
+ *    - Enabled filtering banners by size rather than URL
+ *      by adding patterns that replace all standard banner
+ *      sizes with the "Junkbuster" gif to the re_filterfile
+ *
+ *    - Enabled filtering WebBugs by providing a pattern
+ *      which kills all 1x1 images
+ *
+ *    - Added support for PCRE_UNGREEDY behaviour to pcrs,
+ *      which is selected by the (nonstandard and therefore
+ *      capital) letter 'U' in the option string.
+ *      It causes the quantifiers to be ungreedy by default.
+ *      Appending a ? turns back to greedy (!).
+ *
+ *    - Added a new interceptor ijb-send-banner, which
+ *      sends back the "Junkbuster" gif. Without imagelist or
+ *      MSIE detection support, or if tinygif = 1, or the
+ *      URL isn't recognized as an imageurl, a lame HTML
+ *      explanation is sent instead.
+ *
+ *    - Added new feature, which permits blocking remote
+ *      script redirects and firing back a local redirect
+ *      to the browser.
+ *      The feature is conditionally compiled, i.e. it
+ *      can be disabled with --disable-fast-redirects,
+ *      plus it must be activated by a "fast-redirects"
+ *      line in the config file, has its own log level
+ *      and of course wants to be displayed by show-proxy-args
+ *      Note: Boy, all the #ifdefs in 1001 locations and
+ *      all the fumbling with configure.in and acconfig.h
+ *      were *way* more work than the feature itself :-(
+ *
+ *    - Because a generic redirect template was needed for
+ *      this, tinygif = 3 now uses the same.
+ *
+ *    - Moved GIFs, and other static HTTP response templates
+ *      to project.h
+ *
+ *    - Some minor fixes
+ *
+ *    - Removed some >400 CRs again (Jon, you really worked
+ *      a lot! ;-)
+ *
+ *    Revision 1.3  2001/05/20 01:21:20  jongfoster
+ *    Version 2.9.4 checkin.
+ *    - Merged popupfile and cookiefile, and added control over PCRS
+ *      filtering, in new "permissionsfile".
+ *    - Implemented LOG_LEVEL_FATAL, so that if there is a configuration
+ *      file error you now get a message box (in the Win32 GUI) rather
+ *      than the program exiting with no explanation.
+ *    - Made killpopup use the PCRS MIME-type checking and HTTP-header
+ *      skipping.
+ *    - Removed tabs from "config"
+ *    - Moved duplicated url parsing code in "loaders.c" to a new funcition.
+ *    - Bumped up version number.
+ *
+ *    Revision 1.2  2001/05/17 23:01:01  oes
+ *     - Cleaned CRLF's from the sources and related files
+ *
+ *    Revision 1.1.1.1  2001/05/15 13:58:58  oes
+ *    Initial import of version 2.9.3 source tree
+ *
  *
  *********************************************************************/
 
-
-/* Declare struct FILE for vars and funcs. */
-#include <stdio.h>
-
-/* All of our project's data types. */
-#include "project.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/* Don't need project.h, only this: */
+struct configuration_spec;
+
 /* Global variables */
 
-#ifdef TOGGLE
+#ifdef FEATURE_TOGGLE
 /* indicates if ijb is enabled */
 extern int g_bToggleIJB;
-#endif
-
-extern int debug;
-extern int multi_threaded;
-
-#if defined(DETECT_MSIE_IMAGES) || defined(USE_IMAGE_LIST)
-extern int tinygif;
-extern const char *tinygifurl;
-#endif /* defined(DETECT_MSIE_IMAGES) || defined(USE_IMAGE_LIST) */
-
-extern const char *logfile;
+#endif /* def FEATURE_TOGGLE */
 
 extern const char *configfile;
-
-#ifdef ACL_FILES
-extern const char *aclfile;
-#endif /* def ACL_FILES */
-
-extern const char *blockfile;
-extern const char *cookiefile;
-extern const char *forwardfile;
-
-#ifdef USE_IMAGE_LIST
-extern const char *imagefile;
-#endif /* def USE_IMAGE_LIST */
-
-#ifdef KILLPOPUPS
-extern const char *popupfile;
-#endif /* def KILLPOPUPS */
-
-#ifdef TRUST_FILES
-extern const char *trustfile;
-#endif /* def TRUST_FILES */
-
-#ifdef PCRS
-extern const char *re_filterfile;
-#endif /* def PCRS */
-
-#ifdef PCRS
-extern int re_filter_all;
-#endif /* def PCRS */
-
-#ifdef KILLPOPUPS
-extern int kill_all_popups;     /* Not recommended really .. */
-#endif /* def KILLPOPUPS */
-
-#ifdef JAR_FILES
-extern const char *jarfile;
-extern FILE *jar;
-#endif /* def JAR_FILES */
-
-extern const char *referrer;
-extern const char *uagent;
-extern const char *from;
-
-#ifndef SPLIT_PROXY_ARGS
-extern const char *suppress_message;
-#endif /* ndef SPLIT_PROXY_ARGS */
-
-extern int suppress_vanilla_wafer;
-extern int add_forwarded;
-
-extern struct list wafer_list[];
-extern struct list xtra_list[];
-
-#ifdef TRUST_FILES
-extern struct list trust_info[];
-extern struct url_spec *trust_list[];
-#endif /* def TRUST_FILES */
-
-extern const char *haddr;
-extern int   hport;
-
-#ifndef SPLIT_PROXY_ARGS
-extern int suppress_blocklists;  /* suppress listing sblock and simage */
-#endif /* ndef SPLIT_PROXY_ARGS */
-
-extern struct proxy_args proxy_args[1];
-
-extern int configret;
-extern int config_changed;
 
 
 /* The load_config function is now going to call:
@@ -146,10 +163,14 @@ extern int config_changed;
  */
 extern int Argc;
 extern const char **Argv;
+extern short int MustReload;
 
 
-extern void load_config( int );
+extern struct configuration_spec * load_config(void);
 
+#ifdef FEATURE_GRACEFUL_TERMINATION
+void unload_current_config_file(void);
+#endif
 
 /* Revision control strings from this header and associated .c file */
 extern const char loadcfg_rcs[];
@@ -159,7 +180,7 @@ extern const char loadcfg_h_rcs[];
 } /* extern "C" */
 #endif
 
-#endif /* ndef _JCC_H */
+#endif /* ndef LOADCFG_H_INCLUDED */
 
 /*
   Local Variables:

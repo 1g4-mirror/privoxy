@@ -1,24 +1,24 @@
-const char filters_rcs[] = "$Id: filters.c,v 1.1 2001/05/13 21:57:06 administrator Exp $";
+const char filters_rcs[] = "$Id: filters.c,v 1.57 2002/04/08 20:38:34 swa Exp $";
 /*********************************************************************
  *
- * File        :  $Source: /home/administrator/cvs/ijb/filters.c,v $
+ * File        :  $Source: /cvsroot/ijbswa/current/filters.c,v $
  *
  * Purpose     :  Declares functions to parse/crunch headers and pages.
  *                Functions declared include:
  *                   `acl_addr', `add_stats', `block_acl', `block_imageurl',
- *                   `block_url', `cookie_url', `domaincmp', `dsplit',
- *                   `filter_popups', `forward_url',
- *                   `ij_untrusted_url', `intercept_url', `re_process_buffer',
- *                   `show_proxy_args', and `trust_url'
+ *                   `block_url', `url_actions', `domain_split',
+ *                   `filter_popups', `forward_url', 'redirect_url',
+ *                   `ij_untrusted_url', `intercept_url', `pcrs_filter_respose',
+ *                   'ijb_send_banner', and `trust_url'
  *
  * Copyright   :  Written by and Copyright (C) 2001 the SourceForge
- *                IJBSWA team.  http://ijbswa.sourceforge.net
+ *                Privoxy team. http://www.privoxy.org/
  *
  *                Based on the Internet Junkbuster originally written
- *                by and Copyright (C) 1997 Anonymous Coders and 
+ *                by and Copyright (C) 1997 Anonymous Coders and
  *                Junkbusters Corporation.  http://www.junkbusters.com
  *
- *                This program is free software; you can redistribute it 
+ *                This program is free software; you can redistribute it
  *                and/or modify it under the terms of the GNU General
  *                Public License as published by the Free Software
  *                Foundation; either version 2 of the License, or (at
@@ -38,6 +38,359 @@ const char filters_rcs[] = "$Id: filters.c,v 1.1 2001/05/13 21:57:06 administrat
  *
  * Revisions   :
  *    $Log: filters.c,v $
+ *    Revision 1.57  2002/04/08 20:38:34  swa
+ *    fixed JB spelling
+ *
+ *    Revision 1.56  2002/04/05 15:51:24  oes
+ *     - bugfix: error-pages now get correct request protocol
+ *     - fix for invalid HTML in trust info
+ *
+ *    Revision 1.55  2002/04/02 16:13:51  oes
+ *    Fix: No "Go there anyway" for SSL
+ *
+ *    Revision 1.54  2002/04/02 14:55:56  oes
+ *    Bugfix: is_untrusted_url() now depends on FEATURE_TRUST, not FEATURE_COOKIE_JAR
+ *
+ *    Revision 1.53  2002/03/26 22:29:54  swa
+ *    we have a new homepage!
+ *
+ *    Revision 1.52  2002/03/24 16:35:57  jongfoster
+ *    Removing logo
+ *
+ *    Revision 1.51  2002/03/24 15:23:33  jongfoster
+ *    Name changes
+ *
+ *    Revision 1.50  2002/03/24 13:25:43  swa
+ *    name change related issues
+ *
+ *    Revision 1.49  2002/03/16 20:29:14  oes
+ *    Cosmetics
+ *
+ *    Revision 1.48  2002/03/13 20:25:34  oes
+ *    Better logging for content filters
+ *
+ *    Revision 1.47  2002/03/13 00:30:52  jongfoster
+ *    Killing warnings
+ *    Added option of always sending redirect for imageblock,
+ *    currently disabled with #if 0.
+ *
+ *    Revision 1.46  2002/03/12 01:42:49  oes
+ *    Introduced modular filters
+ *
+ *    Revision 1.45  2002/03/08 16:47:50  oes
+ *    Added choice beween GIF and PNG built-in images
+ *
+ *    Revision 1.44  2002/03/07 03:49:31  oes
+ *     - Fixed compiler warnings etc
+ *     - Changed built-in images from GIF to PNG
+ *       (with regard to Unisys patent issue)
+ *     - Added a 4x4 pattern PNG which is less intrusive
+ *       than the logo but also clearly marks the deleted banners
+ *
+ *    Revision 1.43  2002/01/22 23:51:59  jongfoster
+ *    Replacing strsav() with the safer string_append().
+ *
+ *    Adding missing html_encode() to error message generators.  Where encoded
+ *    and unencoded versions of a string were provided, removing the unencoded
+ *    one.
+ *
+ *    Revision 1.42  2002/01/17 21:00:32  jongfoster
+ *    Moving all our URL and URL pattern parsing code to urlmatch.c.
+ *
+ *    Using a single, simple url_match(pattern,url) function - rather than
+ *    the 3-line match routine which was repeated all over the place.
+ *
+ *    Renaming free_url to free_url_spec, since it frees a struct url_spec.
+ *
+ *    Using parse_http_url() to parse URLs without faking a HTTP
+ *    request line for parse_http_request().
+ *
+ *    Revision 1.41  2001/11/13 00:14:07  jongfoster
+ *    Fixing stupid bug now I've figured out what || means.
+ *    (It always returns 0 or 1, not one of it's paramaters.)
+ *
+ *    Revision 1.40  2001/10/26 17:37:55  oes
+ *    - Re-enabled Netscape 200/404 bug workaround in block_url():
+ *      - Removed OS/2 special case
+ *      - Made block_url() independant from sed() having been run
+ *    - Made trust_url independant from sed() having been run
+ *    - Made is_imageurl independant from sed() having been run.
+ *      It now checks User-Agent: and Accept: by itself.
+ *
+ *
+ *    Revision 1.39  2001/10/25 03:40:48  david__schmidt
+ *    Change in porting tactics: OS/2's EMX porting layer doesn't allow multiple
+ *    threads to call select() simultaneously.  So, it's time to do a real, live,
+ *    native OS/2 port.  See defines for __EMX__ (the porting layer) vs. __OS2__
+ *    (native). Both versions will work, but using __OS2__ offers multi-threading.
+ *
+ *    Revision 1.38  2001/10/23 21:32:33  jongfoster
+ *    Adding error-checking to selected functions
+ *
+ *    Revision 1.37  2001/10/22 15:33:56  david__schmidt
+ *    Special-cased OS/2 out of the Netscape-abort-on-404-in-js problem in
+ *    filters.c.  Added a FIXME in front of the offending code.  I'll gladly
+ *    put in a better/more robust fix for all parties if one is presented...
+ *    It seems that just returning 200 instead of 404 would pretty much fix
+ *    it for everyone, but I don't know all the history of the problem.
+ *
+ *    Revision 1.36  2001/10/10 16:44:16  oes
+ *    Added match_portlist function
+ *
+ *    Revision 1.35  2001/10/07 15:41:23  oes
+ *    Replaced 6 boolean members of csp with one bitmap (csp->flags)
+ *
+ *    New function remove_chunked_transfer_coding that strips chunked
+ *      transfer coding to plain and is called by pcrs_filter_response
+ *      and gif_deanimate_response if neccessary
+ *
+ *    Improved handling of zero-change re_filter runs
+ *
+ *    pcrs_filter_response and gif_deanimate_response now remove
+ *      chunked transfer codeing before processing the body.
+ *
+ *    Revision 1.34  2001/09/20 15:49:36  steudten
+ *
+ *    Fix BUG: Change int size to size_t size in pcrs_filter_response().
+ *    See cgi.c fill_template().
+ *
+ *    Revision 1.33  2001/09/16 17:05:14  jongfoster
+ *    Removing unused #include showarg.h
+ *
+ *    Revision 1.32  2001/09/16 13:21:27  jongfoster
+ *    Changes to use new list functions.
+ *
+ *    Revision 1.31  2001/09/16 11:38:02  jongfoster
+ *    Splitting fill_template() into 2 functions:
+ *    template_load() loads the file
+ *    template_fill() performs the PCRS regexps.
+ *    This is because the CGI edit interface has a "table row"
+ *    template which is used many times in the page - this
+ *    change means it's only loaded from disk once.
+ *
+ *    Revision 1.30  2001/09/16 11:00:10  jongfoster
+ *    New function alloc_http_response, for symmetry with free_http_response
+ *
+ *    Revision 1.29  2001/09/13 23:32:40  jongfoster
+ *    Moving image data to cgi.c rather than cgi.h
+ *    Fixing a GPF under Win32 (and any other OS that protects global
+ *    constants from being written to).
+ *
+ *    Revision 1.28  2001/09/10 10:18:51  oes
+ *    Silenced compiler warnings
+ *
+ *    Revision 1.27  2001/08/05 16:06:20  jongfoster
+ *    Modifiying "struct map" so that there are now separate header and
+ *    "map_entry" structures.  This means that functions which modify a
+ *    map no longer need to return a pointer to the modified map.
+ *    Also, it no longer reverses the order of the entries (which may be
+ *    important with some advanced template substitutions).
+ *
+ *    Revision 1.26  2001/07/30 22:08:36  jongfoster
+ *    Tidying up #defines:
+ *    - All feature #defines are now of the form FEATURE_xxx
+ *    - Permanently turned off WIN_GUI_EDIT
+ *    - Permanently turned on WEBDAV and SPLIT_PROXY_ARGS
+ *
+ *    Revision 1.25  2001/07/26 10:09:46  oes
+ *    Made browser detection a little less naive
+ *
+ *    Revision 1.24  2001/07/25 17:22:51  oes
+ *    Added workaround for Netscape bug that prevents display of page when loading a component fails.
+ *
+ *    Revision 1.23  2001/07/23 13:40:12  oes
+ *    Fixed bug that caused document body to be dropped when pcrs joblist was empty.
+ *
+ *    Revision 1.22  2001/07/18 12:29:34  oes
+ *    - Made gif_deanimate_response respect
+ *      csp->action->string[ACTION_STRING_DEANIMATE]
+ *    - Logging cosmetics
+ *
+ *    Revision 1.21  2001/07/13 13:59:53  oes
+ *     - Introduced gif_deanimate_response which shares the
+ *       generic content modification interface of pcrs_filter_response
+ *       and acts as a wrapper to deanimate.c:gif_deanimate()
+ *     - Renamed re_process_buffer to pcrs_filter_response
+ *     - pcrs_filter_response now returns NULL on failiure
+ *     - Removed all #ifdef PCRS
+ *
+ *    Revision 1.20  2001/07/01 17:01:04  oes
+ *    Added comments and missing return statement in is_untrusted_url()
+ *
+ *    Revision 1.19  2001/06/29 21:45:41  oes
+ *    Indentation, CRLF->LF, Tab-> Space
+ *
+ *    Revision 1.18  2001/06/29 13:27:38  oes
+ *    - Cleaned up, renamed and reorderd functions
+ *      and improved comments
+ *
+ *    - block_url:
+ *      - Ported to CGI platform. Now delivers
+ *        http_response or NULL
+ *      - Unified HTML and GIF generation (moved image detection
+ *        and GIF generation here from jcc.c:chat())
+ *      - Fixed HTTP status to:
+ *       -  403 (Forbidden) for the "blocked" HTML message
+ *       -  200 (OK) for GIF answers
+ *       -  302 (Redirect) for redirect to GIF
+ *
+ *    - trust_url:
+ *      - Ported to CGI platform. Now delivers
+ *        http_response or NULL
+ *      - Separated detection of untrusted URL into
+ *        (bool)is_untrusted_url
+ *      - Added enforcement of untrusted requests
+ *
+ *    - Moved redirect_url() from cgi.c to here
+ *      and ported it to the CGI platform
+ *
+ *    - Removed logentry from cancelled commit
+ *
+ *    Revision 1.17  2001/06/09 10:55:28  jongfoster
+ *    Changing BUFSIZ ==> BUFFER_SIZE
+ *
+ *    Revision 1.16  2001/06/07 23:10:26  jongfoster
+ *    Allowing unanchored domain patterns to back off and retry
+ *    if they partially match.  Optimized right-anchored patterns.
+ *    Moving ACL and forward files into config file.
+ *    Replacing struct gateway with struct forward_spec
+ *
+ *    Revision 1.15  2001/06/03 19:12:00  oes
+ *    extracted-CGI relevant stuff
+ *
+ *    Revision 1.14  2001/06/01 10:30:55  oes
+ *    Added optional left-anchoring to domaincmp
+ *
+ *    Revision 1.13  2001/05/31 21:21:30  jongfoster
+ *    Permissionsfile / actions file changes:
+ *    - Changed "permission" to "action" throughout
+ *    - changes to file format to allow string parameters
+ *    - Moved helper functions to actions.c
+ *
+ *    Revision 1.12  2001/05/31 17:35:20  oes
+ *
+ *     - Enhanced domain part globbing with infix and prefix asterisk
+ *       matching and optional unanchored operation
+ *
+ *    Revision 1.11  2001/05/29 11:53:23  oes
+ *    "See why" link added to "blocked" page
+ *
+ *    Revision 1.10  2001/05/29 09:50:24  jongfoster
+ *    Unified blocklist/imagelist/permissionslist.
+ *    File format is still under discussion, but the internal changes
+ *    are (mostly) done.
+ *
+ *    Also modified interceptor behaviour:
+ *    - We now intercept all URLs beginning with one of the following
+ *      prefixes (and *only* these prefixes):
+ *        * http://i.j.b/
+ *        * http://ijbswa.sf.net/config/
+ *        * http://ijbswa.sourceforge.net/config/
+ *    - New interceptors "home page" - go to http://i.j.b/ to see it.
+ *    - Internal changes so that intercepted and fast redirect pages
+ *      are not replaced with an image.
+ *    - Interceptors now have the option to send a binary page direct
+ *      to the client. (i.e. ijb-send-banner uses this)
+ *    - Implemented show-url-info interceptor.  (Which is why I needed
+ *      the above interceptors changes - a typical URL is
+ *      "http://i.j.b/show-url-info?url=www.somesite.com/banner.gif".
+ *      The previous mechanism would not have intercepted that, and
+ *      if it had been intercepted then it then it would have replaced
+ *      it with an image.)
+ *
+ *    Revision 1.9  2001/05/27 22:17:04  oes
+ *
+ *    - re_process_buffer no longer writes the modified buffer
+ *      to the client, which was very ugly. It now returns the
+ *      buffer, which it is then written by chat.
+ *
+ *    - content_length now adjusts the Content-Length: header
+ *      for modified documents rather than crunch()ing it.
+ *      (Length info in csp->content_length, which is 0 for
+ *      unmodified documents)
+ *
+ *    - For this to work, sed() is called twice when filtering.
+ *
+ *    Revision 1.8  2001/05/26 17:13:28  jongfoster
+ *    Filled in a function comment.
+ *
+ *    Revision 1.7  2001/05/26 15:26:15  jongfoster
+ *    ACL feature now provides more security by immediately dropping
+ *    connections from untrusted hosts.
+ *
+ *    Revision 1.6  2001/05/26 00:28:36  jongfoster
+ *    Automatic reloading of config file.
+ *    Removed obsolete SIGHUP support (Unix) and Reload menu option (Win32).
+ *    Most of the global variables have been moved to a new
+ *    struct configuration_spec, accessed through csp->config->globalname
+ *    Most of the globals remaining are used by the Win32 GUI.
+ *
+ *    Revision 1.5  2001/05/25 22:34:30  jongfoster
+ *    Hard tabs->Spaces
+ *
+ *    Revision 1.4  2001/05/22 18:46:04  oes
+ *
+ *    - Enabled filtering banners by size rather than URL
+ *      by adding patterns that replace all standard banner
+ *      sizes with the "Junkbuster" gif to the re_filterfile
+ *
+ *    - Enabled filtering WebBugs by providing a pattern
+ *      which kills all 1x1 images
+ *
+ *    - Added support for PCRE_UNGREEDY behaviour to pcrs,
+ *      which is selected by the (nonstandard and therefore
+ *      capital) letter 'U' in the option string.
+ *      It causes the quantifiers to be ungreedy by default.
+ *      Appending a ? turns back to greedy (!).
+ *
+ *    - Added a new interceptor ijb-send-banner, which
+ *      sends back the "Junkbuster" gif. Without imagelist or
+ *      MSIE detection support, or if tinygif = 1, or the
+ *      URL isn't recognized as an imageurl, a lame HTML
+ *      explanation is sent instead.
+ *
+ *    - Added new feature, which permits blocking remote
+ *      script redirects and firing back a local redirect
+ *      to the browser.
+ *      The feature is conditionally compiled, i.e. it
+ *      can be disabled with --disable-fast-redirects,
+ *      plus it must be activated by a "fast-redirects"
+ *      line in the config file, has its own log level
+ *      and of course wants to be displayed by show-proxy-args
+ *      Note: Boy, all the #ifdefs in 1001 locations and
+ *      all the fumbling with configure.in and acconfig.h
+ *      were *way* more work than the feature itself :-(
+ *
+ *    - Because a generic redirect template was needed for
+ *      this, tinygif = 3 now uses the same.
+ *
+ *    - Moved GIFs, and other static HTTP response templates
+ *      to project.h
+ *
+ *    - Some minor fixes
+ *
+ *    - Removed some >400 CRs again (Jon, you really worked
+ *      a lot! ;-)
+ *
+ *    Revision 1.3  2001/05/20 16:44:47  jongfoster
+ *    Removing last hardcoded Junkbusters.com URLs.
+ *
+ *    Revision 1.2  2001/05/20 01:21:20  jongfoster
+ *    Version 2.9.4 checkin.
+ *    - Merged popupfile and cookiefile, and added control over PCRS
+ *      filtering, in new "permissionsfile".
+ *    - Implemented LOG_LEVEL_FATAL, so that if there is a configuration
+ *      file error you now get a message box (in the Win32 GUI) rather
+ *      than the program exiting with no explanation.
+ *    - Made killpopup use the PCRS MIME-type checking and HTTP-header
+ *      skipping.
+ *    - Removed tabs from "config"
+ *    - Moved duplicated url parsing code in "loaders.c" to a new funcition.
+ *    - Bumped up version number.
+ *
+ *    Revision 1.1.1.1  2001/05/15 13:58:52  oes
+ *    Initial import of version 2.9.3 source tree
+ *
  *
  *********************************************************************/
 
@@ -49,25 +402,34 @@ const char filters_rcs[] = "$Id: filters.c,v 1.1 2001/05/13 21:57:06 administrat
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include <assert.h>
 
 #ifndef _WIN32
+#ifndef __OS2__
 #include <unistd.h>
+#endif /* ndef __OS2__ */
 #include <netinet/in.h>
 #else
 #include <winsock2.h>
-#endif
+#endif /* ndef _WIN32 */
+
+#ifdef __OS2__
+#include <utils.h>
+#endif /* def __OS2__ */
 
 #include "project.h"
 #include "filters.h"
 #include "encode.h"
-#include "jcc.h"
-#include "showargs.h"
 #include "parsers.h"
 #include "ssplit.h"
-#include "gateway.h"
-#include "jbsockets.h"
 #include "errlog.h"
 #include "jbsockets.h"
+#include "miscutil.h"
+#include "actions.h"
+#include "cgi.h"
+#include "list.h"
+#include "deanimate.h"
+#include "urlmatch.h"
 
 #ifdef _WIN32
 #include "win32.h"
@@ -85,61 +447,7 @@ const char filters_h_rcs[] = FILTERS_H_VERSION;
 #define ijb_isdigit(__X) isdigit((int)(unsigned char)(__X))
 
 
-static const char CBLOCK[] = 
-#ifdef AMIGA 
-       "HTTP/1.0 403 Request for blocked URL\n" 
-#else /* ifndef AMIGA */
-       "HTTP/1.0 202 Request for blocked URL\n"
-#endif /* ndef AMIGA */
-       "Pragma: no-cache\n"
-       "Last-Modified: Thu Jul 31, 1997 07:42:22 pm GMT\n"
-       "Expires:       Thu Jul 31, 1997 07:42:22 pm GMT\n"
-       "Content-Type: text/html\n\n"
-       "<html>\n"
-       "<head>\n"
-       "<title>Internet Junkbuster: Request for blocked URL</title>\n"
-       "</head>\n"
-       WHITEBG
-       "<center><h1>"
-       BANNER
-       "</h1></center>\n"
-      "<p align=center>Your request for <b>%s%s</b><br>\n"
-      "was blocked because it matches the following pattern "
-      "in the blockfile: <b>%s</b>\n</p>"
-#ifdef FORCE_LOAD
-       "<p align=center><a href=\"http://" FORCE_PREFIX
-        "%s%s\">Go there anyway.</a></p>"
-#endif /* def FORCE_LOAD */
-      "</body>\n"
-      "</html>\n";
-
-#ifdef TRUST_FILES
-static const char CTRUST[] =
-#ifdef AMIGA 
-       "HTTP/1.0 403 Request for untrusted URL\n"
-#else /* ifndef AMIGA */
-       "HTTP/1.0 202 Request for untrusted URL\n"
-#endif /* ndef AMIGA */
-       "Pragma: no-cache\n"
-       "Last-Modified: Thu Jul 31, 1997 07:42:22 pm GMT\n"
-       "Expires:       Thu Jul 31, 1997 07:42:22 pm GMT\n"
-       "Content-Type: text/html\n\n"
-       "<html>\n"
-       "<head>\n"
-       "<title>Internet Junkbuster: Request for untrusted URL</title>\n"
-       "</head>\n"
-       WHITEBG
-       "<center>"
-       "<a href=http://internet.junkbuster.com/ij-untrusted-url?%s+%s+%s>"
-       BANNER
-       "</a>"
-       "</center>"
-       "</body>\n"
-       "</html>\n";
-#endif /* def TRUST_FILES */
-
-
-#ifdef ACL_FILES
+#ifdef FEATURE_ACL
 /*********************************************************************
  *
  * Function    :  block_acl
@@ -148,52 +456,51 @@ static const char CTRUST[] =
  *                Decide yes or no based on ACL file.
  *
  * Parameters  :
- *          1  :  src = Address the browser/user agent is requesting.
- *          2  :  dst = The proxy or gateway address this is going to.
- *          3  :  csp = Current client state (buffers, headers, etc...)
+ *          1  :  dst = The proxy or gateway address this is going to.
+ *                      Or NULL to check all possible targets.
+ *          2  :  csp = Current client state (buffers, headers, etc...)
+ *                      Also includes the client IP address.
  *
  * Returns     : 0 = FALSE (don't block) and 1 = TRUE (do block)
  *
  *********************************************************************/
-int block_acl(struct access_control_addr *src, struct access_control_addr *dst, struct client_state *csp)
+int block_acl(struct access_control_addr *dst, struct client_state *csp)
 {
-   struct file_list *fl;
-   struct access_control_list *a, *acl;
-   struct access_control_addr s[1], d[1];
+   struct access_control_list *acl = csp->config->acl;
 
    /* if not using an access control list, then permit the connection */
-   if (((fl = csp->alist) == NULL) || ((acl = fl->f) == NULL))
+   if (acl == NULL)
    {
       return(0);
    }
 
    /* search the list */
-   for (a = acl->next ; a ; a = a->next)
+   while (acl != NULL)
    {
-      *s = *src;
-      *d = *dst;
-
-      s->addr &= a->src->mask;
-      d->addr &= a->dst->mask;
-
-      if ((s->addr  == a->src->addr)
-      && (d->addr  == a->dst->addr)
-      && ((s->port == a->src->port)
-       || (s->port == 0)
-       || (a->src->port == 0))
-      && ((d->port == a->dst->port)
-       || (d->port == 0)
-       || (a->dst->port == 0)))
+      if ((csp->ip_addr_long & acl->src->mask) == acl->src->addr)
       {
-         if (a->action == ACL_PERMIT)
+         if (dst == NULL)
          {
-            return(0);
+            /* Just want to check if they have any access */
+            if (acl->action == ACL_PERMIT)
+            {
+               return(0);
+            }
          }
-         else
+         else if ( ((dst->addr & acl->dst->mask) == acl->dst->addr)
+           && ((dst->port == acl->dst->port) || (acl->dst->port == 0)))
          {
-            return(1);
+            if (acl->action == ACL_PERMIT)
+            {
+               return(0);
+            }
+            else
+            {
+               return(1);
+            }
          }
       }
+      acl = acl->next;
    }
 
    return(1);
@@ -205,11 +512,11 @@ int block_acl(struct access_control_addr *src, struct access_control_addr *dst, 
  *
  * Function    :  acl_addr
  *
- * Description :  Called from `load_aclfile'.  FIXME: I can't say more.
+ * Description :  Called from `load_config' to parse an ACL address.
  *
  * Parameters  :
- *          1  :  aspec = (what?)
- *          2  :  aca = (what?)
+ *          1  :  aspec = String specifying ACL address.
+ *          2  :  aca = struct access_control_addr to fill in.
  *
  * Returns     :  0 => Ok, everything else is an error.
  *
@@ -222,7 +529,7 @@ int acl_addr(char *aspec, struct access_control_addr *aca)
    masklength = 32;
    port       =  0;
 
-   if ((p = strchr(aspec, '/')))
+   if ((p = strchr(aspec, '/')) != NULL)
    {
       *p++ = '\0';
 
@@ -238,7 +545,7 @@ int acl_addr(char *aspec, struct access_control_addr *aca)
       return(-1);
    }
 
-   if ((p = strchr(aspec, ':')))
+   if ((p = strchr(aspec, ':')) != NULL)
    {
       *p++ = '\0';
 
@@ -253,9 +560,8 @@ int acl_addr(char *aspec, struct access_control_addr *aca)
 
    aca->addr = ntohl(resolve_hostname_to_ip(aspec));
 
-   if (aca->addr == -1)
+   if (aca->addr == INADDR_NONE)
    {
-      log_error(LOG_LEVEL_ERROR, "can't resolve address for %s", aspec);
       return(-1);
    }
 
@@ -274,7 +580,87 @@ int acl_addr(char *aspec, struct access_control_addr *aca)
    return(0);
 
 }
-#endif /* def ACL_FILES */
+#endif /* def FEATURE_ACL */
+
+
+/*********************************************************************
+ *
+ * Function    :  match_portlist
+ *
+ * Description :  Check if a given number is covered by a comma
+ *                separated list of numbers and ranges (a,b-c,d,..)
+ *
+ * Parameters  :
+ *          1  :  portlist = String with list
+ *          2  :  port = port to check
+ *
+ * Returns     :  0 => no match
+ *                1 => match
+ *
+ *********************************************************************/
+int match_portlist(const char *portlist, int port)
+{
+   char *min, *max, *next, *portlist_copy;
+
+   min = next = portlist_copy = strdup(portlist);
+
+   /*
+    * Zero-terminate first item and remember offset for next
+    */
+   if (NULL != (next = strchr(portlist_copy, (int) ',')))
+   {
+      *next++ = '\0';
+   }
+
+   /*
+    * Loop through all items, checking for match
+    */
+   while(min)
+   {
+      if (NULL == (max = strchr(min, (int) '-')))
+      {
+         /*
+          * No dash, check for equality
+          */
+         if (port == atoi(min))
+         {
+            free(portlist_copy);
+            return(1);
+         }
+      }
+      else
+      {
+         /*
+          * This is a range, so check if between min and max,
+          * or, if max was omitted, between min and 65K
+          */
+         *max++ = '\0';
+         if(port >= atoi(min) && port <= (atoi(max) ? atoi(max) : 65535))
+         {
+            free(portlist_copy);
+            return(1);
+         }
+
+      }
+
+      /*
+       * Jump to next item
+       */
+      min = next;
+
+      /*
+       * Zero-terminate next item and remember offset for n+1
+       */
+      if ((NULL != next) && (NULL != (next = strchr(next, (int) ','))))
+      {
+         *next++ = '\0';
+      }
+   }
+
+   free(portlist_copy);
+   return 0;
+
+}
 
 
 /*********************************************************************
@@ -284,564 +670,886 @@ int acl_addr(char *aspec, struct access_control_addr *aca)
  * Description :  Called from `chat'.  Check to see if we need to block this.
  *
  * Parameters  :
- *          1  :  http = http_request request to "check" for blocked
- *          2  :  csp = Current client state (buffers, headers, etc...)
+ *          1  :  csp = Current client state (buffers, headers, etc...)
  *
- * Returns     :  NULL => unblocked, else string to HTML block description.
+ * Returns     :  NULL => unblocked, else HTTP block response
  *
  *********************************************************************/
-char *block_url(struct http_request *http, struct client_state *csp)
+struct http_response *block_url(struct client_state *csp)
 {
-   struct file_list *fl;
-   struct block_spec *b;
-   struct url_spec url[1];
+#ifdef FEATURE_IMAGE_BLOCKING
    char *p;
-   int n;
+#endif /* def FEATURE_IMAGE_BLOCKING */
+   struct http_response *rsp;
 
-   if (((fl = csp->blist) == NULL) || ((b = fl->f) == NULL))
+   /*
+    * If it's not blocked, don't block it ;-)
+    */
+   if ((csp->action->flags & ACTION_BLOCK) == 0)
    {
-      return(NULL);
+      return NULL;
    }
 
-   *url = dsplit(http->host);
-
-   /* if splitting the domain fails, punt */
-   if (url->dbuf == NULL) return(NULL);
-
-   for (b = b->next; b ; b = b->next)
+   /*
+    * Else, prepare a response
+    */
+   if (NULL == (rsp = alloc_http_response()))
    {
-      if ((b->url->port == 0) || (b->url->port == http->port))
+      return cgi_error_memory();
+   }
+
+   /*
+    * If it's an image-url, send back an image or redirect
+    * as specified by the relevant +image action
+    */
+#ifdef FEATURE_IMAGE_BLOCKING
+   if (((csp->action->flags & ACTION_IMAGE_BLOCKER) != 0)
+        && is_imageurl(csp))
+   {
+      /* determine HOW images should be blocked */
+      p = csp->action->string[ACTION_STRING_IMAGE_BLOCKER];
+
+#if 1 /* Two alternative strategies, use this one for now: */
+
+      /* and handle accordingly: */
+      if ((p == NULL) || (0 == strcmpic(p, "pattern")))
       {
-         if ((b->url->domain[0] == '\0') || (domaincmp(b->url, url) == 0))
+         rsp->body = bindup(image_pattern_data, image_pattern_length);
+         if (rsp->body == NULL)
          {
-            if ((b->url->path == NULL) ||
-#ifdef REGEX
-               (regexec(b->url->preg, http->path, 0, NULL, 0) == 0)
-#else
-               (strncmp(b->url->path, http->path, b->url->pathlen) == 0)
-#endif
-            )
-            {
-               freez(url->dbuf);
-               freez(url->dvec);
+            free_http_response(rsp);
+            return cgi_error_memory();
+         }
+         rsp->content_length = image_pattern_length;
 
-               if (b->reject == 0) return(NULL);
-
-               n  = strlen(CBLOCK);
-               n += strlen(http->hostport);
-               n += strlen(http->path);
-               n += strlen(b->url->spec);
-#ifdef FORCE_LOAD
-               n += strlen(http->hostport);
-               n += strlen(http->path);
-#endif /* def FORCE_LOAD */
-
-               p = (char *)malloc(n);
-
-#ifdef FORCE_LOAD
-               sprintf(p, CBLOCK, http->hostport, http->path, b->url->spec, http->hostport, http->path);
-#else
-               sprintf(p, CBLOCK, http->hostport, http->path, b->url->spec);
-#endif /* def FORCE_LOAD */
-
-               return(p);
-            }
+         if (enlist_unique_header(rsp->headers, "Content-Type", BUILTIN_IMAGE_MIMETYPE))
+         {
+            free_http_response(rsp);
+            return cgi_error_memory();
          }
       }
-   }
-   freez(url->dbuf);
-   freez(url->dvec);
-   return(NULL);
 
-}
-
-
-#if defined(DETECT_MSIE_IMAGES) || defined(USE_IMAGE_LIST)
-/*********************************************************************
- *
- * Function    :  block_imageurl
- *
- * Description :  Given a URL which is blocked, decide whether to 
- *                send the "blocked" image or HTML.
- *
- * Parameters  :
- *          1  :  http = URL to check.
- *          2  :  csp = Current client state (buffers, headers, etc...)
- *
- * Returns     :  True (nonzero) if URL is in image list, false (0)
- *                otherwise
- *
- *********************************************************************/
-int block_imageurl(struct http_request *http, struct client_state *csp)
-{
-#ifdef DETECT_MSIE_IMAGES
-   if ((csp->accept_types 
-       & (ACCEPT_TYPE_IS_MSIE|ACCEPT_TYPE_MSIE_IMAGE|ACCEPT_TYPE_MSIE_HTML))
-       == (ACCEPT_TYPE_IS_MSIE|ACCEPT_TYPE_MSIE_IMAGE))
-   {
-      return 1;
-   }
-   else if ((csp->accept_types 
-       & (ACCEPT_TYPE_IS_MSIE|ACCEPT_TYPE_MSIE_IMAGE|ACCEPT_TYPE_MSIE_HTML))
-       == (ACCEPT_TYPE_IS_MSIE|ACCEPT_TYPE_MSIE_HTML))
-   {
-      return 0;
-   }
-#endif
-
-#if defined(USE_IMAGE_LIST)
-   return block_imageurl_using_imagelist(http, csp);
-#else
-   /* Don't know - assume HTML */
-   return 0;
-#endif
-}
-#endif /* defined(DETECT_MSIE_IMAGES) || defined(USE_IMAGE_LIST) */
-
-
-#ifdef USE_IMAGE_LIST
-/*********************************************************************
- *
- * Function    :  block_imageurl
- *
- * Description :  Test if a URL is in the imagelist.
- *
- * Parameters  :
- *          1  :  http = URL to check.
- *          2  :  csp = Current client state (buffers, headers, etc...)
- *
- * Returns     :  True (nonzero) if URL is in image list, false (0)
- *                otherwise
- *
- *********************************************************************/
-int block_imageurl_using_imagelist(struct http_request *http, struct client_state *csp)
-{
-   struct file_list *fl;
-   struct block_spec *b;
-   struct url_spec url[1];
-
-   if (((fl = csp->ilist) == NULL) || ((b  = fl->f) == NULL))
-   {
-      return(0);
-   }
-
-   *url = dsplit(http->host);
-
-   /* if splitting the domain fails, punt */
-   if (url->dbuf == NULL) return(0);
-
-   for (b = b->next; b ; b = b->next)
-   {
-
-      if ((b->url->port == 0) || (b->url->port == http->port))
+      else if (0 == strcmpic(p, "blank"))
       {
-         /* port matches, check domain */
-         if ((b->url->domain[0] == '\0') || (domaincmp(b->url, url) == 0))
+         rsp->body = bindup(image_blank_data, image_blank_length);
+         if (rsp->body == NULL)
          {
-            /* domain matches, check path */
-            if ((b->url->path == NULL) ||
-#ifdef REGEX
-               (regexec(b->url->preg, http->path, 0, NULL, 0) == 0)
-#else
-               (strncmp(b->url->path, http->path, b->url->pathlen) == 0)
-#endif
-            )
-            {
-               /* Matches */
-               freez(url->dbuf);
-               freez(url->dvec);
+            free_http_response(rsp);
+            return cgi_error_memory();
+         }
+         rsp->content_length = image_blank_length;
 
-               if (b->reject == 0) return(0);
-
-               return(1);
-            }
+         if (enlist_unique_header(rsp->headers, "Content-Type", BUILTIN_IMAGE_MIMETYPE))
+         {
+            free_http_response(rsp);
+            return cgi_error_memory();
          }
       }
+
+      else
+      {
+         rsp->status = strdup("302 Local Redirect from Privoxy");
+         if (rsp->status == NULL)
+         {
+            free_http_response(rsp);
+            return cgi_error_memory();
+         }
+
+         if (enlist_unique_header(rsp->headers, "Location", p))
+         {
+            free_http_response(rsp);
+            return cgi_error_memory();
+         }
+      }
+
+#else /* Following code is disabled for now */
+
+      /* and handle accordingly: */
+      if ((p == NULL) || (0 == strcmpic(p, "pattern")))
+      {
+         p = CGI_PREFIX "send-banner?type=pattern";
+      }
+      else if (0 == strcmpic(p, "blank"))
+      {
+         p = CGI_PREFIX "send-banner?type=blank";
+      }
+      rsp->status = strdup("302 Local Redirect from Privoxy");
+      if (rsp->status == NULL)
+      {
+         free_http_response(rsp);
+         return cgi_error_memory();
+      }
+
+      if (enlist_unique_header(rsp->headers, "Location", p))
+      {
+         free_http_response(rsp);
+         return cgi_error_memory();
+      }
+#endif /* Preceeding code is disabled for now */
    }
-   freez(url->dbuf);
-   freez(url->dvec);
-   return(0);
+   else
+#endif /* def FEATURE_IMAGE_BLOCKING */
+
+   /*
+    * Else, generate an HTML "blocked" message:
+    */
+   {
+      jb_err err;
+      struct map * exports;
+
+      /*
+       * Workaround for stupid Netscape bug which prevents
+       * pages from being displayed if loading a referenced
+       * JavaScript or style sheet fails. So make it appear
+       * as if it succeeded.
+       */
+      if ( NULL != (p = get_header_value(csp->headers, "User-Agent:"))
+           && !strncmpic(p, "mozilla", 7) /* Catch Netscape but */
+           && !strstr(p, "Gecko")         /* save Mozilla, */
+           && !strstr(p, "compatible")    /* MSIE */
+           && !strstr(p, "Opera"))        /* and Opera. */
+      {
+         rsp->status = strdup("200 Request for blocked URL");
+      }
+      else
+      {
+         rsp->status = strdup("404 Request for blocked URL");
+      }
+
+      if (rsp->status == NULL)
+      {
+         free_http_response(rsp);
+         return cgi_error_memory();
+      }
+
+      exports = default_exports(csp, NULL);
+      if (exports == NULL)
+      {
+         free_http_response(rsp);
+         return cgi_error_memory();
+      }
+
+#ifdef FEATURE_FORCE_LOAD
+      err = map(exports, "force-prefix", 1, FORCE_PREFIX, 1);
+      if (csp->http->ssl != 0)
+#endif /* ndef FEATURE_FORCE_LOAD */
+      {
+         err = map_block_killer(exports, "force-support");
+      }
+
+      if (!err) err = map(exports, "protocol", 1, csp->http->ssl ? "https://" : "http://", 1);
+      if (!err) err = map(exports, "hostport", 1, html_encode(csp->http->hostport), 0);
+      if (!err) err = map(exports, "path", 1, html_encode(csp->http->path), 0);
+
+      if (err)
+      {
+         free_map(exports);
+         free_http_response(rsp);
+         return cgi_error_memory();
+      }
+
+      err = template_fill_for_cgi(csp, "blocked", exports, rsp);
+      if (err)
+      {
+         free_http_response(rsp);
+         return cgi_error_memory();
+      }
+   }
+
+   return finish_http_response(rsp);
 
 }
-#endif /* def USE_IMAGE_LIST */
 
 
-#ifdef PCRS
+#ifdef FEATURE_TRUST
 /*********************************************************************
  *
- * Function    :  re_process_buffer
+ * Function    :  trust_url FIXME: I should be called distrust_url
  *
- * Description :  Apply all jobs from the joblist (aka. Perl regexp's) to
- *                the text buffer that's been accumulated in csp->iob->buf.
- *                Then, write the modified buffer out to the client
- *                (Maybe this should happen from jcc.c via flush_socket
- *                for better readability).
+ * Description :  Calls is_untrusted_url to determine if the URL is trusted
+ *                and if not, returns a HTTP 304 response with a reject message.
  *
  * Parameters  :
  *          1  :  csp = Current client state (buffers, headers, etc...)
  *
- * Returns     :  N/A
+ * Returns     :  NULL => trusted, else http_response.
  *
  *********************************************************************/
-void re_process_buffer(struct client_state *csp)
+struct http_response *trust_url(struct client_state *csp)
 {
-   int hits=0;
-   int size = csp->iob->eod - csp->iob->cur;
-   char *old=csp->iob->cur, *new = NULL;
-   pcrs_job *job, *joblist;
+   struct http_response *rsp;
+   struct map * exports;
+   char buf[BUFFER_SIZE];
+   char *p;
+   struct url_spec **tl;
+   struct url_spec *t;
+   jb_err err;
 
-   struct file_list *fl;
-   struct re_filterfile_spec *b;
-
-   /* Sanity first ;-) */
-   if (size <= 0) return;
-
-   if ( ( NULL == (fl = csp->rlist) ) || ( NULL == (b = fl->f) ) )
-   {
-      log_error(LOG_LEVEL_ERROR, "Unable to get current state of regexp filtering.");
-      return;
-   }
-
-   joblist = b->joblist;
-
-
-   log_error(LOG_LEVEL_REF, "re_filtering %s%s (size %d) ...",
-              csp->http->hostport, csp->http->path, size);
-
-   /* Apply all jobs from the joblist */
-   for (job = joblist; NULL != job; job = job->next)
-   {
-      hits += pcrs_exec_substitution(job, old, size, &new, &size);
-      if (old != csp->iob->cur) free(old);
-      old=new;
-   }
-
-   log_error(LOG_LEVEL_REF, " produced %d hits (new size %d).", hits, size);
-
-   if (write_socket(csp->cfd, old, size) != size)
-   {
-      log_error(LOG_LEVEL_ERROR, "write to client failed.");
-   }
-
-   /* fwiw, reset the iob */
-   IOB_RESET(csp);
-   freez(new);
-   return;
-
-}
-#endif /* def PCRS */
-
-
-#ifdef TRUST_FILES
-/*********************************************************************
- *
- * Function    :  trust_url
- *
- * Description :  Should we "trust" this URL?  See "trustfile" line in config.
- *
- * Parameters  :
- *          1  :  http = http_request request for requested URL
- *          2  :  csp = Current client state (buffers, headers, etc...)
- *
- * Returns     :  NULL => trusted, else string to HTML "untrusted" description.
- *
- *********************************************************************/
-char *trust_url(struct http_request *http, struct client_state *csp)
-{
-   struct file_list *fl;
-   struct block_spec *b;
-   struct url_spec url[1], **tl, *t;
-   char *p, *h;
-   char *hostport, *path, *refer;
-   struct http_request rhttp[1];
-   int n;
-
-   if (((fl = csp->tlist) == NULL) || ((b  = fl->f) == NULL))
-   {
-      return(NULL);
-   }
-
-   *url = dsplit(http->host);
-
-   /* if splitting the domain fails, punt */
-   if (url->dbuf == NULL) return(NULL);
-
-   memset(rhttp, '\0', sizeof(*rhttp));
-
-   for (b = b->next; b ; b = b->next)
-   {
-      if ((b->url->port == 0) || (b->url->port == http->port))
-      {
-         if ((b->url->domain[0] == '\0') || (domaincmp(b->url, url) == 0))
-         {
-            if ((b->url->path == NULL) ||
-#ifdef REGEX
-               (regexec(b->url->preg, http->path, 0, NULL, 0) == 0)
-#else
-               (strncmp(b->url->path, http->path, b->url->pathlen) == 0)
-#endif
-            )
-            {
-               freez(url->dbuf);
-               freez(url->dvec);
-
-               if (b->reject == 0) return(NULL);
-
-               hostport = url_encode(http->hostport);
-               path     = url_encode(http->path);
-
-               if (csp->referrer)
-               {
-                  refer = url_encode(csp->referrer);
-               }
-               else
-               {
-                  refer = url_encode("undefined");
-               }
-
-               n  = strlen(CTRUST);
-               n += strlen(hostport);
-               n += strlen(path);
-               n += strlen(refer);
-
-               p = (char *)malloc(n);
-
-               sprintf(p, CTRUST, hostport, path, refer);
-
-               freez(hostport);
-               freez(path);
-               freez(refer);
-
-               return(p);
-            }
-         }
-      }
-   }
-
-   freez(url->dbuf);
-   freez(url->dvec);
-
-   if ((csp->referrer == NULL)|| (strlen(csp->referrer) <= 9))
-   {
-      /* no referrer was supplied */
-      goto trust_url_not_trusted;
-   }
-
-   /* forge a URL from the referrer so we can use
-    * convert_url() to parse it into its components.
+   /*
+    * Don't bother to work on trusted URLs
     */
-
-   p = NULL;
-   p = strsav(p, "GET ");
-   p = strsav(p, csp->referrer + 9);   /* skip over "Referer: " */
-   p = strsav(p, " HTTP/1.0");
-
-   parse_http_request(p, rhttp, csp);
-
-   if (rhttp->cmd == NULL)
+   if (!is_untrusted_url(csp))
    {
-      freez(p);
-      goto trust_url_not_trusted;
+      return NULL;
    }
 
-   freez(p);
-
-   *url = dsplit(rhttp->host);
-
-   /* if splitting the domain fails, punt */
-   if (url->dbuf == NULL) goto trust_url_not_trusted;
-
-   for (tl = trust_list; (t = *tl) ; tl++)
+   /*
+    * Else, prepare a response:
+    */
+   if (NULL == (rsp = alloc_http_response()))
    {
-      if ((t->port == 0) || (t->port == rhttp->port))
-      {
-         if ((t->domain[0] == '\0') || domaincmp(t, url) == 0)
-         {
-            if ((t->path == NULL) ||
-#ifdef REGEX
-               (regexec(t->preg, rhttp->path, 0, NULL, 0) == 0)
-#else
-               (strncmp(t->path, rhttp->path, t->pathlen) == 0)
-#endif
-            )
-            {
-               /* if the URL's referrer is from a trusted referrer, then
-                * add the target spec to the trustfile as an unblocked
-                * domain and return NULL (which means it's OK).
-                */
-
-               FILE *fp;
-
-               freez(url->dbuf);
-               freez(url->dvec);
-
-               if ((fp = fopen(trustfile, "a")))
-               {
-                  h = NULL;
-
-                  h = strsav(h, "~");
-                  h = strsav(h, http->hostport);
-
-                  p = http->path;
-                  if ((*p++ == '/')
-                  && (*p++ == '~'))
-                  {
-                  /* since this path points into a user's home space
-                   * be sure to include this spec in the trustfile.
-                   */
-                     if ((p = strchr(p, '/')))
-                     {
-                        *p = '\0';
-                        h = strsav(h, http->path);
-                        h = strsav(h, "/");
-                     }
-                  }
-
-                  free_http_request(rhttp);
-
-                  fprintf(fp, "%s\n", h);
-                  freez(h);
-                  fclose(fp);
-               }
-               return(NULL);
-            }
-         }
-      }
+      return cgi_error_memory();
    }
 
-trust_url_not_trusted:
-   free_http_request(rhttp);
-
-   hostport = url_encode(http->hostport);
-   path     = url_encode(http->path);
-
-   if (csp->referrer)
+   exports = default_exports(csp, NULL);
+   if (exports == NULL)
    {
-      refer = url_encode(csp->referrer);
+      free_http_response(rsp);
+      return cgi_error_memory();
+   }
+
+   /*
+    * Export the protocol, host, port, and referrer information
+    */
+   err = map(exports, "hostport", 1, csp->http->hostport, 1);
+   if (!err) err = map(exports, "protocol", 1, csp->http->ssl ? "https://" : "http://", 1); 
+   if (!err) err = map(exports, "path", 1, csp->http->path, 1);
+
+   if (NULL != (p = get_header_value(csp->headers, "Referer:")))
+   {
+      if (!err) err = map(exports, "referrer", 1, html_encode(p), 0);
    }
    else
    {
-      refer = url_encode("undefined");
+      if (!err) err = map(exports, "referrer", 1, "unknown", 1);
    }
 
-   n  = strlen(CTRUST);
-   n += strlen(hostport);
-   n += strlen(path);
-   n += strlen(refer);
+   if (err)
+   {
+      free_map(exports);
+      free_http_response(rsp);
+      return cgi_error_memory();
+   }
 
-   p = (char *)malloc(n);
-   sprintf(p, CTRUST, hostport, path, refer);
+   /*
+    * Export the trust list
+    */
+   p = strdup("");
+   for (tl = csp->config->trust_list; (t = *tl) != NULL ; tl++)
+   {
+      sprintf(buf, "<li>%s</li>\n", t->spec);
+      string_append(&p, buf);
+   }
+   err = map(exports, "trusted-referrers", 1, p, 0);
 
-   freez(hostport);
-   freez(path);
-   freez(refer);
+   if (err)
+   {
+      free_map(exports);
+      free_http_response(rsp);
+      return cgi_error_memory();
+   }
 
-   return(p);
+   /*
+    * Export the trust info, if available
+    */
+   if (csp->config->trust_info->first)
+   {
+      struct list_entry *l;
+
+      p = strdup("");
+      for (l = csp->config->trust_info->first; l ; l = l->next)
+      {
+         sprintf(buf, "<li> <a href=\"%s\">%s</a><br>\n",l->str, l->str);
+         string_append(&p, buf);
+      }
+      err = map(exports, "trust-info", 1, p, 0);
+   }
+   else
+   {
+      err = map_block_killer(exports, "have-trust-info");
+   }
+
+   if (err)
+   {
+      free_map(exports);
+      free_http_response(rsp);
+      return cgi_error_memory();
+   }
+
+   /*
+    * Export the force prefix or the force conditional block killer
+    */
+#ifdef FEATURE_FORCE_LOAD
+   err = map(exports, "force-prefix", 1, FORCE_PREFIX, 1);
+#else /* ifndef FEATURE_FORCE_LOAD */
+   err = map_block_killer(exports, "force-support");
+#endif /* ndef FEATURE_FORCE_LOAD */
+
+   if (err)
+   {
+      free_map(exports);
+      free_http_response(rsp);
+      return cgi_error_memory();
+   }
+
+   /*
+    * Build the response
+    */
+   err = template_fill_for_cgi(csp, "untrusted", exports, rsp);
+   if (err)
+   {
+      free_http_response(rsp);
+      return cgi_error_memory();
+   }
+
+   return finish_http_response(rsp);
+}
+#endif /* def FEATURE_TRUST */
+
+
+#ifdef FEATURE_FAST_REDIRECTS
+/*********************************************************************
+ *
+ * Function    :  redirect_url
+ *
+ * Description :  Checks for redirection URLs and returns a HTTP redirect
+ *                to the destination URL, if necessary
+ *
+ * Parameters  :
+ *          1  :  csp = Current client state (buffers, headers, etc...)
+ *
+ * Returns     :  NULL if URL was clean, HTTP redirect otherwise.
+ *
+ *********************************************************************/
+struct http_response *redirect_url(struct client_state *csp)
+{
+   char *p, *q;
+   struct http_response *rsp;
+
+   p = q = csp->http->path;
+   log_error(LOG_LEVEL_REDIRECTS, "checking path for redirects: %s", p);
+
+   /*
+    * find the last URL encoded in the request
+    */
+   while ((p = strstr(p, "http://")) != NULL)
+   {
+      q = p++;
+   }
+
+   /*
+    * if there was any, generate and return a HTTP redirect
+    */
+   if (q != csp->http->path)
+   {
+      log_error(LOG_LEVEL_REDIRECTS, "redirecting to: %s", q);
+
+      if (NULL == (rsp = alloc_http_response()))
+      {
+         return cgi_error_memory();
+      }
+
+      if ( enlist_unique_header(rsp->headers, "Location", q)
+        || (NULL == (rsp->status = strdup("302 Local Redirect from Privoxy"))) )
+      {
+         free_http_response(rsp);
+         return cgi_error_memory();
+      }
+
+      return finish_http_response(rsp);
+   }
+   else
+   {
+      return NULL;
+   }
 
 }
-#endif /* def TRUST_FILES */
+#endif /* def FEATURE_FAST_REDIRECTS */
+
+
+#ifdef FEATURE_IMAGE_BLOCKING
+/*********************************************************************
+ *
+ * Function    :  is_imageurl
+ *
+ * Description :  Given a URL, decide whether it is an image or not,
+ *                using either the info from a previous +image action
+ *                or, #ifdef FEATURE_IMAGE_DETECT_MSIE, the info from
+ *                the browser's accept header.
+ *
+ * Parameters  :
+ *          1  :  csp = Current client state (buffers, headers, etc...)
+ *
+ * Returns     :  True (nonzero) if URL is an image, false (0)
+ *                otherwise
+ *
+ *********************************************************************/
+int is_imageurl(struct client_state *csp)
+{
+#ifdef FEATURE_IMAGE_DETECT_MSIE
+   char *tmp;
+
+   tmp = get_header_value(csp->headers, "User-Agent:");
+   if (tmp && strstr(tmp, "MSIE"))
+   {
+      tmp = get_header_value(csp->headers, "Accept:");
+      if (tmp && strstr(tmp, "image/gif"))
+      {
+         /* Client will accept HTML.  If this seems counterintuitive,
+          * blame Microsoft.
+          */
+         return(0);
+      }
+      else
+      {
+         return(1);
+      }
+   }
+#endif /* def FEATURE_IMAGE_DETECT_MSIE */
+
+   return ((csp->action->flags & ACTION_IMAGE) != 0);
+
+}
+#endif /* def FEATURE_IMAGE_BLOCKING */
+
+
+#ifdef FEATURE_TRUST
+/*********************************************************************
+ *
+ * Function    :  is_untrusted_url
+ *
+ * Description :  Should we "distrust" this URL (and block it)?
+ *
+ *                Yes if it matches a line in the trustfile, or if the
+ *                    referrer matches a line starting with "+" in the
+ *                    trustfile.
+ *                No  otherwise.
+ *
+ * Parameters  :
+ *          1  :  csp = Current client state (buffers, headers, etc...)
+ *
+ * Returns     :  0 => trusted, 1 => untrusted
+ *
+ *********************************************************************/
+int is_untrusted_url(struct client_state *csp)
+{
+   struct file_list *fl;
+   struct block_spec *b;
+   struct url_spec **trusted_url;
+   struct http_request rhttp[1];
+   const char * referer;
+   jb_err err;
+
+   /*
+    * If we don't have a trustlist, we trust everybody
+    */
+   if (((fl = csp->tlist) == NULL) || ((b  = fl->f) == NULL))
+   {
+      return 0;
+   }
+
+   memset(rhttp, '\0', sizeof(*rhttp));
+
+   /*
+    * Do we trust the request URL itself?
+    */
+   for (b = b->next; b ; b = b->next)
+   {
+      if (url_match(b->url, csp->http))
+      {
+         return b->reject;
+      }
+   }
+
+   if (NULL == (referer = get_header_value(csp->headers, "Referer:")))
+   {
+      /* no referrer was supplied */
+      return 1;
+   }
+
+
+   /*
+    * If not, do we maybe trust its referrer?
+    */
+   err = parse_http_url(referer, rhttp, csp);
+   if (err)
+   {
+      return 1;
+   }
+
+   for (trusted_url = csp->config->trust_list; *trusted_url != NULL; trusted_url++)
+   {
+      if (url_match(*trusted_url, rhttp))
+      {
+         /* if the URL's referrer is from a trusted referrer, then
+          * add the target spec to the trustfile as an unblocked
+          * domain and return NULL (which means it's OK).
+          */
+
+         FILE *fp;
+
+         if (NULL != (fp = fopen(csp->config->trustfile, "a")))
+         {
+            char * path;
+            char * path_end;
+            char * new_entry = strdup("~");
+
+            string_append(&new_entry, csp->http->hostport);
+
+            path = csp->http->path;
+            if ( (path[0] == '/')
+              && (path[1] == '~')
+              && ((path_end = strchr(path + 2, '/')) != NULL))
+            {
+               /* since this path points into a user's home space
+                * be sure to include this spec in the trustfile.
+                */
+               int path_len = path_end - path; /* save offset */
+               path = strdup(path); /* Copy string */
+               if (path != NULL)
+               {
+                  path_end = path + path_len; /* regenerate ptr to new buffer */
+                  *(path_end + 1) = '\0'; /* Truncate path after '/' */
+               }
+               string_join(&new_entry, path);
+            }
+
+            if (new_entry != NULL)
+            {
+               fprintf(fp, "%s\n", new_entry);
+               free(new_entry);
+            }
+            else
+            {
+               /* FIXME: No way to handle out-of memory, so mostly ignoring it */
+               log_error(LOG_LEVEL_ERROR, "Out of memory adding pattern to trust file");
+            }
+
+            fclose(fp);
+         }
+         return 0;
+      }
+   }
+   return 1;
+}
+#endif /* def FEATURE_TRUST */
 
 
 /*********************************************************************
  *
- * Function    :  intercept_url
+ * Function    :  pcrs_filter_response
  *
- * Description :  checks the URL `basename' against a list of URLs to
- *                snarf. If it matches, it calls the associated function
- *                which returns an HTML page to send back to the client.
- *                Right now, we snarf:
- *                      "show-proxy-args", and
- *                      "ij-untrusted-url" (optional w/TRUST_FILES)
+ * Description :  Ecexute all text substitutions from all applying
+ *                +filter actions on the text buffer that's been accumulated
+ *                in csp->iob->buf. If this changes the contents, set
+ *                csp->content_length to the modified size and raise the
+ *                CSP_FLAG_MODIFIED flag.
  *
  * Parameters  :
- *          1  :  http = http_request request, check `basename's of blocklist
- *          2  :  csp = Current client state (buffers, headers, etc...)
+ *          1  :  csp = Current client state (buffers, headers, etc...)
  *
- * Returns     :  NULL for no recognized URLs, or an HTML description page.
+ * Returns     :  a pointer to the (newly allocated) modified buffer.
+ *                or NULL if there were no hits or something went wrong
  *
  *********************************************************************/
-char *intercept_url(struct http_request *http, struct client_state *csp)
+char *pcrs_filter_response(struct client_state *csp)
 {
-   char *basename;
-   const struct interceptors *v;
+   int hits=0;
+   size_t size;
 
-   basename = strrchr(http->path, '/');
+   char *old = csp->iob->cur, *new = NULL;
+   pcrs_job *job;
 
-   if (basename == NULL) return(NULL);
+   struct file_list *fl;
+   struct re_filterfile_spec *b;
+   struct list_entry *filtername;
 
-   basename ++; /* first char past the last slash */
-
-   if (*basename)
+   /* 
+    * Sanity first
+    */
+   if (csp->iob->cur >= csp->iob->eod)
    {
-      for (v = intercept_patterns; v->str; v++)
+      return(NULL);
+   }
+   size = csp->iob->eod - csp->iob->cur;
+
+   if ( ( NULL == (fl = csp->rlist) ) || ( NULL == fl->f) )
+   {
+      log_error(LOG_LEVEL_ERROR, "Unable to get current state of regexp filtering.");
+      return(NULL);
+   }
+
+   /*
+    * If the body has a "chunked" transfer-encoding,
+    * get rid of it first, adjusting size and iob->eod
+    */
+   if (csp->flags & CSP_FLAG_CHUNKED)
+   {
+      log_error(LOG_LEVEL_RE_FILTER, "Need to de-chunk first");
+      if (0 == (size = remove_chunked_transfer_coding(csp->iob->cur, size)))
       {
-         if (strncmp(basename, v->str, v->len) == 0)
+         return(NULL);
+      }
+      csp->iob->eod = csp->iob->cur + size;
+      csp->flags |= CSP_FLAG_MODIFIED;
+   }
+
+   /*
+    * For all applying +filter actions, look if a filter by that
+    * name exists and if yes, execute it's pcrs_joblist on the
+    * buffer.
+    */
+   for (b = fl->f; b; b = b->next)
+   {
+      for (filtername = csp->action->multi[ACTION_MULTI_FILTER]->first;
+           filtername ; filtername = filtername->next)
+      {
+         if (strcmp(b->name, filtername->str) == 0)
          {
-            return((v->interceptor)(http, csp));
+            int current_hits = 0;
+
+            if ( NULL == b->joblist )
+            {
+               log_error(LOG_LEVEL_RE_FILTER, "Filter %s has empty joblist. Nothing to do.", b->name);
+               return(NULL);
+            }
+
+            log_error(LOG_LEVEL_RE_FILTER, "re_filtering %s%s (size %d) with filter %s...",
+                      csp->http->hostport, csp->http->path, size, b->name);
+
+            /* Apply all jobs from the joblist */
+            for (job = b->joblist; NULL != job; job = job->next)
+            {
+               current_hits += pcrs_execute(job, old, size, &new, &size);
+               if (old != csp->iob->cur) free(old);
+               old=new;
+            }
+
+            log_error(LOG_LEVEL_RE_FILTER, " ...produced %d hits (new size %d).", current_hits, size);
+            hits += current_hits;
          }
       }
    }
 
-   return(NULL);
+   /*
+    * If there were no hits, destroy our copy and let
+    * chat() use the original in csp->iob
+    */
+   if (!hits)
+   {
+      free(new);
+      return(NULL);
+   }
+
+   csp->flags |= CSP_FLAG_MODIFIED;
+   csp->content_length = size;
+   IOB_RESET(csp);
+
+   return(new);
 
 }
 
 
 /*********************************************************************
  *
- * Function    :  cookie_url
+ * Function    :  gif_deanimate_response
  *
- * Description :  Accept this cookie, or no?  See "cookiefile" setting.
+ * Description :  Deanimate the GIF image that has been accumulated in
+ *                csp->iob->buf, set csp->content_length to the modified
+ *                size and raise the CSP_FLAG_MODIFIED flag.
+ *
+ * Parameters  :
+ *          1  :  csp = Current client state (buffers, headers, etc...)
+ *
+ * Returns     :  a pointer to the (newly allocated) modified buffer.
+ *                or NULL in case something went wrong.
+ *
+ *********************************************************************/
+char *gif_deanimate_response(struct client_state *csp)
+{
+   struct binbuffer *in, *out;
+   char *p;
+   size_t size = csp->iob->eod - csp->iob->cur;
+
+   /*
+    * If the body has a "chunked" transfer-encoding,
+    * get rid of it first, adjusting size and iob->eod
+    */
+   if (csp->flags & CSP_FLAG_CHUNKED)
+   {
+      log_error(LOG_LEVEL_DEANIMATE, "Need to de-chunk first");
+      if (0 == (size = remove_chunked_transfer_coding(csp->iob->cur, size)))
+      {
+         return(NULL);
+      }
+      csp->iob->eod = csp->iob->cur + size;
+      csp->flags |= CSP_FLAG_MODIFIED;
+   }
+
+   if (  (NULL == (in =  (struct binbuffer *)zalloc(sizeof *in )))
+      || (NULL == (out = (struct binbuffer *)zalloc(sizeof *out))) )
+   {
+      log_error(LOG_LEVEL_DEANIMATE, "failed! (no mem)");
+      return NULL;
+   }
+
+   in->buffer = csp->iob->cur;
+   in->size = size;
+
+   if (gif_deanimate(in, out, strncmp("last", csp->action->string[ACTION_STRING_DEANIMATE], 4)))
+   {
+      log_error(LOG_LEVEL_DEANIMATE, "failed! (gif parsing)");
+      free(in);
+      buf_free(out);
+      return(NULL);
+   }
+   else
+   {
+      if ((int)size == out->offset)
+      {
+         log_error(LOG_LEVEL_DEANIMATE, "GIF not changed.");
+      }
+      else
+      {
+         log_error(LOG_LEVEL_DEANIMATE, "Success! GIF shrunk from %d bytes to %d.", size, out->offset);
+      }
+      csp->content_length = out->offset;
+      csp->flags |= CSP_FLAG_MODIFIED;
+      p = out->buffer;
+      free(in);
+      free(out);
+      return(p);
+   }
+
+}
+
+
+/*********************************************************************
+ *
+ * Function    :  remove_chunked_transfer_coding
+ *
+ * Description :  In-situ remove the "chunked" transfer coding as defined
+ *                in rfc2616 from a buffer.
+ *
+ * Parameters  :
+ *          1  :  buffer = Pointer to the text buffer
+ *          2  :  size = Number of bytes to be processed
+ *
+ * Returns     :  The new size, i.e. the number of bytes from buffer which
+ *                are occupied by the stripped body, or 0 in case something
+ *                went wrong
+ *
+ *********************************************************************/
+int remove_chunked_transfer_coding(char *buffer, const size_t size)
+{
+   size_t newsize = 0;
+   unsigned int chunksize = 0;
+   char *from_p, *to_p;
+
+   assert(buffer);
+   from_p = to_p = buffer;
+
+   if (sscanf(buffer, "%x", &chunksize) != 1)
+   {
+      log_error(LOG_LEVEL_ERROR, "Invalid first chunksize while stripping \"chunked\" transfer coding");
+      return(0);
+   }
+
+   while (chunksize > 0)
+   {
+      if (NULL == (from_p = strstr(from_p, "\r\n")))
+      {
+         log_error(LOG_LEVEL_ERROR, "Parse error while stripping \"chunked\" transfer coding");
+         return(0);
+      }
+      newsize += chunksize;
+      from_p += 2;
+
+      memmove(to_p, from_p, (size_t) chunksize);
+      to_p = buffer + newsize;
+      from_p += chunksize + 2;
+
+      if (sscanf(from_p, "%x", &chunksize) != 1)
+      {
+         log_error(LOG_LEVEL_ERROR, "Parse error while stripping \"chunked\" transfer coding");
+         return(0);
+      }
+   }
+
+   /* FIXME: Should this get its own loglevel? */
+   log_error(LOG_LEVEL_RE_FILTER, "De-chunking successful. Shrunk from %d to %d\n", size, newsize);
+   return(newsize);
+
+}
+
+
+/*********************************************************************
+ *
+ * Function    :  url_actions
+ *
+ * Description :  Gets the actions for this URL.
  *
  * Parameters  :
  *          1  :  http = http_request request for blocked URLs
  *          2  :  csp = Current client state (buffers, headers, etc...)
  *
- * Returns     :  NULL => accept, cookie_spec pointer to crunch.
+ * Returns     :  N/A
  *
  *********************************************************************/
-struct cookie_spec *cookie_url(struct http_request *http, struct client_state *csp)
+void url_actions(struct http_request *http,
+                 struct client_state *csp)
 {
    struct file_list *fl;
-   struct cookie_spec *b;
-   struct url_spec url[1];
+   struct url_actions *b;
+   int i;
 
-   if (((fl = csp->clist) == NULL) || ((b = fl->f) == NULL))
+   init_current_action(csp->action);
+
+   for (i = 0; i < MAX_ACTION_FILES; i++)
    {
-      return(NULL);
+      if (((fl = csp->actions_list[i]) == NULL) || ((b = fl->f) == NULL))
+      {
+         return;
+      }
+
+      apply_url_actions(csp->action, http, b);
    }
 
-   *url = dsplit(http->host);
+   return;
+}
 
-   /* if splitting the domain fails, punt */
-   if (url->dbuf == NULL) return(NULL);
+
+/*********************************************************************
+ *
+ * Function    :  apply_url_actions
+ *
+ * Description :  Applies a list of URL actions.
+ *
+ * Parameters  :
+ *          1  :  action = Destination.
+ *          2  :  http = Current URL
+ *          3  :  b = list of URL actions to apply
+ *
+ * Returns     :  N/A
+ *
+ *********************************************************************/
+void apply_url_actions(struct current_action_spec *action,
+                       struct http_request *http,
+                       struct url_actions *b)
+{
+   if (b == NULL)
+   {
+      /* Should never happen */
+      return;
+   }
 
    for (b = b->next; NULL != b; b = b->next)
    {
-      if ((b->url->port == 0) || (b->url->port == http->port))
+      if (url_match(b->url, http))
       {
-         if ((b->url->domain[0] == '\0') || (domaincmp(b->url, url) == 0))
-         {
-            if ((b->url->path == NULL) ||
-#ifdef REGEX
-               (regexec(b->url->preg, http->path, 0, NULL, 0) == 0)
-#else
-               (strncmp(b->url->path, http->path, b->url->pathlen) == 0)
-#endif
-            )
-            {
-               freez(url->dbuf);
-               freez(url->dvec);
-               return(b);
-            }
-         }
+         merge_current_action(action, b->action);
       }
    }
-
-   freez(url->dbuf);
-   freez(url->dvec);
-   return(NULL);
-
 }
 
 
@@ -855,671 +1563,31 @@ struct cookie_spec *cookie_url(struct http_request *http, struct client_state *c
  *          1  :  http = http_request request for current URL
  *          2  :  csp = Current client state (buffers, headers, etc...)
  *
- * Returns     :  Return gw_default for no forward match,
- *                else a gateway pointer to a specific forwarding proxy.
+ * Returns     :  Pointer to forwarding information.
  *
  *********************************************************************/
-const struct gateway *forward_url(struct http_request *http, struct client_state *csp)
+const struct forward_spec * forward_url(struct http_request *http,
+                                        struct client_state *csp)
 {
-   struct file_list *fl;
-   struct forward_spec *b;
-   struct url_spec url[1];
+   static const struct forward_spec fwd_default[1] = { FORWARD_SPEC_INITIALIZER };
+   struct forward_spec *fwd = csp->config->forward;
 
-   if (((fl = csp->flist) == NULL) || ((b = fl->f) == NULL))
+   if (fwd == NULL)
    {
-      return(gw_default);
+      return fwd_default;
    }
 
-   *url = dsplit(http->host);
-
-   /* if splitting the domain fails, punt */
-   if (url->dbuf == NULL) return(gw_default);
-
-   for (b = b->next; b ; b = b->next)
+   while (fwd != NULL)
    {
-      if ((b->url->port == 0) || (b->url->port == http->port))
+      if (url_match(fwd->url, http))
       {
-         if ((b->url->domain[0] == '\0') || (domaincmp(b->url, url) == 0))
-         {
-            if ((b->url->path == NULL) ||
-#ifdef REGEX
-               (regexec(b->url->preg, http->path, 0, NULL, 0) == 0)
-#else
-               (strncmp(b->url->path, http->path, b->url->pathlen) == 0)
-#endif
-            )
-            {
-               freez(url->dbuf);
-               freez(url->dvec);
-               return(b->gw);
-            }
-         }
+         return fwd;
       }
+      fwd = fwd->next;
    }
 
-   freez(url->dbuf);
-   freez(url->dvec);
-   return(gw_default);
-
+   return fwd_default;
 }
-
-
-/*********************************************************************
- *
- * Function    :  dsplit
- *
- * Description :  Takes a domain and returns a pointer to a url_spec
- *                structure populated with dbuf, dcnt and dvec.  The
- *                other fields in the structure that is returned are zero.
- *
- * Parameters  :
- *          1  :  domain = a URL address
- *
- * Returns     :  url_spec structure populated with dbuf, dcnt and dvec.
- *
- *********************************************************************/
-struct url_spec dsplit(char *domain)
-{
-   struct url_spec ret[1];
-   char *v[BUFSIZ];
-   int size;
-   char *p;
-
-   memset(ret, '\0', sizeof(*ret));
-
-   if ((p = strrchr(domain, '.')))
-   {
-      if (*(++p) == '\0')
-      {
-         ret->toplevel = 1;
-      }
-   }
-
-   ret->dbuf = strdup(domain);
-
-   /* map to lower case */
-   for (p = ret->dbuf; *p ; p++) *p = tolower(*p);
-
-   /* split the domain name into components */
-   ret->dcnt = ssplit(ret->dbuf, ".", v, SZ(v), 1, 1);
-
-   if (ret->dcnt <= 0)
-   {
-      memset(ret, '\0', sizeof(ret));
-      return(*ret);
-   }
-
-   /* save a copy of the pointers in dvec */
-   size = ret->dcnt * sizeof(*ret->dvec);
-
-   if ((ret->dvec = (char **)malloc(size)))
-   {
-      memcpy(ret->dvec, v, size);
-   }
-
-   return(*ret);
-
-}
-
-
-/*********************************************************************
- *
- * Function    :  domaincmp
- *
- * Description :  Compare domain names.
- *                domaincmp("a.b.c" , "a.b.c")  => 0 (MATCH)
- *                domaincmp("a*.b.c", "a.b.c")  => 0 (MATCH)
- *                domaincmp("b.c"   , "a.b.c")  => 0 (MATCH)
- *                domaincmp(""      , "a.b.c")  => 0 (MATCH)
- *
- * Parameters  :
- *          1  :  pattern = a domain that may contain a '*' as a wildcard.
- *          2  :  fqdn = domain name against which the patterns are compared.
- *
- * Returns     :  0 => domains are equivalent, else no match.
- *
- *********************************************************************/
-int domaincmp(struct url_spec *pattern, struct url_spec *fqdn)
-{
-   char **pv, **fv;  /* vectors  */
-   int    pn,   fn;  /* counters */
-   char  *p,   *f;   /* chars    */
-
-   pv = pattern->dvec;
-   pn = pattern->dcnt;
-
-   fv = fqdn->dvec;
-   fn = fqdn->dcnt;
-
-   while ((pn > 0) && (fn > 0))
-   {
-      p = pv[--pn];
-      f = fv[--fn];
-
-      while (*p && *f && (*p == tolower(*f)))
-      {
-         p++, f++;
-      }
-
-      if ((*p != tolower(*f)) && (*p != '*')) return(1);
-   }
-
-   if (pn > 0) return(1);
-
-   return(0);
-
-}
-
-
-/* intercept functions */
-
-/*********************************************************************
- *
- * Function    :  show_proxy_args
- *
- * Description :  This "crunch"es "http:/any.thing/show-proxy-args" and
- *                returns a web page describing the current status of IJB.
- *
- * Parameters  :
- *          1  :  http = ignored
- *          2  :  csp = Current client state (buffers, headers, etc...)
- *
- * Returns     :  A string that contains the current status of IJB.
- *
- *********************************************************************/
-char *show_proxy_args(struct http_request *http, struct client_state *csp)
-{
-   char *s = NULL;
-
-#ifdef SPLIT_PROXY_ARGS
-   FILE * fp;
-   char buf[BUFSIZ];
-   char * p;
-   const char * filename = NULL;
-   const char * file_description = NULL;
-   char * query_string = strrchr(http->path, '?');
-   char which_file = '\0';
-
-
-   if (query_string != NULL)
-   {
-      /* first char past the last '?' (maybe '\0')*/
-      which_file = query_string[1];
-   }
-   switch (which_file)
-   {
-   case 'b':
-      if (csp->blist)
-      {
-         filename = csp->blist->filename;
-         file_description = "Block List";
-      }
-      break;
-   case 'c':
-      if (csp->clist)
-      {
-         filename = csp->clist->filename;
-         file_description = "Cookie List";
-      }
-      break;
-   case 'f':
-      if (csp->flist)
-      {
-         filename = csp->flist->filename;
-         file_description = "Forward List";
-      }
-      break;
-
-#ifdef ACL_FILES
-   case 'a':
-      if (csp->alist)
-      {
-         filename = csp->alist->filename;
-         file_description = "Access Control List";
-      }
-      break;
-#endif /* def ACL_FILES */
-
-#ifdef USE_IMAGE_LIST
-   case 'i':
-      if (csp->ilist)
-      {
-         filename = csp->ilist->filename;
-         file_description = "Image List";
-      }
-      break;
-#endif /* def USE_IMAGE_LIST */
-
-#ifdef KILLPOPUPS
-   case 'p':
-      if (csp->plist)
-      {
-         filename = csp->plist->filename;
-         file_description = "Popup list";
-      }
-      break;
-#endif /* def KILLPOPUPS */
-
-#ifdef PCRS
-   case 'r':
-      if (csp->rlist)
-      {
-         filename = csp->rlist->filename;
-         file_description = "RE Filter List";
-      }
-      break;
-#endif /* def PCRS */
-
-#ifdef TRUST_FILES
-   case 't':
-      if (csp->tlist)
-      {
-         filename = csp->tlist->filename;
-         file_description = "Trust List";
-      }
-      break;
-#endif /* def TRUST_FILES */
-   }
-
-   if (filename)
-   {
-      /* Display specified file */
-      /* FIXME: Add HTTP headers so this isn't cached */
-      s = strsav(s,
-         "HTTP/1.0 200 OK\n"
-         "Server: IJ/" VERSION "\n"
-         "Content-type: text/html\n"
-         "Pragma: no-cache\n"
-         "Last-Modified: Thu Jul 31, 1997 07:42:22 pm GMT\n"
-         "Expires:       Thu Jul 31, 1997 07:42:22 pm GMT\n"
-         "\n"
-
-         "<html>"
-         "<head>"
-         "<title>Internet Junkbuster Proxy Status - ");
-      s = strsav(s, file_description);
-      s = strsav(s, 
-         "</title>"
-         "</head>\n"
-         "<body bgcolor=\"#f8f8f0\" link=\"#000078\" alink=\"#ff0022\" vlink=\"#787878\">\n"
-         "<center>\n"
-         "<h1>" BANNER "\n");
-      s = strsav(s, file_description);
-      s = strsav(s, 
-         "</h1></center>\n"
-         "<p><a href=\"show-proxy-args\">Back to proxy status</a></p>\n"
-         "<h2>");
-      s = strsav(s, file_description);
-      s = strsav(s,
-         "</h2>\n"
-         "Contents of file &quot;<code>");
-      p = html_encode(filename);
-      s = strsav(s, p);
-      freez(p);
-      s = strsav(s,
-         "</code>&quot;:<br>\n"
-         "</p>\n"
-         "<pre>");
-      
-      if ((fp = fopen(filename, "r")) == NULL)
-      {
-         s = strsav(s, "</pre><h1>ERROR OPENING FILE!</h1><pre>");
-      }
-      else
-      {
-         while (fgets(buf, sizeof(buf), fp))
-         {
-            p = html_encode(buf);
-            if (p)
-            {
-               s = strsav(s, p);
-               freez(p);
-               s = strsav(s, "<br>");
-            }
-         }
-         fclose(fp);
-      }
-
-      s = strsav(s,
-         "</pre>\n"
-         "<br>\n"
-         "<p><a href=\"show-proxy-args\">Back to proxy status</a></p>\n"
-         "<br>\n"
-         "<small><small><p>\n"
-         "Code and documentation of the " BANNER " Proxy"
-         "<sup><small>TM</small></sup>\n"
-         "<a href=\"http://www.junkbusters.com/ht/en/legal.html#copy\">\n" "Copyright</a>&#169; 1997 Junkbusters Corporation\n"
-         "<a href=\"http://www.junkbusters.com/ht/en/legal.html#marks\"><sup><small>TM</small></sup></a><br>\n"
-         "Copying and distribution permitted under the"
-         "<a href=\"http://www.gnu.org/copyleft/gpl.html\">\n"
-         "<small>GNU</small></a> "
-         "General Public License.\n"
-         "</small>"
-         "<address><kbd>webmaster@junkbusters.com</kbd></address>"
-         "</small>"
-         "</body></html>\n");
-      return(s);
-   }
-#endif /* def SPLIT_PROXY_ARGS */
-   
-   s = strsav(s, proxy_args->header);
-   s = strsav(s, proxy_args->invocation);
-#ifdef STATISTICS
-   s = add_stats(s);
-#endif /* def STATISTICS */
-   s = strsav(s, proxy_args->gateways);
-
-#ifdef SPLIT_PROXY_ARGS
-   s = strsav(s, 
-      "<h2>The following files are in use:</h2>\n"
-      "<p>(Click a filename to view it)</p>\n"
-      "<ul>\n");
-
-   if (csp->blist)
-   {
-      s = strsav(s, "<li>Block List: <a href=\"show-proxy-args?block\"><code>");
-      s = strsav(s, csp->blist->filename);
-      s = strsav(s, "</code></a></li>\n");
-   }
-
-   if (csp->clist)
-   {
-      s = strsav(s, "<li>Cookie List: <a href=\"show-proxy-args?cookie\"><code>");
-      s = strsav(s, csp->clist->filename);
-      s = strsav(s, "</code></a></li>\n");
-   }
-
-   if (csp->flist)
-   {
-      s = strsav(s, "<li>Forward List: <a href=\"show-proxy-args?forward\"><code>");
-      s = strsav(s, csp->flist->filename);
-      s = strsav(s, "</code></a></li>\n");
-   }
-
-#ifdef ACL_FILES
-   if (csp->alist)
-   {
-      s = strsav(s, "<li>Access Control List: <a href=\"show-proxy-args?acl\"><code>");
-      s = strsav(s, csp->alist->filename);
-      s = strsav(s, "</code></a></li>\n");
-   }
-#endif /* def ACL_FILES */
-
-#ifdef USE_IMAGE_LIST
-   if (csp->ilist)
-   {
-      s = strsav(s, "<li>Image List: <a href=\"show-proxy-args?image\"><code>");
-      s = strsav(s, csp->ilist->filename);
-      s = strsav(s, "</code></a></li>\n");
-   }
-#endif /* def USE_IMAGE_LIST */
-
-#ifdef KILLPOPUPS
-   if (csp->plist)
-   {
-      s = strsav(s, "<li>Popup List: <a href=\"show-proxy-args?popup\"><code>");
-      s = strsav(s, csp->plist->filename);
-      s = strsav(s, "</code></a></li>\n");
-   }
-#endif /* def KILLPOPUPS */
-
-#ifdef PCRS
-   if (csp->rlist)
-   {
-      s = strsav(s, "<li>RE Filter List: <a href=\"show-proxy-args?re\"><code>");
-      s = strsav(s, csp->rlist->filename);
-      s = strsav(s, "</code></a></li>\n");
-   }
-#endif /* def PCRS */
-
-#ifdef TRUST_FILES
-   if (csp->tlist)
-   {
-      s = strsav(s, "<li>Trust List: <a href=\"show-proxy-args?trust\"><code>");
-      s = strsav(s, csp->tlist->filename);
-      s = strsav(s, "</code></a></li>\n");
-   }
-#endif /* def TRUST_FILES */
-
-   s = strsav(s, "</ul>");
-
-#else /* ifndef SPLIT_PROXY_ARGS */
-   if (csp->blist)
-   {
-      s = strsav(s, csp->blist->proxy_args);
-   }
-
-   if (csp->clist)
-   {
-      s = strsav(s, csp->clist->proxy_args);
-   }
-
-   if (csp->flist)
-   {
-      s = strsav(s, csp->flist->proxy_args);
-   }
-
-#ifdef ACL_FILES
-   if (csp->alist)
-   {
-      s = strsav(s, csp->alist->proxy_args);
-   }
-#endif /* def ACL_FILES */
-
-#ifdef USE_IMAGE_LIST
-   if (csp->ilist)
-   {
-      s = strsav(s, csp->ilist->proxy_args);
-   }
-#endif /* def USE_IMAGE_LIST */
-
-#ifdef KILLPOPUPS
-   if (csp->plist)
-   {
-      s = strsav(s, csp->plist->proxy_args);
-   }
-#endif /* def KILLPOPUPS */
-
-#ifdef PCRS
-   if (csp->rlist)
-   {
-      s = strsav(s, csp->rlist->proxy_args);
-   }
-#endif /* def PCRS */
-
-#ifdef TRUST_FILES
-   if (csp->tlist)
-   {
-      s = strsav(s, csp->tlist->proxy_args);
-   }
-#endif /* def TRUST_FILES */
-
-#endif /* ndef SPLIT_PROXY_ARGS */
-
-   s = strsav(s, proxy_args->trailer);
-
-   return(s);
-
-}
-
-
-#ifdef TRUST_FILES
-/*********************************************************************
- *
- * Function    :  ij_untrusted_url
- *
- * Description :  This "crunch"es "http:/any.thing/ij-untrusted-url" and
- *                returns a web page describing why it was untrusted.
- *
- * Parameters  :
- *          1  :  http = http_request request for crunched URL
- *          2  :  csp = Current client state (buffers, headers, etc...)
- *
- * Returns     :  A string that contains why this was untrusted.
- *
- *********************************************************************/
-char *ij_untrusted_url(struct http_request *http, struct client_state *csp)
-{
-   int n;
-   char *hostport, *path, *refer, *p, *v[9];
-   char buf[BUFSIZ];
-   struct url_spec **tl, *t;
-
-
-   static const char format[] =
-      "HTTP/1.0 200 OK\r\n"
-      "Pragma: no-cache\n"
-      "Last-Modified: Thu Jul 31, 1997 07:42:22 pm GMT\n"
-      "Expires:       Thu Jul 31, 1997 07:42:22 pm GMT\n"
-      "Content-Type: text/html\n\n"
-      "<html>\n"
-      "<head>\n"
-      "<title>Internet Junkbuster: Request for untrusted URL</title>\n"
-      "</head>\n"
-      BODY
-      "<center><h1>"
-      BANNER
-      "</h1></center>"
-      "The " BANNER " Proxy "
-      "<A href=\"" HOME_PAGE_URL "\">"
-      "(" HOME_PAGE_URL ") </A>"
-      "intercepted the request for %s%s\n"
-      "because the URL is not trusted.\n"
-      "<br><br>\n";
-
-   if ((n = ssplit(http->path, "?+", v, SZ(v), 0, 0)) == 4)
-   {
-      hostport = url_decode(v[1]);
-      path     = url_decode(v[2]);
-      refer    = url_decode(v[3]);
-   }
-   else
-   {
-      hostport = strdup("undefined_host");
-      path     = strdup("/undefined_path");
-      refer    = strdup("undefined");
-   }
-
-   n  = sizeof(format);
-   n += strlen(hostport);
-   n += strlen(path    );
-
-   if ((p = (char *)malloc(n)))
-   {
-      sprintf(p, format, hostport, path);
-   }
-
-   strsav(p, "The referrer in this request was <strong>");
-   strsav(p, refer);
-   strsav(p, "</strong><br>\n");
-
-   freez(hostport);
-   freez(path    );
-   freez(refer   );
-
-   p = strsav(p, "<h3>The following referrers are trusted</h3>\n");
-
-   for (tl = trust_list; (t = *tl) ; tl++)
-   {
-      sprintf(buf, "%s<br>\n", t->spec);
-      p = strsav(p, buf);
-   }
-
-   if (trust_info->next)
-   {
-      struct list *l;
-
-      strcpy(buf,
-         "<p>"
-         "You can learn more about what this means "
-         "and what you may be able to do about it by "
-         "reading the following documents:<br>\n"
-         "<ol>\n"
-      );
-
-      p = strsav(p, buf);
-
-      for (l = trust_info->next; l ; l = l->next)
-      {
-         sprintf(buf,
-            "<li> <a href=%s>%s</a><br>\n",
-               l->str, l->str);
-         p = strsav(p, buf);
-      }
-
-      p = strsav(p, "</ol>\n");
-   }
-
-   p = strsav(p, "</body>\n" "</html>\n");
-
-   return(p);
-
-}
-#endif /* def TRUST_FILES */
-
-
-#ifdef STATISTICS
-/*********************************************************************
- *
- * Function    :  add_stats
- *
- * Description :  Statistics function of JB.  Called by `show_proxy_args'.
- *
- * Parameters  :
- *          1  :  s = string that holds the proxy args description page
- *
- * Returns     :  A pointer to the descriptive status web page.
- *
- *********************************************************************/
-char *add_stats(char *s)
-{
-   /*
-    * Output details of the number of requests rejected and
-    * accepted. This is switchable in the junkbuster config.
-    * Does nothing if this option is not enabled.
-    */
-
-   float perc_rej;   /* Percentage of http requests rejected */
-   char out_str[81];
-   int local_urls_read     = urls_read;
-   int local_urls_rejected = urls_rejected;
-
-   /*
-    * Need to alter the stats not to include the fetch of this
-    * page.
-    *
-	 * Can't do following thread safely! doh!
-	 *
-    * urls_read--;
-    * urls_rejected--; * This will be incremented subsequently *
-	 */
-
-   s = strsav(s,"<h2>Statistics for this " BANNER ":</h2>\n");
-
-   if (local_urls_read == 0)
-   {
-
-      s = strsav(s,"No activity so far!\n");
-
-   }
-   else
-   {
-
-      perc_rej = (float)local_urls_rejected * 100.0F /
-            (float)local_urls_read;
-
-      sprintf(out_str,
-         "%d requests received, %d filtered "
-         "(%6.2f %%).",
-         local_urls_read, 
-         local_urls_rejected, perc_rej);
-
-      s = strsav(s,out_str);
-   }
-
-   return(s);
-}
-#endif /* def STATISTICS */
 
 
 /*

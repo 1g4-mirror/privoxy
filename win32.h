@@ -1,14 +1,14 @@
-#ifndef _WIN32_H
-#define _WIN32_H
-#define WIN32_H_VERSION "$Id: win32.h,v 1.1 2001/05/13 21:57:07 administrator Exp $"
+#ifndef WIN32_H_INCLUDED
+#define WIN32_H_INCLUDED
+#define WIN32_H_VERSION "$Id: win32.h,v 1.4 2002/03/24 12:03:47 jongfoster Exp $"
 /*********************************************************************
  *
- * File        :  $Source: /home/administrator/cvs/ijb/win32.h,v $
+ * File        :  $Source: /cvsroot/ijbswa/current/win32.h,v $
  *
  * Purpose     :  Win32 User Interface initialization and message loop
  *
- * Copyright   :  Written by and Copyright (C) 2001 the SourceForge
- *                IJBSWA team.  http://ijbswa.sourceforge.net
+ * Copyright   :  Written by and Copyright (C) 2001-2002 members of
+ *                the Privoxy team.  http://www.privoxy.org/
  *
  *                Written by and Copyright (C) 1999 Adam Lock
  *                <locka@iol.ie>
@@ -33,6 +33,22 @@
  *
  * Revisions   :
  *    $Log: win32.h,v $
+ *    Revision 1.4  2002/03/24 12:03:47  jongfoster
+ *    Name change
+ *
+ *    Revision 1.3  2001/07/30 22:08:36  jongfoster
+ *    Tidying up #defines:
+ *    - All feature #defines are now of the form FEATURE_xxx
+ *    - Permanently turned off WIN_GUI_EDIT
+ *    - Permanently turned on WEBDAV and SPLIT_PROXY_ARGS
+ *
+ *    Revision 1.2  2001/07/29 18:43:08  jongfoster
+ *    Changing #ifdef _FILENAME_H to FILENAME_H_INCLUDED, to conform to
+ *    ANSI C rules.
+ *
+ *    Revision 1.1.1.1  2001/05/15 13:59:08  oes
+ *    Initial import of version 2.9.3 source tree
+ *
  *
  *********************************************************************/
 
@@ -62,8 +78,8 @@ extern const char win32_h_rcs[];
 } /* extern "C" */
 #endif
 
-#endif /* ndef _WIN32_H */
-
+#endif /* ndef WIN32_H_INCLUDED */
+  
 /*
   Local Variables:
   tab-width: 3
