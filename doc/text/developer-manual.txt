@@ -2,7 +2,7 @@ Privoxy Developer Manual
 
 By: Privoxy Developers
 
-$Id: developer-manual.sgml,v 1.33 2002/04/12 03:49:53 hal9 Exp $
+$Id: developer-manual.sgml,v 1.28 2002/04/08 22:59:26 hal9 Exp $
 
 The developer manual gives the users information on how to help the developer
 team. It provides guidance on coding, testing, documentation and other issues.
@@ -98,7 +98,7 @@ Table of Contents
         5.7.8. The Programmer Who Uses 'malloc' is Responsible for Ensuring
             'free'
         5.7.9. Add loaders to the `file_list' structure and in order
-        5.7.10. "Uncertain" new code and/or changes to existing code, use FIXME
+        5.7.10. "Uncertain" new code and/or changes to exitinst code, use FIXME
        
     5.8. Addendum: Template for files and function comment blocks:
    
@@ -165,14 +165,11 @@ following guidelines for changing stuff in the code. If it is
    
  5. A major redesign of some part of the code: ask the list
    
-Note that near a major public release, we get a bit more cautious - if unsure,
-it doesn't hurt to ask first.
-
 -------------------------------------------------------------------------------
 
 4. Documentation Guidelines
 
-All formal documents are maintained in Docbook SGML and located in the doc/
+All formal documents are maintained in docbook SGML and located in the doc/
 source/* directory. You will need Docbook, the Docbook DTD's and the Docbook
 modular stylesheets (or comparable alternatives), and either jade or openjade
 (recommended) installed in order to build docs from source. Currently there is 
@@ -184,7 +181,7 @@ SGML. DO NOT edit these directly. Edit the SGML source, or contact someone
 involved in the documentation (at present Stefan and Hal).
 
 Other, less formal documents (e.g. LICENSE, INSTALL) are maintained as plain
-text files in the top-level source directory. At least for the time being.
+text files in the toplevel source directory. At least for the time being.
 
 Packagers are encouraged to include this documentation. For those without the
 ability to build the docs locally, text versions of each are kept in CVS. HTML
@@ -196,7 +193,7 @@ uses the document SGML sources in doc/source/*/* to update all text files in
 doc/text/ and to update all HTML documents in doc/webserver/.
 
 Documentation writers should please make sure documents build successfully
-before committing to CVS, if possible.
+before committing to CVS.
 
 How do you update the webserver (i.e. the pages on privoxy.org)?
 
@@ -205,12 +202,6 @@ How do you update the webserver (i.e. the pages on privoxy.org)?
  2. Run make webserver which copies all files from doc/webserver to the
     sourceforge webserver via scp.
    
-Finished docs should be occasionally submitted to CVS (doc/webserver/*/*.html)
-so that those without the ability to build them locally, have access to them if
-needed. This is especially important just prior to a new release! Please do
-this after the $VERSION and other release specific data in configure.in has
-been updated (this is done just prior to a new release).
-
 -------------------------------------------------------------------------------
 
 4.1. Quickstart to Docbook and SGML
@@ -305,11 +296,10 @@ Here it is:
     v4.x <comment> is replaced by <remark>.)
    
   * We have an international audience. Refrain from slang, or English
-    idiosyncrasies (too many to list :). Humor also does not translate well
-    sometimes.
+    idiosyncrasies (too many to list :).
    
   * Try to keep overall line lengths in source files to 80 characters or less
-    for obvious reasons. This is not always possible, with lengthy URLs for
+    for obvious reasons. This is not always possible, with lenghty URLs for
     instance.
    
   * Our documents are available in differing formats. Right now, they are just
@@ -346,7 +336,7 @@ encouraged to use these where possible. Some of these obviously require
 re-setting with each release (done by the Makefile). A sampling of custom
 entities are listed below. See any of the main docs for examples.
 
-  * Re- "boilerplate" text entities are defined like:
+  * Re-cyclable "boilerplate" text entities are defined like:
    
     <!entity supported SYSTEM "supported.sgml">
    
@@ -358,10 +348,10 @@ entities are listed below. See any of the main docs for examples.
    
   * Commonly used "internal entities":
    
-    p-version: the Privoxy version string, e.g. "2.9.14".                      
-    p-status: the project status, either "alpha", "beta", or "stable".         
+    p-version: the Privoxy version string, e.g. "2.9.13".                      
+    p-status: the project status, either "ALPHA", "BETA", or "STABLE".         
     p-not-stable: use to conditionally include text in "not stable" releases   
-    (e.g. "beta").                                                             
+    (e.g. "BETA").                                                             
     p-stable: just the opposite.                                               
     p-text: this doc is only generated as text.                                
    
@@ -456,7 +446,7 @@ if ( thisVariable == thatVariable ) /* this may not either */
 
 Exception:
 
-If you are trying to add a small logic comment and do not wish to "disrupt" the
+If you are trying to add a small logic comment and do not wish to "disrubt" the
 flow of the code, feel free to use a 1 line comment which is NOT on the same
 line as the code.
 
@@ -583,7 +573,7 @@ if ( 1 == X )
 
 Explanation:
 
-Use all lowercase, and separate words via an underscore ('_'). Do not start an
+Use all lowercase, and seperate words via an underscore ('_'). Do not start an
 identifier with an underscore. (ANSI C reserves these for use by the compiler
 and system headers.) Do not use identifiers which are reserved in ANSI C++.
 (E.g. template, class, true, false, ...). This is in case we ever decide to
@@ -603,7 +593,7 @@ int msiis5hack = 0; int msIis5Hack = 0;
 
 Explanation:
 
-Use all lowercase, and separate words via an underscore ('_'). Do not start an
+Use all lowercase, and seperate words via an underscore ('_'). Do not start an
 identifier with an underscore. (ANSI C reserves these for use by the compiler
 and system headers.) Do not use identifiers which are reserved in ANSI C++.
 (E.g. template, class, true, false, ...). This is in case we ever decide to
@@ -720,11 +710,11 @@ or
 if ( this == that ) { ... }
 
 Note: In the special case that the if-statement is inside a loop, and it is
-trivial, i.e. it tests for a condition that is obvious from the purpose of the
+trivial, i.e. it tests for a condidtion that is obvious from the purpose of the
 block, one-liners as above may optically preserve the loop structure and make
 it easier to read.
 
-Status: developer-discretion.
+Status: developer-discrection.
 
 Example exception:
 
@@ -778,7 +768,7 @@ Instead of:
 
 if ( condition ) { structure->flag = 1; } else { structure->flag = 0; }
 
-Note: The former is readable and concise. The later is wordy and inefficient.
+Note: The former is readable and consice. The later is wordy and inefficient.
 Please assume that any developer new to the project has at least a "good"
 knowledge of C/C++. (Hope I do not offend by that last comment ... 8-)
 
@@ -845,13 +835,13 @@ Instead of:
 
 int function1( ... ) { ...code... return( retCode ); } int function2( ... ) { }
 
-Note: Use 1 blank line before the closing brace and 2 lines afterward. This
+Note: Use 1 blank line before the closing brace and 2 lines afterwards. This
 makes the end of function standout to the most casual viewer. Although function
-comments help separate functions, this is still a good coding practice. In
+comments help seperate functions, this is still a good coding practice. In
 fact, I follow these rules when using blocks in "for", "while", "do" loops, and
 long if {} statements too. After all whitespace is free!
 
-Status: developer-discretion on the number of blank lines. Enforced is the end
+Status: developer-discrection on the number of blank lines. Enforced is the end
 of function comments.
 
 -------------------------------------------------------------------------------
@@ -909,7 +899,7 @@ Note: It is much easier to debug a SIGSEGV if the message says you are trying
 to access memory address 00000000 and not 129FA012; or arrayPtr[20] causes a
 SIGSEV vs. arrayPtr[0].
 
-Status: developer-discretion if and only if the variable is assigned a value
+Status: developer-discrection if and only if the variable is assigned a value
 "shortly after" declaration.
 
 -------------------------------------------------------------------------------
@@ -1032,7 +1022,7 @@ Exception:
 #include                                                                       
 
 Note: Please! do not add "-I." to the Makefile without a _very_ good reason.
-This duplicates the #include "file.h" behavior.
+This duplicates the #include "file.h" behaviour.
 
 -------------------------------------------------------------------------------
 
@@ -1095,9 +1085,9 @@ extern file_list *xyz;
 
 Note: If you declare "file_list xyz;" (without the pointer), then including the
 proper header file is necessary. If you only want to prototype a pointer,
-however, the header file is unnecessary.
+however, the header file is unneccessary.
 
-Status: Use with discretion.
+Status: Use with discrection.
 
 -------------------------------------------------------------------------------
 
@@ -1136,7 +1126,7 @@ switch( hash_string( cmd ) )
                                                                                
    default :                                                                   
       log_error( ... );                                                        
-      ... anomaly code goes here ...                                           
+      ... anomly code goes here ...                                            
       continue; / break; / exit( 1 ); / etc ...                                
                                                                                
 } /* end switch( hash_string( cmd ) ) */                                       
@@ -1146,7 +1136,7 @@ this point. Of note, most of the WIN32 code calls `DefWindowProc' after the
 switch statement. This API call *should* be included in a default statement.
 
 Another Note: This is not so much a readability issue as a robust programming
-issue. The "anomaly code goes here" may be no more than a print to the STDERR
+issue. The "anomly code goes here" may be no more than a print to the STDERR
 stream (as in load_config). Or it may really be an ABEND condition.
 
 Status: Programmer discretion is advised.
@@ -1223,7 +1213,7 @@ Exceptions: when you want to declare a bunch of loop variables or other trivial
 variables; feel free to declare them on 1 line. You should, although, provide a
 good comment on their functions.
 
-Status: developer-discretion.
+Status: developer-discrection.
 
 -------------------------------------------------------------------------------
 
@@ -1231,7 +1221,7 @@ Status: developer-discretion.
 
 Explanation:
 
-Create a local struct (on the stack) if the variable will live and die within
+Create a local stuct (on the stack) if the variable will live and die within
 the context of one function call.
 
 Only "malloc" a struct (on the heap) if the variable's life will extend beyond
@@ -1240,7 +1230,7 @@ the context of one function call.
 Example:
 
 If a function creates a struct and stores a pointer to it in a                 
-list, then it should definitely be allocated via `malloc'.                     
+list, then it should definately be allocated via `malloc'.                     
 
 -------------------------------------------------------------------------------
 
@@ -1253,7 +1243,7 @@ instance is `free'd, even if the deallocation event falls within some other
 programmer's code. You are also responsible for ensuring that deletion is
 timely (i.e. not too soon, not too late). This is known as "low-coupling" and
 is a "good thing (tm)". You may need to offer a free/unload/destuctor type
-function to accommodate this.
+function to accomodate this.
 
 Example:
 
@@ -1265,8 +1255,8 @@ Exceptions:
 The developer cannot be expected to provide `free'ing functions for C run-time
 library functions ... such as `strdup'.
 
-Status: developer-discretion. The "main" use of this standard is for allocating
-and freeing data structures (complex or nested).
+Status: developer-discrection. The "main" use of this standard is for
+allocating and freeing data structures (complex or nested).
 
 -------------------------------------------------------------------------------
 
@@ -1283,15 +1273,15 @@ KILLPOPUPs, it is clear that it should come first.
 
 -------------------------------------------------------------------------------
 
-5.7.10. "Uncertain" new code and/or changes to existing code, use FIXME
+5.7.10. "Uncertain" new code and/or changes to exitinst code, use FIXME
 
 Explanation:
 
 If you have enough confidence in new code or confidence in your changes, but
-are not *quite* sure of the repercussions, add this:
+are not *quite* sure of the reprocussions, add this:
 
-/* FIXME: this code has a logic error on platform XYZ, * attempting to fix */ #
-ifdef PLATFORM ...changed code here... #endif
+/* FIXME: this code has a logic error on platform XYZ, * attempthing to fix */
+#ifdef PLATFORM ...changed code here... #endif
 
 or:
 
@@ -1303,7 +1293,7 @@ or:
 /* FIXME: new code that *may* break something else... */ ...new code here...
 
 Note: If you make it clear that this may or may not be a "good thing (tm)", it
-will be easier to identify and include in the project (or conversely exclude
+will be easier to identify and include in the project (or conversly exclude
 from the project).
 
 -------------------------------------------------------------------------------
@@ -1312,7 +1302,7 @@ from the project).
 
 Example for file comments:
 
-const char FILENAME_rcs[] = "$Id: developer-manual.sgml,v 1.33 2002/04/12 03:49:53 hal9 Exp $"; 
+const char FILENAME_rcs[] = "$Id: developer-manual.sgml,v 1.28 2002/04/08 22:59:26 hal9 Exp $"; 
 /*********************************************************************                          
  *                                                                                              
  * File        :  $Source$                                                                      
@@ -1361,15 +1351,14 @@ Note: This declares the rcs variables that should be added to the
 change the "Copyright" section to represent the rights you wish to maintain.
 
 Note: The formfeed character that is present right after the comment flower box
-is handy for (X|GNU)Emacs users to skip the verbiage and get to the heart of
-the code (via `forward-page' and `backward-page'). Please include it if you
-can.
+is handy for (X|GNU)Emacs users to skip the verbige and get to the heart of the
+code (via `forward-page' and `backward-page'). Please include it if you can.
 
 Example for file header comments:
 
 #ifndef _FILENAME_H                                                                           
 #define _FILENAME_H                                                                           
-#define FILENAME_H_VERSION "$Id: developer-manual.sgml,v 1.33 2002/04/12 03:49:53 hal9 Exp $" 
+#define FILENAME_H_VERSION "$Id: developer-manual.sgml,v 1.28 2002/04/08 22:59:26 hal9 Exp $" 
 /*********************************************************************                        
  *                                                                                            
  * File        :  $Source$                                                                    
@@ -1520,32 +1509,28 @@ Do not mail to the mailinglist (we cannot keep track on issues there).
 
 8. Releasing a new version
 
-To minimize trouble with distribution contents, web-page errors and the like,
-we strongly encourage you to follow this section if you prepare a new release
-of code or new pages on the webserver.
+To minimize trouble with distribution contents, webpage errors and the like, we
+strongly encourage you to follow this section if you prepare a new release of
+code or new pages on the webserver.
 
 The following programs are required to follow this process: ncftpput (ncftp),
 scp (ssh), gmake (GNU's version of make), autoconf, cvs, ???.
-
-Replace X, Y and Z with the actual version number (X = major, Y = minor, Z =
-point):
 
 -------------------------------------------------------------------------------
 
 8.1. Before the Release
 
-The following must be done by one of the developers prior to each new release.
+The following must be done by one of the developers prior to each new release:
 
   * Make sure that everybody who has worked on the code in the last couple of
     days has had a chance to yell "no!" in case they have pending changes/fixes
     in their pipelines.
    
-  * Increment the version number in configure.in in CVS. Also, increase or
-    reset the RPM release number in configure.in as appropriate. Do NOT touch
-    version information after export from CVS. All packages will use the
-    version and release data from configure.in. Local files should not be
-    changed, except prior to a CVS commit!!! This way we are all on the same
-    page!
+  * Increment the version number in configure.in in CVS. Also, the RPM release
+    number in configure.in. Do NOT touch version information after export from
+    CVS. All packages will use the version and release data from configure.in.
+    Local files should not be changed, except prior to a CVS commit!!! This way
+    we are all on the same page!
    
   * If the default actionsfile has changed since last release, bump up its
     version info in this line:
@@ -1556,38 +1541,29 @@ The following must be done by one of the developers prior to each new release.
     Then change the version info in doc/webserver/actions/index.php, line:
     '$required_actions_file_version = "A.B";'
    
-  * Commit all files that were changed in the above steps!
+  * Tag all files in CVS with the version number with "cvs tag v_X_Y_Z" (where
+    X = major, Y = minor, Z = point). Don't use vX_Y_Z, ver_X_Y_Z, v_X.Y.Z
+    (won't work) etc.
    
-  * Tag all files in CVS with the version number with "cvs tag v_X_Y_Z". Don't
-    use vX_Y_Z, ver_X_Y_Z, v_X.Y.Z (won't work) etc.
-   
-  * The first package uploaded should be the official "tarball" release, as
-    required by the GPL. This is built with the "make tarball-dist" Makefile
-    target, and then can be uploaded with "make tarball-upload" (see below).
+  * The first package uploaded should be the official "tarball" release. This
+    is built with the "make tarball-dist" Makefile target, and then can be
+    uploaded with "make tarball-upload" (see below).
    
 -------------------------------------------------------------------------------
 
 8.2. Update the webserver
 
 All files must be group-readable and group-writable (or no one else will be
-able to change them)! To update the webserver, create any pages locally in the
-doc/webserver/* directory (or create new directories under doc/webserver), then
+able to change them). To update the webserver, create any pages locally in the
+doc/webserver directory (or create new directories under doc/webserver), then
 do
 
   make webserver                                                               
                                                                                
 
-This will do the upload to the webserver (www.privoxy.org).
-
 Note that "make dok" (or "make redhat-dok") creates doc/webserver/user-manual,
-doc/webserver/developer-manual, doc/webserver/faq and doc/webserver/index.html
-automatically. (doc/webserver/man-page/privoxy-man-page.html is created by a
-separate Makefile target, "make man", due to dependencies on some obscure perl
-scripts. See comments in GNUmakefile.)
-
-Someone should also commit these to CVS so that packagers without the ability
-to build docs locally, have access to them. This is a separate step, and should
-also be done before each official release.
+doc/webserver/developer-manual, doc/webserver/faq and doc/webserver/man-page
+automatically.
 
 Please do NOT use any other means of transferring files to the webserver. "make
 webserver" not only uploads, but will make sure that the appropriate
@@ -1599,9 +1575,9 @@ permissions are preserved for shared group access.
 
 Ensure that you have the latest code version. Hence run:
 
+  cd current                                                                                          
   cvs -d:pserver:anonymous@cvs.ijbswa.sourceforge.net:/cvsroot/ijbswa login                           
   cvs -z3  -d:pserver:anonymous@cvs.ijbswa.sourceforge.net:/cvsroot/ijbswa export -r  v_X_Y_Z current 
-  cd current                                                                                          
                                                                                                       
 
 first.
@@ -1616,7 +1592,7 @@ Then do
 
 To upload the package to Sourceforge, simply issue
 
-  make suse-upload (or make redhat-upload)                                     
+  make suse-upload or make redhat-upload                                       
                                                                                
 
 Go to the displayed URL and release the file publicly on Sourceforge.
@@ -1627,6 +1603,7 @@ Go to the displayed URL and release the file publicly on Sourceforge.
 
 Ensure that you have the latest code version. Hence run:
 
+  cd current                                                                                         
   cvs -d:pserver:anonymous@cvs.ijbswa.sourceforge.net:/cvsroot/ijbswa login                          
   cvs -z3 -d:pserver:anonymous@cvs.ijbswa.sourceforge.net:/cvsroot/ijbswa export -r  v_X_Y_Z current 
   cd ..                                                                                              
@@ -1672,9 +1649,9 @@ Login to Sourceforge's compilefarm via ssh
 Choose the right operating system (not the Debian one). If you have downloaded
 Privoxy before,
 
+  cd current                                                                                          
   cvs -d:pserver:anonymous@cvs.ijbswa.sourceforge.net:/cvsroot/ijbswa login                           
   cvs -z3  -d:pserver:anonymous@cvs.ijbswa.sourceforge.net:/cvsroot/ijbswa export -r  v_X_Y_Z current 
-  cd current                                                                                          
                                                                                                       
 
 If not, please checkout Privoxy via CVS first. Run:
@@ -1695,29 +1672,19 @@ archive to Sourceforge's ftp server and release the file publicly.
 
 8.6. Windows
 
-You should ensure you have the latest version of Cygwin (from http://
-www.cygwin.com/). Run the following commands from within a Cygwin bash shell.
+Ensure that you have the latest code version. Hence run
 
-First check out a clean copy of the correct code version, by running:
-
-        mkdir dist                                                                                    
-        cd dist                                                                                       
-        cvs -d:pserver:anonymous@cvs.ijbswa.sourceforge.net:/cvsroot/ijbswa login                     
-        cvs -z3  -d:pserver:anonymous@cvs.ijbswa.sourceforge.net:/cvsroot/ijbswa export -r  v_X_Y_Z . 
+  cd current                                                                                          
+  cvs -d:pserver:anonymous@cvs.ijbswa.sourceforge.net:/cvsroot/ijbswa login                           
+  cvs -z3  -d:pserver:anonymous@cvs.ijbswa.sourceforge.net:/cvsroot/ijbswa export -r  v_X_Y_Z current 
                                                                                                       
 
-(Note: It is important that this is a clean copy of the code, do not re-use a
-working directory after you have manually compiled there).
+Run:
 
-Then you can build the package. This is fully automated, and is controlled by
-winsetup/GNUmakefile. All you need to do is:
-
-        cd winsetup                                                            
-        make                                                                   
+  autoheader && autoconf && ./configure                                        
                                                                                
 
-Now you can manually rename privoxy_setup.exe to privoxy_setup_X_Y_Z.exe, and
-upload it to SourceForge.
+Then do FIXME.
 
 -------------------------------------------------------------------------------
 
@@ -1725,9 +1692,9 @@ upload it to SourceForge.
 
 Ensure that you have the latest code version. Hence run:
 
+  cd current                                                                                          
   cvs -d:pserver:anonymous@cvs.ijbswa.sourceforge.net:/cvsroot/ijbswa login                           
   cvs -z3  -d:pserver:anonymous@cvs.ijbswa.sourceforge.net:/cvsroot/ijbswa export -r  v_X_Y_Z current 
-  cd current                                                                                          
                                                                                                       
 
 first. Run:
@@ -1743,6 +1710,7 @@ Then do FIXME.
 
 Ensure that you have the latest code version. Hence run:
 
+  cd current                                                                                         
   cvs -d:pserver:anonymous@cvs.ijbswa.sourceforge.net:/cvsroot/ijbswa login                          
   cvs -z3 -d:pserver:anonymous@cvs.ijbswa.sourceforge.net:/cvsroot/ijbswa export -r  v_X_Y_Z current 
   cd ..                                                                                              
@@ -1785,14 +1753,14 @@ Login to Sourceforge's compilefarm via ssh:
   ssh cf.sourceforge.net                                                       
                                                                                
 
-Choose the right operating system.
+Choose the right operating system. If you have downloaded Privoxy before,
 
+  cd current                                                                                          
   cvs -d:pserver:anonymous@cvs.ijbswa.sourceforge.net:/cvsroot/ijbswa login                           
   cvs -z3  -d:pserver:anonymous@cvs.ijbswa.sourceforge.net:/cvsroot/ijbswa export -r  v_X_Y_Z current 
-  cd current                                                                                          
                                                                                                       
 
-Run:
+If not, please checkout Privoxy via CVS first. Run:
 
   autoheader && autoconf && ./configure                                        
                                                                                
@@ -1810,15 +1778,16 @@ archive to Sourceforge's ftp server and release the file publicly.
 
 8.10. Tarball
 
-Ensure that you have the right code version. Hence run:
+Ensure that you have the latest code version. Hence run:
 
+  cd current                                                                                          
   cvs -d:pserver:anonymous@cvs.ijbswa.sourceforge.net:/cvsroot/ijbswa login                           
   cvs -z3  -d:pserver:anonymous@cvs.ijbswa.sourceforge.net:/cvsroot/ijbswa export -r  v_X_Y_Z current 
-  cd current                                                                                          
                                                                                                       
 
 first. Run:
 
+  make clobber                                                                 
   autoheader && autoconf && ./configure                                        
                                                                                
 
@@ -1840,9 +1809,9 @@ Goto the displayed URL and release the file publicly on Sourceforge.
 
 Ensure that you have the latest code version. Hence run:
 
+  cd current                                                                                          
   cvs -d:pserver:anonymous@cvs.ijbswa.sourceforge.net:/cvsroot/ijbswa login                           
   cvs -z3  -d:pserver:anonymous@cvs.ijbswa.sourceforge.net:/cvsroot/ijbswa export -r  v_X_Y_Z current 
-  cd current                                                                                          
                                                                                                       
 
 first. Run:
@@ -1858,9 +1827,9 @@ Then do FIXME.
 
 Ensure that you have the latest code version. Hence run:
 
+  cd current                                                                                          
   cvs -d:pserver:anonymous@cvs.ijbswa.sourceforge.net:/cvsroot/ijbswa login                           
   cvs -z3  -d:pserver:anonymous@cvs.ijbswa.sourceforge.net:/cvsroot/ijbswa export -r  v_X_Y_Z current 
-  cd current                                                                                          
                                                                                                       
 
 first. Run:
@@ -1881,9 +1850,9 @@ Login to Sourceforge's compilefarm via ssh:
 
 Choose the right operating system. If you have downloaded Privoxy before:
 
+  cd current                                                                                          
   cvs -d:pserver:anonymous@cvs.ijbswa.sourceforge.net:/cvsroot/ijbswa login                           
   cvs -z3  -d:pserver:anonymous@cvs.ijbswa.sourceforge.net:/cvsroot/ijbswa export -r  v_X_Y_Z current 
-  cd current                                                                                          
                                                                                                       
 
 If not, please checkout Privoxy via CVS first. Run:
@@ -1907,12 +1876,12 @@ archive to Sourceforge's ftp server and release the file publicly.
 We value your feedback. However, to provide you with the best support, please
 note:
 
-  * Use the Sourceforge Support Forum to get help:
+  *  Use the Sourceforge Support Forum to get help:
        
         http://sourceforge.net/tracker/?group_id=11118&atid=211118
        
    
-  * Submit bugs only through our Sourceforge Bug Forum:
+  *  Submit bugs only through our Sourceforge Bug Forum:
      
         http://sourceforge.net/tracker/?group_id=11118&atid=111118. 
         
@@ -1926,25 +1895,26 @@ note:
     platform, browser, any pertinent log data, any other relevant details
     (please be specific) and, if possible, some way to reproduce the bug.
    
-  * Submit feature requests only through our Sourceforge feature request forum:
+  *  Submit feature requests only through our Sourceforge feature request forum:
      
         http://sourceforge.net/tracker/?atid=361118&group_id=11118&func=browse.
        
    
-  * You can also send feedback on websites that Privoxy has problems with. Please bookmark
-    the following link: "Privoxy - Submit Filter Feedback"
-    . Once you surf to a page with problems, use the
-    bookmark to send us feedback. We will look into the issue as soon as possible.
+  *  Submit missed ads and banners, and incorrectly blocked images, popups, etc:
+          
+        http://p.p/, and select "actions file feedback system"
        
    
-  * For any other issues, feel free to use the mailing lists:
+    This page can also be reached from many of the internal CGI pages.
+   
+  *  For any other issues, feel free to use the mailing lists:
      
         http://sourceforge.net/mail/?group_id=11118.
      
    
     Anyone interested in actively participating in development and related
     discussions can also join the appropriate mailing list. Archives are
-    available, too.
+    available too.
    
 -------------------------------------------------------------------------------
 

@@ -4,7 +4,7 @@
 <!entity contacting SYSTEM "contacting.sgml">
 <!entity history SYSTEM "history.sgml">
 <!entity copyright SYSTEM "copyright.sgml">
-<!entity p-version "2.9.14">
+<!entity p-version "2.9.13">
 <!entity p-status "beta">
 <!entity % p-not-stable "INCLUDE">
 <!entity % p-stable "IGNORE">
@@ -19,9 +19,9 @@
                 This file belongs into
                 ijbswa.sourceforge.net:/home/groups/i/ij/ijbswa/htdocs/
                 
- $Id: index.sgml,v 1.7 2002/04/12 10:11:53 swa Exp $
+ $Id: index.sgml,v 1.3 2002/04/07 20:27:18 hal9 Exp $
 
- Written by and Copyright (C) 2001, 2002 the SourceForge
+ Written by and Copyright (C) 2001 the SourceForge
  Privoxy team. http://www.privoxy.org/
 
  Based on the Internet Junkbuster originally written
@@ -31,11 +31,12 @@
 
  ========================================================================
  NOTE: Please read developer-manual/documentation.html before touching 
- anything in this, or other Privoxy documentation. 
+ anything in this, or other Privoxy documentation. You have been warned!
+ Failure to abide by this rule will result in the revocation of your license 
+ to live a peaceful existence!
  ========================================================================
 
- Note: This is the privoxy home page. The Makefile is adding additional
- meta data and content via perl.
+ Note: This is the privoxy home page.
 
 -->
 
@@ -72,8 +73,8 @@
 <!-- end boilerplate -->
 </sect1>
 
-<sect1 id="moreinfo" label="">
-<title>More info</title>
+<sect1 id="moreinfos" label="">
+<title>More infos</title>
 <para>
 <itemizedlist>
 	<listitem>
@@ -150,11 +151,6 @@ page</ulink> on Sourceforge
 	</listitem>
 	<listitem>
 	<literallayout>
-	<ulink url="team/index.html">Pictures of the Privoxy Team</ulink>
-	</literallayout>
-	</listitem>
-	<listitem>
-	<literallayout>
 	<ulink url="developer-manual/index.html">Developer Manual</ulink>
 	</literallayout>
 	</listitem>
@@ -183,39 +179,6 @@ page</ulink> on Sourceforge
 <!-- end -->
 </sect1>
 
-
-<!--   ~~~~~       New section      ~~~~~     -->
-<sect1 label="">
-<title></title>
-<!-- dummy section, for spacing -->
-<para>
-<!-- show the SF logo per AUP -->
-<informaltable frame=none label="" pgwide="1">
- <tgroup cols=1 align="center" colsep=1 rowsep=1>
-  <colspec colname=c1 align="center">
-   <tbody>
-    <row>
-     <entry align="center">
-      <ulink url="http://sourceforge.net/">
-       <inlinegraphic  fileref="http://sourceforge.net/sflogo.php?group_id=11118&#38;type=1&#38;dummy=.gif"></inlinegraphic>
-      </ulink>
-    </entry>
-   </row>
-  </tbody>
- </tgroup>
-</informaltable>
-</para>
-
-<!--
-<informalfigure pgwide="1">
- <ulink url="http://sourceforge.net/">
-  <inlinegraphic align="center" fileref="http://sourceforge.net/sflogo.php?group_id=11118&#38;type=1&#38;dummy=.gif"></inlinegraphic>
- </ulink>
-</informalfigure>
--->
-
-</sect1>
- 
  <!--
 
  This program is free software; you can redistribute it 
@@ -237,19 +200,6 @@ page</ulink> on Sourceforge
  Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
  $Log: index.sgml,v $
- Revision 1.7  2002/04/12 10:11:53  swa
- changed bookmarklet text so that users can easily find the bookmark
-
- Revision 1.6  2002/04/12 08:34:18  swa
- added link to new page
-
- Revision 1.5  2002/04/12 02:05:19  david__schmidt
- Tiny English fix: infos -> info
- Add copyright date 2002
-
- Revision 1.4  2002/04/08 20:42:07  swa
- fixed JB spelling
-
  Revision 1.3  2002/04/07 20:27:18  hal9
  Fix meta data.
 

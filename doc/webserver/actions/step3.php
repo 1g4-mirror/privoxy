@@ -8,12 +8,9 @@
               This file belongs in
               ijbswa.sourceforge.net:/home/groups/i/ij/ijbswa/htdocs/
 
-  $Id: step3.php,v 1.15 2002/04/09 15:08:10 oes Exp $
+  $Id: step3.php,v 1.14 2002/04/08 17:04:05 oes Exp $
 
   $Log: step3.php,v $
-  Revision 1.15  2002/04/09 15:08:10  oes
-  Restoring lost text change
-
   Revision 1.14  2002/04/08 17:04:05  oes
   Adapt to unified stylesheet
 
@@ -174,11 +171,6 @@ if (!isset($name) || ($name == ""))
    $name = "anonymous";
 }
 
-/*
- * Assign unique ID:
- */
-$item_id = date("U");
-
 
 /* 
  * Open the logfile or fail:
@@ -213,7 +205,7 @@ if(!$fp)
  * Write Head (type, severity, user, client-ip)
  * and remarks field:
  */
-fwrite($fp, "\n#FEEDBACK ID $item_id TYPE $problem SEVERITY $severity FROM $name ON $REMOTE_ADDR VERIFIED $url_confirmed TIME " . date("r") ."\n");
+fwrite($fp, "\n#FEEDBACK TYPE $problem SEVERITY $severity FROM $name ON $REMOTE_ADDR VERIFIED $url_confirmed TIME " . date("r") ."\n");
 if (isset($remarks))
 {
    $lines = explode("\n", $remarks);
@@ -242,14 +234,14 @@ switch ($problem)
              if (isset($block_image[$i]))
              {
                 fwrite($fp, "#BLOCK-URL: $image_url[$i]\n");
-                $trackertext .= "Block image: $image_url[$i]\n\n";
+                $trackertext .= "Block image: $image_url[$i]\n";
              }
          }
       }
       if (isset($manual_image_url) && ($manual_image_url != ""))
       {
          fwrite($fp, "#BLOCK-URL: $manual_image_url\n");
-         $trackertext .= "Block image: $manual_image_url\n\n";
+         $trackertext .= "Block image: $manual_image_url\n";
       }
       break;
 
@@ -261,7 +253,7 @@ switch ($problem)
       if (isset($image_url) && ($image_url != ""))
       {
          fwrite($fp, "#UNBLOCK-URL: $image_url\n");
-         $trackertext .= "Unblock image: $image_url\n\n";
+         $trackertext .= "Unblock image: $image_url\n";
       }
       break;
 
@@ -289,11 +281,11 @@ switch($problem)
    default:   $category_id="412814"; $summary = "IMPOSSIBLE ";break;
 }
 
-$summary .= "on " . $referrer_url . " (" .$item_id . ")";
+$summary .= date("U"); /* Must be unique */
 $priority = 3 * $severity;
 
-$details = urlencode("On " . date("r") . " new data was received from $name:\n\n"
-                    ."URL: $referrer_url\n\n$trackertext\nRemarks:\n$remarks");
+$details = urlencode("On " . date("r") . " new data was received from $name:\n"
+                    ."URL: $referrer_url\n$trackertext\nRemarks:\n\n$remarks");
 
 $postfields = ( "group_id=11118&atid=460288&func=postadd&category_id=$category_id&artifact_group_id=195890" .
                 "&priority=$priority&summary=$summary&details=$details" );

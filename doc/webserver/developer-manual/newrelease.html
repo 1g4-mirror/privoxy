@@ -4,8 +4,7 @@
 >Releasing a new version</TITLE
 ><META
 NAME="GENERATOR"
-CONTENT="Modular DocBook HTML Stylesheet Version 1.64
-"><LINK
+CONTENT="Modular DocBook HTML Stylesheet Version 1.60"><LINK
 REL="HOME"
 TITLE="Privoxy Developer Manual"
 HREF="index.html"><LINK
@@ -74,7 +73,7 @@ NAME="NEWRELEASE"
 >8. Releasing a new version</A
 ></H1
 ><P
->	To minimize trouble with distribution contents, web-page
+>	To minimize trouble with distribution contents, webpage
 	errors and the like, we strongly encourage you
 	to follow this section if you prepare a new release of
 	code or new pages on the webserver.
@@ -131,7 +130,7 @@ CLASS="QUOTE"
 CLASS="FILENAME"
 >configure.in</TT
 > in
-         CVS. Also, increase or reset the RPM release number in
+         CVS. Also, inrease or reset the RPM release number in
          <TT
 CLASS="FILENAME"
 >configure.in</TT
@@ -154,11 +153,8 @@ CLASS="FILENAME"
 ></LI
 ><LI
 ><P
->        If the default <TT
-CLASS="FILENAME"
->actionsfile</TT
-> has changed since last
-        release, bump up its version info in this line:
+>        If the default actionsfile has changed since last release,
+        bump up its version info in this line:
        </P
 ><P
 > 
@@ -210,14 +206,14 @@ CLASS="COMMAND"
         <SPAN
 CLASS="QUOTE"
 >"tarball"</SPAN
-> release, as required by the GPL. This is built
-        with the <SPAN
+> release. This is built with the
+        <SPAN
 CLASS="QUOTE"
 >"<B
 CLASS="COMMAND"
 >make tarball-dist</B
 >"</SPAN
-> Makefile
+> Makefile 
         target, and then can be uploaded with 
         <SPAN
 CLASS="QUOTE"
@@ -242,10 +238,10 @@ NAME="NEWRELEASE-WEB"
 ></H2
 ><P
 >	All files must be group-readable and group-writable (or no one else
-	will be able to change them)! To update the webserver, create any
+	will be able to change them). To update the webserver, create any
 	pages locally in the <TT
 CLASS="FILENAME"
->doc/webserver/*</TT
+>doc/webserver</TT
 > directory (or
 	create new directories under <TT
 CLASS="FILENAME"
@@ -268,9 +264,6 @@ CLASS="PROGRAMLISTING"
 ></TABLE
 >
 	</P
-><P
->      This will do the upload to the webserver (www.privoxy.org).      
-     </P
 ><P
 >	Note that <SPAN
 CLASS="QUOTE"
@@ -300,31 +293,9 @@ CLASS="FILENAME"
 > and
 	<TT
 CLASS="FILENAME"
->doc/webserver/index.html</TT
+>doc/webserver/man-page</TT
 > automatically.
-     (<TT
-CLASS="FILENAME"
->doc/webserver/man-page/privoxy-man-page.html</TT
->
-     is created by a separate Makefile target, <SPAN
-CLASS="QUOTE"
->"<B
-CLASS="COMMAND"
->make
-     man</B
->"</SPAN
->, due to dependencies on some obscure perl scripts. 
-     See comments in <TT
-CLASS="FILENAME"
->GNUmakefile</TT
->.)
       </P
-><P
-> 
-      Someone should also commit these to CVS so that packagers without the
-      ability to build docs locally, have access to them. This is a separate
-      step, and should also be done before each official release.
-     </P
 ><P
 >      Please do NOT use any other means of transferring files to the
       webserver. <SPAN
@@ -417,7 +388,7 @@ WIDTH="100%"
 ><TD
 ><PRE
 CLASS="PROGRAMLISTING"
->  make suse-upload (or make redhat-upload)
+>  make suse-upload or make redhat-upload
 	</PRE
 ></TD
 ></TR
@@ -666,19 +637,10 @@ NAME="NEWRELEASE-WINDOWS"
 >8.6. Windows</A
 ></H2
 ><P
->        You should ensure you have the latest version of Cygwin (from
-        <A
-HREF="http://www.cygwin.com/"
-TARGET="_top"
->http://www.cygwin.com/</A
->).
-        Run the following commands from within a Cygwin bash shell.
-      </P
+>	Ensure that you have the latest code version. Hence run
+	</P
 ><P
->        First check out a clean copy of the correct code version, by running:
-      </P
-><P
->      <TABLE
+>	<TABLE
 BORDER="0"
 BGCOLOR="#E0E0E0"
 WIDTH="100%"
@@ -686,31 +648,20 @@ WIDTH="100%"
 ><TD
 ><PRE
 CLASS="PROGRAMLISTING"
->        mkdir dist
-        cd dist
-        cvs -d:pserver:anonymous@cvs.ijbswa.sourceforge.net:/cvsroot/ijbswa login
-        cvs -z3  -d:pserver:anonymous@cvs.ijbswa.sourceforge.net:/cvsroot/ijbswa export -r  v_X_Y_Z .
-      </PRE
+>  cvs -d:pserver:anonymous@cvs.ijbswa.sourceforge.net:/cvsroot/ijbswa login
+  cvs -z3  -d:pserver:anonymous@cvs.ijbswa.sourceforge.net:/cvsroot/ijbswa export -r  v_X_Y_Z current
+  cd current
+	</PRE
 ></TD
 ></TR
 ></TABLE
 >
-      </P
+	</P
 ><P
->        (Note: It is important that this is a clean copy of the code,
-        do not re-use a working directory after you have manually compiled
-        there).
-      </P
+>	 Run:
+	</P
 ><P
->        Then you can build the package.  This is fully automated, and is
-        controlled by <TT
-CLASS="FILENAME"
->winsetup/GNUmakefile</TT
->.
-        All you need to do is:
-      </P
-><P
->      <TABLE
+>	<TABLE
 BORDER="0"
 BGCOLOR="#E0E0E0"
 WIDTH="100%"
@@ -718,25 +669,16 @@ WIDTH="100%"
 ><TD
 ><PRE
 CLASS="PROGRAMLISTING"
->        cd winsetup
-        make
-      </PRE
+>  autoheader &#38;&#38; autoconf &#38;&#38; ./configure
+	</PRE
 ></TD
 ></TR
 ></TABLE
 >
-      </P
+	</P
 ><P
->        Now you can manually rename <TT
-CLASS="FILENAME"
->privoxy_setup.exe</TT
-> to
-        <TT
-CLASS="FILENAME"
->privoxy_setup_X_Y_Z.exe</TT
->, and upload it to
-        SourceForge.
-      </P
+>	Then do FIXME.
+	</P
 ></DIV
 ><DIV
 CLASS="SECT2"

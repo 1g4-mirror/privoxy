@@ -1,6 +1,6 @@
 # Note:  Makefile is built automatically from Makefile.in
 #
-# $Id: GNUmakefile.in,v 1.85 2002/04/14 01:05:34 hal9 Exp $
+# $Id: GNUmakefile.in,v 1.78 2002/04/09 13:37:11 sarantis Exp $
 #
 # Written by and Copyright (C) 2001 the SourceForge
 # Privoxy team. http://www.privoxy.org/
@@ -82,7 +82,7 @@ LN         = ln
 WDUMP      = @WDUMP@ -dump
 JADECAT    = @JADECAT@
 JADEBIN    = @JADEBIN@
-DB         = $(JADEBIN) $(JADECAT) -ihtml -t sgml  -D.. -d ldpOK.dsl\#html
+DB         = $(JADEBIN) $(JADECAT) -t sgml -ihtml -D.. -d ldpOK.dsl\#html
 DB2HTML    = @DB2HTML@
 DKPREFIX   = @DKPREFIX@
 MAN2HTML   = @MAN2HTML@
@@ -263,7 +263,7 @@ dist-check:
            $(ECHO) "***                                             ***"; \
            $(ECHO) "***************************************************"; \
            $(ECHO) "Type \"yes i am sure\" if you are sure that you"; \
-           $(ECHO) -n "really want to proceed: "; \
+           $(ECHO) -n "want to continue: "; \
            read answer; \
            if [ "$$answer" != "yes i am sure" ]; then exit 1; fi \
          fi;
@@ -464,35 +464,50 @@ win-dist:
 
 
 #############################################################################
-# Tarball distribution: No CVS dirs, dotfiles, debian build dir,
-# (FIXME:) only parts of the static / generated docs mix in doc/webserver
+# Tarball distribution. Only source files. No binaries.
 #############################################################################
 
-tarball-dist: dist-check clean clobber
+MISC_FILES = install-sh config.sub configure.in GNUmakefile.in config.h.in config.guess privoxy*
+
+tarball-dist: dist-check
 	$(LN) -s current ../privoxy-$(VERSION)-$(CODE_STATUS)
-
-	for i in `find . -type f -a -not \( -path "*/CVS*" -o -name ".*" \
-	-o -path "*/debian/*" -o -path "*/actions/*" -o -name "*.php" \)`; do \
-	   files="$$files privoxy-$(VERSION)-$(CODE_STATUS)/$$i"; \
-	done &&  \
-	cd .. && $(TAR) cvhf privoxy-$(VERSION)-$(CODE_STATUS)-src.tar $$files ; \
-
+# add source files
+	for foo in `find . -name "*.c"`; do \
+		(cd .. && $(TAR) -uvhf privoxy-$(VERSION)-$(CODE_STATUS)-src.tar privoxy-$(VERSION)-$(CODE_STATUS)/$$foo;) \
+	done; 
+# add header files
+	for foo in `find . -name "*.h"`; do \
+		(cd .. && $(TAR) -uvhf privoxy-$(VERSION)-$(CODE_STATUS)-src.tar privoxy-$(VERSION)-$(CODE_STATUS)/$$foo;) \
+	done; 
+# add config files
+	for foo in $(CONFIG_FILES); do \
+		(cd .. && $(TAR) -uvhf privoxy-$(TARGET_OS)-$(VERSION)-$(CODE_STATUS)-src.tar privoxy-$(VERSION)-$(CODE_STATUS)/$$foo;) \
+	done; 
+# add misc files
+	for foo in $(MISC_FILES); do \
+		(cd .. && $(TAR) -uvhf privoxy-$(VERSION)-$(CODE_STATUS)-src.tar privoxy-$(VERSION)-$(CODE_STATUS)/$$foo;) \
+	done; 
+# add documentation
+	for foo in $(DOC_FILES); do \
+		(cd .. && $(TAR) -uvhf privoxy-$(VERSION)-$(CODE_STATUS)-src.tar privoxy-$(VERSION)-$(CODE_STATUS)/$$foo;) \
+	done;
 # and zip the archive
-	$(RM) ../privoxy-$(VERSION)-$(CODE_STATUS) 
+	$(RM) ../privoxy-$(VERSION)-$(CODE_STATUS)
 	$(GZIP_PROG) ../privoxy-$(VERSION)-$(CODE_STATUS)-src.tar
 	@$(ECHO) Tarball distribution created.
 
 # anonymously ncftps the tarball to sourceforge
 tarball-upload:
-	ncftpput -u anonymous -p ijbswa-developers@lists.sourceforge.net upload.sourceforge.net /incoming ../privoxy-$(VERSION)-$(CODE_STATUS)-src.tar.gz
+	ncftpput -u anonymous -p ijbswa-developers@lists.sourceforge.net upload.sourceforge.net /incoming privoxy-$(VERSION)-$(CODE_STATUS)-src.tar.gz
 	@$(ECHO) -------------------------------------------------------
 	@$(ECHO) Now goto
 	@$(ECHO) http://sourceforge.net/project/admin/editpackages.php?group_id=11118
 	@$(ECHO) ... and release the files.
 	@$(ECHO) -------------------------------------------------------
 
+# handle with care
 tarball-clean:
-	$(RM) ../privoxy-$(VERSION)-$(CODE_STATUS)-src.tar.gz
+	$(RM) privoxy-$(VERSION)-$(CODE_STATUS)-src.tar.gz
 
 #############################################################################
 #
@@ -557,12 +572,13 @@ dok-readme: doc/source/ldpOK.dsl
 # webserver files
 dok-webserver: doc/source/ldpOK.dsl
 	cd doc/source/webserver && $(DB) -V nochunks index.sgml > ../../webserver/index.html
-	$(PERL) -pi.bak -e 's/..\/p_doc.css/p_web.css/;\
+	$(PERL) -pi -e 's/..\/p_doc.css/p_web.css/;\
      s/<\/HEAD/\n<meta name=\"description\" content=\"Privoxy helps consumers reduce unwanted junk email and protect their privacy from direct marketing companies.\"><\/HEAD/;\
 	s/<\/HEAD/\n<meta name="MSSmartTagsPreventParsing" content="TRUE"><\/HEAD/'\
-     doc/webserver/index.html && rm -f doc/source/webserver/*.bak
+     doc/webserver/index.html
 
-# Main documentation target.
+# Removed dok-man 04/08/02, hal. Added authors and dok-release. And
+# dok-webserver!
 dok: dok-release dok-devel dok-user dok-faq dok-readme dok-webserver authors
 # kludge to force recreation on next run. Rodgrigo?
 	@rm -f doc/source/ldpOK.dsl
@@ -581,10 +597,10 @@ man2html:
 	mkdir -p doc/webserver/man-page
 ifneq ($(MAN2HTML),false)
 	$(MAN2HTML) privoxy.1 |grep -v "^Content-type" > tmp.html
-	$(PERL) -pi.bak -e 's/<A .*Contents<\/A>//; s/<A .*man2html<\/A>/man2html/' tmp.html
-	$(PERL) -pi.bak -e 's/(<\/HEAD>)/<LINK REL=\"STYLESHEET\" TYPE=\"text\/css\" HREF=\"..\/p_doc.css\"><\/HEAD>/' tmp.html
-# Get rid of spurious  from conversion. (How to do this with perl?)
-	$(SED) -e 's///g' tmp.html > doc/webserver/man-page/privoxy-man-page.html && rm -f tmp.*
+	$(PERL) -pi -e 's/<A .*Contents<\/A>//; s/<A .*man2html<\/A>/man2html/' tmp.html
+	$(PERL) -pi -e 's/(<\/HEAD>)/<LINK REL=\"STYLESHEET\" TYPE=\"text\/css\" HREF=\"..\/p_doc.css\"><\/HEAD>/' tmp.html
+# Get rid of spurious  from converion. (How to do this with perl?)
+	$(SED) -e 's///g' tmp.html > doc/webserver/man-page/privoxy-man-page.html && rm -f tmp.html
 else
 	$(MAKE) groff2html
 endif
@@ -604,13 +620,14 @@ authors: doc/source/ldpOK.dsl
 	@rm -f doc/source/ldpOK.dsl
 
 # make a man page, and then (lousy) HTML version.
-# Requires docbook2man (short perl script), see comments 
-# in privoxy-man-page.sgml. This target is not invoked from other dok targets.
-# It is built separately due to dependencies on perl scripts.
+# Requires docbook2man (short perl script), see CVS
+# http://sources.redhat.com/docbook-tools/. Also requires openjade and SGMLSpm
+# perl module. This target is not invoked from other dok targets. It is 
+# built separately due to dependencies on perl scripts.
 man: doc/source/ldpOK.dsl
 	mkdir -p doc/source/man
 	cd doc/source/man && docbook2man ../privoxy-man-page.sgml &&\
-	perl -pi.bak -e 's/ <URL:.*>//; s/\[ /\[/g' privoxy.1
+	perl -pi -e 's/ <URL:.*>//; s/\[ /\[/g' privoxy.1
 	cd doc/source/man && $(DB) ../privoxy-man-page.sgml &&\
 	mv -f index.html privoxy-man-page.html
      # This html is not used. See make man2html.
@@ -621,24 +638,21 @@ man: doc/source/ldpOK.dsl
 
 # Set doc entities for VERSION and CODE_STATUS in sgml docs. Toggle content
 # exceptions accordingly. This needs to go before any doc building (doh).
-dok-release:
+make dok-release:
 	@$(ECHO) Setting doc version and status to $(VERSION), $(CODE_STATUS)
-	@$(PERL) -pi.bak -e 's/<!entity +p-version.*>/<!entity p-version "$(VERSION)">/;\
+	@$(PERL) -pi -e 's/<!entity +p-version.*>/<!entity p-version "$(VERSION)">/;\
      s/<!entity +p-status.*>/<!entity p-status "$(CODE_STATUS)">/' \
      doc/source/*sgml doc/source/*/*sgml
-	rm -fr doc/source/*bak doc/source/*/*bak
 ifeq ($(CODE_STATUS),stable)
 	@$(ECHO) Setting docs to stable $(VERSION)
-	@$(PERL) -pi.bak -e 's/<!entity +% +p-stable.*>/<!entity % p-stable "INCLUDE">/;\
+	@$(PERL) -pi -e 's/<!entity +% +p-stable.*>/<!entity % p-stable "INCLUDE">/;\
      s/<!entity +% +p-not-stable.*>/<!entity % p-not-stable "IGNORE">/' \
      doc/source/*sgml doc/source/*/*sgml
-	rm -fr doc/source/*bak doc/source/*/*bak
 else
 	@$(ECHO) Setting docs to not stable $(VERSION)
-	@$(PERL) -pi.bak -e 's/<!entity +% +p-stable.*>/<!entity % p-stable "IGNORE">/;\
+	@$(PERL) -pi -e 's/<!entity +% +p-stable.*>/<!entity % p-stable "IGNORE">/;\
      s/<!entity +% +p-not-stable.*>/<!entity % p-not-stable "INCLUDE">/' \
      doc/source/*sgml doc/source/*/*sgml
-	rm -fr doc/source/*bak doc/source/*/*bak
 endif
 
 #############################################################################
@@ -787,28 +801,6 @@ install: all
 ## end:
 
 # $Log: GNUmakefile.in,v $
-# Revision 1.85  2002/04/14 01:05:34  hal9
-# Revert dok-webserver change for SF logo.
-#
-# Revision 1.84  2002/04/13 22:43:25  hal9
-# -Fix dok-webserver for SF logo (more perl).
-# -Change all perl -pi to perl -pi.bak for Cygwin problem.
-#
-# Revision 1.83  2002/04/12 09:39:25  oes
-# Excluding yet more files from tarball; making dist warning yet more scary
-#
-# Revision 1.82  2002/04/11 21:07:11  oes
-# Excluding more files from tarball build
-#
-# Revision 1.81  2002/04/11 14:40:27  oes
-# Fixed typo -- Thanks, Moritz!
-#
-# Revision 1.80  2002/04/11 12:50:00  oes
-# Fixed tarball-dist target
-#
-# Revision 1.79  2002/04/11 06:49:28  oes
-# webserver target: silenced timestamp warnings resulting from uploading westwards, made permissions fixing independant of screwed local dir permissions, suppress (false alarm) make error if not owner of feedback log
-#
 # Revision 1.78  2002/04/09 13:37:11  sarantis
 # fix tar options typo
 #

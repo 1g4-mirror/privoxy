@@ -1,4 +1,4 @@
-# $Id: privoxy-suse.spec,v 1.14 2002/04/11 17:57:40 oes Exp $
+# $Id: privoxy-suse.spec,v 1.12 2002/04/09 13:29:43 swa Exp $
 #
 # Written by and Copyright (C) 2001 the SourceForge
 # Privoxy team. http://www.privoxy.org/
@@ -16,7 +16,7 @@
 # This program is distributed in the hope that it will
 # be useful, but WITHOUT ANY WARRANTY; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A
-# PARTICULAR PURPOSE.  See the GNU General Public 
+# PARTICULAR PURPOSE.  See the GNU General Public
 # License for more details.
 #
 # The GNU General Public License should be included with
@@ -27,7 +27,7 @@
 #
 
 # do not set to %{name}
-%define privoxyconf %{_sysconfdir}/privoxy
+%define ijbconf %{_sysconfdir}/privoxy
 
 Summary:      Privoxy - privacy enhancing proxy
 Vendor:       http://www.privoxy.org
@@ -35,17 +35,18 @@ Name:         privoxy-suse
 Distribution: defineme
 Version: 2.9.14
 Release: 1
-# Needs makefile change: Source: http://prdownloads.sourceforge.net/ijbswa/privoxy-%{version}-%{status}-src.tar.gz
-Source: http://prdownloads.sourceforge.net/ijbswa/privoxy-%{version}.tar.gz
+Source: http://www.waldherr.org/%{name}/privoxy-%{version}.tar.gz
 # not sure if this works
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 Packager:     Stefan Waldherr <stefan@waldherr.org>
 Copyright:    GPL
 Group:        Networking/Utilities
 URL:          http://www.privoxy.org/
+Provides:     privoxy
+Obsoletes:    privoxy
 Autoreqprov:  on
 BuildRequires: perl gzip libtool autoconf
-Conflicts: junkbuster-raw junkbuster-blank junkbuster-suse junkbuster privoxy
+Conflicts: junkbuster-raw junkbuster-blank junkbuster
 
 #
 # -----------------------------------------------------------------------------
@@ -78,7 +79,7 @@ SuSE series: n
 %build
 autoheader
 autoconf
-./configure --disable-dynamic-pcre
+./configure
 make
 
 
@@ -95,16 +96,16 @@ make
 mkdir -p ${RPM_BUILD_ROOT}%{_sbindir} \
          ${RPM_BUILD_ROOT}%{_mandir}/man8 \
          ${RPM_BUILD_ROOT}/var/log/privoxy \
-         ${RPM_BUILD_ROOT}%{privoxyconf}/templates \
+         ${RPM_BUILD_ROOT}%{ijbconf}/templates \
          ${RPM_BUILD_ROOT}%{_sysconfdir}/logrotate.d \
          ${RPM_BUILD_ROOT}%{_sysconfdir}/init.d
 gzip README AUTHORS ChangeLog privoxy.1 LICENSE || /bin/true
 install -s -m 744 privoxy $RPM_BUILD_ROOT%{_sbindir}/privoxy
 cp -f privoxy.1.gz $RPM_BUILD_ROOT%{_mandir}/man8/privoxy.8.gz
-cp -f *.action $RPM_BUILD_ROOT%{privoxyconf}/
-cp -f default.filter $RPM_BUILD_ROOT%{privoxyconf}/default.filter
-cp -f trust $RPM_BUILD_ROOT%{privoxyconf}/trust
-cp -f templates/*  $RPM_BUILD_ROOT%{privoxyconf}/templates/
+cp -f *.action $RPM_BUILD_ROOT%{ijbconf}/
+cp -f default.filter $RPM_BUILD_ROOT%{ijbconf}/default.filter
+cp -f trust $RPM_BUILD_ROOT%{ijbconf}/trust
+cp -f templates/*  $RPM_BUILD_ROOT%{ijbconf}/templates/
 cp -f privoxy.logrotate $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d/privoxy
 install -m 755 privoxy.init.suse $RPM_BUILD_ROOT%{_sysconfdir}/init.d/privoxy
 install -m 711 -d $RPM_BUILD_ROOT/var/log/privoxy
@@ -121,7 +122,7 @@ cat config | \
 #    sed 's/^forward.*/forward \/etc\/privoxy\/forward/g' | \
 #    sed 's/^aclfile.*/aclfile \/etc\/privoxy\/aclfile/g' > \
     sed 's/^logdir.*/logdir \/var\/log\/privoxy/g' > \
-    $RPM_BUILD_ROOT%{privoxyconf}/config
+    $RPM_BUILD_ROOT%{ijbconf}/config
 
 #
 # -----------------------------------------------------------------------------
@@ -198,8 +199,8 @@ id privoxy > /dev/null 2>&1 && /usr/sbin/userdel privoxy || /bin/true
 %doc doc/webserver/p_web.css
 %doc doc/webserver/index.html
 #%doc privoxy.weekly privoxy.monthly AUTHORS
-%dir %{privoxyconf}
-%config %{privoxyconf}/*
+%dir %{ijbconf}
+%config %{ijbconf}/*
 %attr(0744,privoxy,privoxy) %dir /var/log/privoxy
 %config %{_sysconfdir}/logrotate.d/privoxy
 %attr(0755,root,root)/usr/sbin/privoxy
@@ -296,12 +297,6 @@ id privoxy > /dev/null 2>&1 && /usr/sbin/userdel privoxy || /bin/true
 - new package: version 2.0
 
 # $Log: privoxy-suse.spec,v $
-# Revision 1.14  2002/04/11 17:57:40  oes
-# Fixed(?) Conflicts: Provides: Obsoletes:
-#
-# Revision 1.13  2002/04/11 10:09:20  oes
-# Version 2.9.14
-#
 # Revision 1.12  2002/04/09 13:29:43  swa
 # build suse and gen-dist with html docs. do not generate docs while building rpm
 #

@@ -37,9 +37,6 @@
  *
  * Revisions   :
  *    $Log: acconfig.h,v $
- *    Revision 1.25  2002/04/06 20:38:01  jongfoster
- *    Renaming VC++ versions of config.h
- *
  *    Revision 1.24  2002/04/04 00:36:36  gliptak
  *    always use pcre for matching
  *
@@ -383,11 +380,6 @@
  */
 #undef HAVE_GMTIME_R
 #undef HAVE_LOCALTIME_R
-
-/* Define to 'int' if <sys/socket.h> doesn't have it. 
- */
-#undef socklen_t
-
 
 @BOTTOM@
 
