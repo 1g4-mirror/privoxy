@@ -1,4 +1,4 @@
-const char cgi_rcs[] = "$Id: cgi.c,v 1.70 2002/05/19 11:33:20 jongfoster Exp $";
+const char cgi_rcs[] = "$Id: cgi.c,v 1.70.2.1 2002/08/05 11:17:46 oes Exp $";
 /*********************************************************************
  *
  * File        :  $Source: /cvsroot/ijbswa/current/Attic/cgi.c,v $
@@ -38,6 +38,9 @@ const char cgi_rcs[] = "$Id: cgi.c,v 1.70 2002/05/19 11:33:20 jongfoster Exp $";
  *
  * Revisions   :
  *    $Log: cgi.c,v $
+ *    Revision 1.70.2.1  2002/08/05 11:17:46  oes
+ *    Fixed Bug #587820, i.e. added workaround for IE bug that includes fragment identifier in (cgi) query
+ *
  *    Revision 1.70  2002/05/19 11:33:20  jongfoster
  *    If a CGI error was not handled, and propogated back to
  *    dispatch_known_cgi(), then it was assumed to be "out of memory".
@@ -1942,7 +1945,9 @@ struct map *default_exports(const struct client_state *csp, const char *caller)
    if (!err) err = map(exports, "code-status",   1, CODE_STATUS, 1);
    if (!err) err = map(exports, "user-manual",   1, csp->config->usermanual ,1);
    if (!err) err = map(exports, "actions-help-prefix", 1, ACTIONS_HELP_PREFIX ,1);
+#ifdef FEATURE_TOGGLE
    if (!err) err = map_conditional(exports, "enabled-display", g_bToggleIJB);
+#endif
 
    snprintf(buf, 20, "%d", csp->config->hport);
    if (!err) err = map(exports, "my-port", 1, buf, 1);
