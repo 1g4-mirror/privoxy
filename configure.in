@@ -903,29 +903,6 @@ AC_CHECK_LIB(pcre2-posix, regcomp, [
 ], [have_pcre2posix=no], -lpcre2-8)
 fi
 
-if test $have_pcre2 = "no"; then
-
-AC_CHECK_LIB(pcre, pcre_compile, [
-   AC_CHECK_HEADER(pcre.h, [
-      AC_EGREP_HEADER(pcre_fullinfo, pcre.h, [have_pcre=yes], [AC_MSG_WARN([[pcre old version installed]]); have_pcre=no])
-   ], [
-      AC_CHECK_HEADER(pcre/pcre.h, [
-         AC_EGREP_HEADER(pcre_fullinfo, pcre/pcre.h, [have_pcre=yes]; [AC_DEFINE(PCRE_H_IN_SUBDIR)], [AC_MSG_WARN([[pcre old version installed]]); have_pcre=no])
-      ], [have_pcre=no])
-   ])
-], [have_pcre=no])
-
-AC_CHECK_LIB(pcreposix, regcomp, [
-   AC_CHECK_HEADER(pcreposix.h, [
-      AC_EGREP_HEADER(pcreposix_regerror, pcreposix.h, [AC_MSG_WARN([[pcreposix old version installed]]); have_pcreposix=no], [have_pcreposix=yes])
-   ], [
-      AC_CHECK_HEADER(pcre/pcreposix.h, [
-         AC_EGREP_HEADER(pcreposix_regerror, pcre/pcreposix.h, [AC_MSG_WARN([[pcreposix old version installed]]); have_pcreposix=no], [have_pcreposix=yes]; [AC_DEFINE(PCREPOSIX_H_IN_SUBDIR)])
-      ], [have_pcreposix=no])
-   ])
-], [have_pcreposix=no], -lpcre)
-
-fi
 dnl ================================================================
 dnl libpcrs is temporarily disabled.
 dnl
@@ -1158,30 +1135,7 @@ if test $have_pcre2 = "yes"; then
     AC_DEFINE(FEATURE_DYNAMIC_PCRE,1,[Define to dynamically link to pcre.])
   fi
 else
-
-if test $have_pcre = "yes"; then
-  echo "using libpcre"
-  STATIC_PCRE_ONLY=#
-  LIBS="$LIBS -lpcre -lpcreposix"
-  if test "$use_static_pcre" = "yes"; then
-    pcre_dyn=no
-    AC_DEFINE(PCRE_STATIC,1,[Define to statically link to pcre library on Windows.])
-#     see /usr/i686-w64-mingw32/sys-root/mingw/include/pcre.h line 54
-#       #if defined(_WIN32) && !defined(PCRE_STATIC)
-#       #  ifndef PCRE_EXP_DECL
-#       #    define PCRE_EXP_DECL  extern __declspec(dllimport)
-#       #  endif
-#     If you want to statically link a program against a PCRE library in the form of
-#     a non-dll .a file, you must define PCRE_STATIC before including pcre.h or
-#     pcrecpp.h, otherwise the pcre_malloc() and pcre_free() exported functions will
-#     be declared __declspec(dllimport), with unwanted results.
-  else
-    pcre_dyn=yes
-    AC_DEFINE(FEATURE_DYNAMIC_PCRE,1,[Define to dynamically link to pcre.])
-  fi
-else
-  AC_MSG_ERROR(Detected neither pcre2 nor pcre library.)
-fi
+  AC_MSG_ERROR(Failed to detect pcre2 library.)
 fi
 
 AC_DEFINE(FEATURE_CONNECTION_KEEP_ALIVE)
