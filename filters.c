@@ -238,15 +238,15 @@ static int match_sockaddr(const struct sockaddr_storage *network,
  *                Decide yes or no based on ACL file.
  *
  * Parameters  :
- *          1  :  dst = The proxy or gateway address this is going to.
- *                      Or NULL to check all possible targets.
- *          2  :  csp = Current client state (buffers, headers, etc...)
+ *          1  :  csp = Current client state (buffers, headers, etc...)
  *                      Also includes the client IP address.
+ *          2  :  dst = The proxy or gateway address this is going to.
+ *                      Or NULL to check all possible targets.
  *
  * Returns     : 0 = FALSE (don't block (yet)) and 1 = TRUE (do block)
  *
  *********************************************************************/
-int block_acl(const struct access_control_addr *dst, const struct client_state *csp)
+int block_acl(const struct client_state *csp, const struct access_control_addr *dst)
 {
    struct access_control_list *acl = csp->config->acl;
 

@@ -6319,7 +6319,7 @@ static void listen_loop(void)
       }
 
 #ifdef FEATURE_ACL
-      if (block_acl(NULL,csp))
+      if (block_acl(csp, NULL))
       {
          log_error(LOG_LEVEL_CONNECT,
             "Connection from %s on %s (socket %d) dropped due to ACL",

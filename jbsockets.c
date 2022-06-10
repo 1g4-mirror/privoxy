@@ -258,7 +258,7 @@ static jb_socket rfc2553_connect_to(const char *host, int portnum, struct client
 #ifdef FEATURE_ACL
       memcpy(&dst->addr, rp->ai_addr, rp->ai_addrlen);
 
-      if (block_acl(dst, csp))
+      if (block_acl(csp, dst))
       {
          socket_error = errno = EPERM;
          continue;
@@ -468,7 +468,7 @@ static jb_socket no_rfc2553_connect_to(const char *host, int portnum, struct cli
    dst->addr = ntohl(addr);
    dst->port = portnum;
 
-   if (block_acl(dst, csp))
+   if (block_acl(csp, dst))
    {
       errno = EPERM;
       return(JB_INVALID_SOCKET);
