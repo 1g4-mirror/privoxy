@@ -243,7 +243,7 @@ static int match_sockaddr(const struct sockaddr_storage *network,
  *          2  :  csp = Current client state (buffers, headers, etc...)
  *                      Also includes the client IP address.
  *
- * Returns     : 0 = FALSE (don't block) and 1 = TRUE (do block)
+ * Returns     : 0 = FALSE (don't block (yet)) and 1 = TRUE (do block)
  *
  *********************************************************************/
 int block_acl(const struct access_control_addr *dst, const struct client_state *csp)
@@ -269,6 +269,16 @@ int block_acl(const struct access_control_addr *dst, const struct client_state *
       {
          if (dst == NULL)
          {
+            if (!acl->wildcard_dst)
+            {
+               /*
+                * While the client address matches, the ACL also
+                * has a destination address which we can't check
+                * yet so we accept the connection for now and check
+                * again later when the destination is known.
+                */
+               return(0);
+            }
             /* Just want to check if they have any access */
             if (acl->action == ACL_PERMIT)
             {

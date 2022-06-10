@@ -1008,12 +1008,10 @@ struct configuration_spec * load_config(void)
                   break;
                }
             }
-#ifdef HAVE_RFC2553
             else
             {
                cur_acl->wildcard_dst = 1;
             }
-#endif /* def HAVE_RFC2553 */
 
             /*
              * Add it to the list.  Note we reverse the list to get the
@@ -1564,12 +1562,10 @@ struct configuration_spec * load_config(void)
                   break;
                }
             }
-#ifdef HAVE_RFC2553
             else
             {
                cur_acl->wildcard_dst = 1;
             }
-#endif /* def HAVE_RFC2553 */
 
             /*
              * Add it to the list.  Note we reverse the list to get the

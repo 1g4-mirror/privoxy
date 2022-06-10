@@ -1386,9 +1386,7 @@ struct access_control_list
 {
    struct access_control_addr src[1];  /**< Client IP address */
    struct access_control_addr dst[1];  /**< Website or parent proxy IP address */
-#ifdef HAVE_RFC2553
    short wildcard_dst;                 /** < dst address is wildcard */
-#endif
 
    short action;                       /**< ACL_PERMIT or ACL_DENY */
    struct access_control_list *next;   /**< The next entry in the ACL. */
