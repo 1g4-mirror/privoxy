@@ -294,7 +294,7 @@ int block_acl(const struct client_state *csp, const struct access_control_addr *
                /*
                 * XXX: An undefined acl->dst is full of zeros and should be
                 * considered a wildcard address. sockaddr_storage_to_ip()
-                * fails on such destinations because of unknown sa_familly
+                * fails on such destinations because of unknown sa_family
                 * (glibc only?). However this test is not portable.
                 *
                 * So, we signal the acl->dst is wildcard in wildcard_dst.
