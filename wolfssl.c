@@ -1145,7 +1145,7 @@ extern int create_server_ssl_connection(struct client_state *csp)
    {
       char buffer[80];
       int error = wolfSSL_get_error(ssl, ret);
-      log_error(LOG_LEVEL_FATAL,
+      log_error(LOG_LEVEL_ERROR,
          "Failed to set check domain name. error = %d, %s",
          error, wolfSSL_ERR_error_string((unsigned long)error, buffer));
       ret = -1;
