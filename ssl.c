@@ -32,12 +32,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#if !defined(MBEDTLS_CONFIG_FILE)
-#  include "mbedtls/config.h"
-#else
-#  include MBEDTLS_CONFIG_FILE
-#endif
-
+#include <mbedtls/version.h>
 #include "mbedtls/sha256.h"
 #include "mbedtls/pem.h"
 #include "mbedtls/base64.h"
@@ -143,59 +138,37 @@ extern size_t is_ssl_pending(struct ssl_attr *ssl_attr)
 extern int ssl_send_data(struct ssl_attr *ssl_attr, const unsigned char *buf, size_t len)
 {
    mbedtls_ssl_context *ssl = &ssl_attr->mbedtls_attr.ssl;
-   int ret = 0;
-   size_t max_fragment_size = 0;  /* Maximal length of data in one SSL fragment*/
-   int send_len             = 0;  /* length of one data part to send */
-   int pos                  = 0;  /* Position of unsent part in buffer */
+   int pos = 0; /* Position of unsent part in buffer */
 
    if (len == 0)
    {
       return 0;
    }
 
-   /* Getting maximal length of data sent in one fragment */
-   max_fragment_size = mbedtls_ssl_get_max_frag_len(ssl);
-
-   /*
-    * Whole buffer must be sent in many fragments, because each fragment
-    * has its maximal length.
-    */
    while (pos < len)
    {
-      /* Compute length of data, that can be send in next fragment */
-      if ((pos + (int)max_fragment_size) > len)
-      {
-         send_len = (int)len - pos;
-      }
-      else
-      {
-         send_len = (int)max_fragment_size;
-      }
+      int ret;
+      int send_len;
+
+      send_len = (int)len - pos;
 
       log_error(LOG_LEVEL_WRITING, "TLS on socket %d: %N",
          ssl_attr->mbedtls_attr.socket_fd.fd, send_len, buf+pos);
 
-      /*
-       * Sending one part of the buffer
-       */
-      while ((ret = mbedtls_ssl_write(ssl,
-         (const unsigned char *)(buf + pos),
-         (size_t)send_len)) < 0)
+      ret = mbedtls_ssl_write(ssl, (const unsigned char *)(buf + pos),
+         (size_t)send_len);
+      if (ret <= 0)
       {
-         if (ret != MBEDTLS_ERR_SSL_WANT_READ &&
-             ret != MBEDTLS_ERR_SSL_WANT_WRITE)
-         {
-            char err_buf[ERROR_BUF_SIZE];
+         char err_buf[ERROR_BUF_SIZE];
 
-            mbedtls_strerror(ret, err_buf, sizeof(err_buf));
-            log_error(LOG_LEVEL_ERROR,
-               "Sending data on socket %d over TLS/SSL failed: %s",
-               ssl_attr->mbedtls_attr.socket_fd.fd, err_buf);
-            return -1;
-         }
+         mbedtls_strerror(ret, err_buf, sizeof(err_buf));
+         log_error(LOG_LEVEL_ERROR,
+            "Sending %d bytes on socket %d over TLS/SSL failed with ret %d: %s",
+            send_len, ssl_attr->mbedtls_attr.socket_fd.fd, ret, err_buf);
+         return -1;
       }
-      /* Adding count of sent bytes to position in buffer */
-      pos = pos + send_len;
+
+      pos = pos + ret;
    }
 
    return (int)len;
@@ -371,8 +344,13 @@ extern int create_client_ssl_connection(struct client_state *csp)
       goto exit;
    }
 
+#if MBEDTLS_VERSION_MAJOR < 3
    ret = mbedtls_pk_parse_keyfile(&(ssl_attr->mbedtls_attr.prim_key),
       key_file, NULL);
+#else
+   ret = mbedtls_pk_parse_keyfile(&(ssl_attr->mbedtls_attr.prim_key),
+      key_file, NULL, mbedtls_ctr_drbg_random, &ctr_drbg);
+#endif
    if (ret != 0)
    {
       mbedtls_strerror(ret, err_buf, sizeof(err_buf));
@@ -1285,7 +1263,11 @@ static int generate_host_certificate(struct client_state *csp)
    mbedtls_pk_context *issuer_key  = &loaded_issuer_key;
    mbedtls_pk_context *subject_key = &loaded_subject_key;
    mbedtls_x509write_cert cert;
+#if MBEDTLS_VERSION_MAJOR < 3
    mbedtls_mpi serial;
+#else
+   unsigned char serial_buf[16];
+#endif
 
    unsigned char *key_buf = NULL;    /* Buffer for created key */
 
@@ -1381,7 +1363,9 @@ static int generate_host_certificate(struct client_state *csp)
    mbedtls_x509write_crt_set_md_alg(&cert, CERT_SIGNATURE_ALGORITHM);
    mbedtls_pk_init(&loaded_issuer_key);
    mbedtls_pk_init(&loaded_subject_key);
+#if MBEDTLS_VERSION_MAJOR < 3
    mbedtls_mpi_init(&serial);
+#endif
    mbedtls_x509_crt_init(&issuer_cert);
 
    /*
@@ -1395,6 +1379,7 @@ static int generate_host_certificate(struct client_state *csp)
    char cert_params[cert_params_len];
    memset(cert_params, 0, cert_params_len);
 
+#if MBEDTLS_VERSION_MAJOR < 3
    /*
     * Converting unsigned long serial number to char * serial number.
     * We must compute length of serial number in string + terminating null.
@@ -1418,6 +1403,7 @@ static int generate_host_certificate(struct client_state *csp)
       ret = -1;
       goto exit;
    }
+#endif
 
    /*
     * Preparing parameters for certificate
@@ -1446,7 +1432,9 @@ static int generate_host_certificate(struct client_state *csp)
    cert_opt.subject_name  = cert_params;
    cert_opt.not_before    = cert_valid_from;
    cert_opt.not_after     = cert_valid_to;
+#if MBEDTLS_VERSION_MAJOR < 3
    cert_opt.serial        = serial_num_text;
+#endif
    cert_opt.is_ca         = 0;
    cert_opt.max_pathlen   = -1;
 
@@ -1471,6 +1459,7 @@ static int generate_host_certificate(struct client_state *csp)
       goto exit;
    }
 
+#if MBEDTLS_VERSION_MAJOR < 3
    /*
     * Parse serial to MPI
     */
@@ -1483,6 +1472,7 @@ static int generate_host_certificate(struct client_state *csp)
       ret = -1;
       goto exit;
    }
+#endif
 
    /*
     * Loading certificates
@@ -1513,15 +1503,28 @@ static int generate_host_certificate(struct client_state *csp)
    if (key_buf != NULL && subject_key_len > 0)
    {
       /* Key was created in this function and is stored in buffer */
+#if MBEDTLS_VERSION_MAJOR < 3
       ret = mbedtls_pk_parse_key(&loaded_subject_key, key_buf,
          (size_t)(subject_key_len + 1), (unsigned const char *)
          cert_opt.subject_pwd, strlen(cert_opt.subject_pwd));
+#else
+      ret = mbedtls_pk_parse_key(&loaded_subject_key, key_buf,
+         (size_t)(subject_key_len + 1), (unsigned const char *)
+         cert_opt.subject_pwd, strlen(cert_opt.subject_pwd),
+         mbedtls_ctr_drbg_random, &ctr_drbg);
+#endif
    }
    else
    {
       /* Key wasn't created in this function, because it already existed */
+#if MBEDTLS_VERSION_MAJOR < 3
       ret = mbedtls_pk_parse_keyfile(&loaded_subject_key,
          cert_opt.subject_key, cert_opt.subject_pwd);
+#else
+      ret = mbedtls_pk_parse_keyfile(&loaded_subject_key,
+         cert_opt.subject_key, cert_opt.subject_pwd,
+         mbedtls_ctr_drbg_random, &ctr_drbg);
+#endif
    }
 
    if (ret != 0)
@@ -1533,28 +1536,18 @@ static int generate_host_certificate(struct client_state *csp)
       goto exit;
    }
 
+#if MBEDTLS_VERSION_MAJOR < 3
    ret = mbedtls_pk_parse_keyfile(&loaded_issuer_key, cert_opt.issuer_key,
       cert_opt.issuer_pwd);
+#else
+   ret = mbedtls_pk_parse_keyfile(&loaded_issuer_key, cert_opt.issuer_key,
+      cert_opt.issuer_pwd, mbedtls_ctr_drbg_random, &ctr_drbg);
+#endif
    if (ret != 0)
    {
       mbedtls_strerror(ret, err_buf, sizeof(err_buf));
       log_error(LOG_LEVEL_ERROR,
          "Parsing issuer key %s failed: %s", cert_opt.issuer_key, err_buf);
-      ret = -1;
-      goto exit;
-   }
-
-   /*
-    * Check if key and issuer certificate match
-    */
-   if (!mbedtls_pk_can_do(&issuer_cert.pk, MBEDTLS_PK_RSA) ||
-      mbedtls_mpi_cmp_mpi(&mbedtls_pk_rsa(issuer_cert.pk)->N,
-         &mbedtls_pk_rsa(*issuer_key)->N) != 0 ||
-      mbedtls_mpi_cmp_mpi(&mbedtls_pk_rsa(issuer_cert.pk)->E,
-         &mbedtls_pk_rsa(*issuer_key)->E) != 0)
-   {
-      log_error(LOG_LEVEL_ERROR,
-         "Issuer key doesn't match issuer certificate");
       ret = -1;
       goto exit;
    }
@@ -1585,7 +1578,13 @@ static int generate_host_certificate(struct client_state *csp)
       goto exit;
    }
 
+#if MBEDTLS_VERSION_MAJOR < 3
    ret = mbedtls_x509write_crt_set_serial(&cert, &serial);
+#else
+   mbedtls_ctr_drbg_random(&ctr_drbg, serial_buf, sizeof(serial_buf));
+   ret = mbedtls_x509write_crt_set_serial_raw(&cert,
+      (unsigned char *)&serial_buf, sizeof(serial_buf));
+#endif
    if (ret != 0)
    {
       mbedtls_strerror(ret, err_buf, sizeof(err_buf));
@@ -1670,7 +1669,9 @@ exit:
    mbedtls_x509write_crt_free(&cert);
    mbedtls_pk_free(&loaded_subject_key);
    mbedtls_pk_free(&loaded_issuer_key);
+#if MBEDTLS_VERSION_MAJOR < 3
    mbedtls_mpi_free(&serial);
+#endif
    mbedtls_x509_crt_free(&issuer_cert);
 
    freez(cert_opt.subject_key);
@@ -1829,6 +1830,15 @@ static int seed_rng(struct client_state *csp)
       privoxy_mutex_lock(&ssl_init_mutex);
       if (rng_seeded == 0)
       {
+#if MBEDTLS_VERSION_MAJOR >= 3
+         psa_status_t status = psa_crypto_init();
+         if (PSA_SUCCESS != status)
+         {
+            log_error(LOG_LEVEL_ERROR, "psa_crypto_init failed: %d", status);
+            privoxy_mutex_unlock(&ssl_init_mutex);
+            return -1;
+         }
+#endif
          mbedtls_ctr_drbg_init(&ctr_drbg);
          mbedtls_entropy_init(&entropy);
          ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func,
