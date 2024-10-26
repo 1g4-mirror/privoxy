@@ -1,6 +1,6 @@
 # Note:  GNUmakefile is built automatically from GNUmakefile.in
 #
-# Written by and Copyright (C) 2001-2021 members of the
+# Written by and Copyright (C) 2001-2024 members of the
 # Privoxy team. https://www.privoxy.org/
 #
 # Based on the Internet Junkbuster originally written
@@ -922,16 +922,21 @@ install: CONF_DEST LOG_DEST PID_DEST check_doc GROUP_T
 					GROUP_T=privoxy ;\
 				else \
 					$(ECHO)  "******************************************************************" ;\
-					$(ECHO)  " WARNING! WARNING! installing config files as root!" ;\
+					$(ECHO)  " WARNING! Installing config files as root!" ;\
 					$(ECHO)  " It is strongly recommended to run $(PROGRAM) as a non-root user," ;\
 					$(ECHO)  " and to install the config files as that user and/or group!" ;\
 					$(ECHO)  " Please read INSTALL, and create a privoxy user and group!" ;\
 					$(ECHO)  "*******************************************************************" ;\
+					GROUP_T=$(GROUP) ;\
 				fi ;\
 			else \
 				GROUP_T=$(GROUP) ;\
 			fi ;\
-			INSTALL_CONF="$(INSTALL_R) -g $$GROUP_T " ;\
+			if [ x$(GROUP_T) != x ]; then \
+				INSTALL_CONF="$(INSTALL_R) -g $$GROUP_T " ;\
+			else \
+				INSTALL_CONF="$(INSTALL_R)" ;\
+			fi ;\
 		else \
 			$(ECHO) "Superuser install, installing config files as $(USER):$(GROUP_T)" ;\
 			INSTALL_CONF="$(INSTALL_R) -o $(USER) -g $(GROUP_T)" ;\

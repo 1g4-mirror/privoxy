@@ -157,6 +157,8 @@ extern int ssl_send_data(struct ssl_attr *ssl_attr, const unsigned char *buf, si
       return 0;
    }
 
+   wolfSSL_ERR_clear_error();
+
    ssl = ssl_attr->wolfssl_attr.ssl;
    fd = wolfSSL_get_fd(ssl);
 
@@ -206,6 +208,7 @@ extern int ssl_recv_data(struct ssl_attr *ssl_attr, unsigned char *buf, size_t m
    int fd = -1;
 
    memset(buf, 0, max_length);
+   wolfSSL_ERR_clear_error();
 
    /*
     * Receiving data from SSL context into buffer
@@ -293,7 +296,7 @@ static int ssl_store_cert(struct client_state *csp, X509 *cert)
 
    if (!bio)
    {
-      log_ssl_errors(LOG_LEVEL_ERROR, "BIO_new() failed");
+      log_error(LOG_LEVEL_ERROR, "BIO_new() failed.");
       return -1;
    }
 
@@ -315,7 +318,7 @@ static int ssl_store_cert(struct client_state *csp, X509 *cert)
     */
    if (wolfSSL_PEM_write_bio_X509(bio, cert) != WOLFSSL_SUCCESS)
    {
-      log_ssl_errors(LOG_LEVEL_ERROR, "wolfSSL_PEM_write_bio_X509() failed");
+      log_error(LOG_LEVEL_ERROR, "wolfSSL_PEM_write_bio_X509() failed.");
       ret = -1;
       goto exit;
    }
@@ -325,7 +328,7 @@ static int ssl_store_cert(struct client_state *csp, X509 *cert)
    if (last->file_buf == NULL)
    {
       log_error(LOG_LEVEL_ERROR,
-         "Failed to allocate %lu bytes to store the X509 PEM certificate",
+         "Failed to allocate %lu bytes to store the X509 PEM certificate.",
          len + 1);
       ret = -1;
       goto exit;
@@ -337,7 +340,7 @@ static int ssl_store_cert(struct client_state *csp, X509 *cert)
    bio = wolfSSL_BIO_new(wolfSSL_BIO_s_mem());
    if (!bio)
    {
-      log_ssl_errors(LOG_LEVEL_ERROR, "wolfSSL_BIO_new() failed");
+      log_error(LOG_LEVEL_ERROR, "wolfSSL_BIO_new() failed.");
       ret = -1;
       goto exit;
    }
@@ -350,8 +353,7 @@ static int ssl_store_cert(struct client_state *csp, X509 *cert)
    {
       if (wolfSSL_BIO_printf(bio, "cert. version     : %ld\n", l + 1) <= 0)
       {
-         log_ssl_errors(LOG_LEVEL_ERROR,
-            "wolfSSL_BIO_printf() for version failed");
+         log_error(LOG_LEVEL_ERROR, "wolfSSL_BIO_printf() for version failed.");
          ret = -1;
          goto exit;
       }
@@ -360,8 +362,7 @@ static int ssl_store_cert(struct client_state *csp, X509 *cert)
    {
       if (wolfSSL_BIO_printf(bio, "cert. version     : Unknown (%ld)\n", l) <= 0)
       {
-         log_ssl_errors(LOG_LEVEL_ERROR,
-            "wolfSSL_BIO_printf() for version failed");
+         log_error(LOG_LEVEL_ERROR, "wolfSSL_BIO_printf() for version failed.");
          ret = -1;
          goto exit;
       }
@@ -369,15 +370,15 @@ static int ssl_store_cert(struct client_state *csp, X509 *cert)
 
    if (wolfSSL_BIO_puts(bio, "serial number     : ") <= 0)
    {
-      log_ssl_errors(LOG_LEVEL_ERROR,
-         "wolfSSL_BIO_puts() for serial number failed");
+      log_error(LOG_LEVEL_ERROR,
+         "wolfSSL_BIO_puts() for serial number failed.");
       ret = -1;
       goto exit;
    }
    if (wolfSSL_X509_get_serial_number(cert, serial_number, &serial_number_size)
       != WOLFSSL_SUCCESS)
    {
-      log_error(LOG_LEVEL_ERROR, "wolfSSL_X509_get_serial_number() failed");
+      log_error(LOG_LEVEL_ERROR, "wolfSSL_X509_get_serial_number() failed.");
       ret = -1;
       goto exit;
    }
@@ -387,8 +388,8 @@ static int ssl_store_cert(struct client_state *csp, X509 *cert)
       if (wolfSSL_BIO_printf(bio, "%lu (0x%lx)\n", serial_number[0],
             serial_number[0]) <= 0)
       {
-         log_ssl_errors(LOG_LEVEL_ERROR,
-            "wolfSSL_BIO_printf() for serial number as single byte failed");
+         log_error(LOG_LEVEL_ERROR,
+            "wolfSSL_BIO_printf() for serial number as single byte failed.");
          ret = -1;
          goto exit;
       }
@@ -401,8 +402,8 @@ static int ssl_store_cert(struct client_state *csp, X509 *cert)
          if (wolfSSL_BIO_printf(bio, "%02x%c", serial_number[i],
                ((i + 1 == serial_number_size) ? '\n' : ':')) <= 0)
          {
-            log_ssl_errors(LOG_LEVEL_ERROR,
-               "wolfSSL_BIO_printf() for serial number bytes failed");
+            log_error(LOG_LEVEL_ERROR,
+               "wolfSSL_BIO_printf() for serial number bytes failed.");
             ret = -1;
             goto exit;
          }
@@ -411,7 +412,7 @@ static int ssl_store_cert(struct client_state *csp, X509 *cert)
 
    if (wolfSSL_BIO_puts(bio, "issuer name       : ") <= 0)
    {
-      log_ssl_errors(LOG_LEVEL_ERROR, "wolfSSL_BIO_puts() for issuer failed");
+      log_error(LOG_LEVEL_ERROR, "wolfSSL_BIO_puts() for issuer failed.");
       ret = -1;
       goto exit;
    }
@@ -420,24 +421,24 @@ static int ssl_store_cert(struct client_state *csp, X509 *cert)
    {
       if (wolfSSL_BIO_puts(bio, "none") <= 0)
       {
-         log_ssl_errors(LOG_LEVEL_ERROR,
-            "wolfSSL_BIO_puts() for issuer name failed");
+         log_error(LOG_LEVEL_ERROR,
+            "wolfSSL_BIO_puts() for issuer name failed.");
          ret = -1;
          goto exit;
       }
    }
    else if (wolfSSL_X509_NAME_print_ex(bio, issuer_name, 0, 0) < 0)
    {
-      log_ssl_errors(LOG_LEVEL_ERROR,
-         "wolfSSL_X509_NAME_print_ex() for issuer failed");
+      log_error(LOG_LEVEL_ERROR,
+         "wolfSSL_X509_NAME_print_ex() for issuer failed.");
       ret = -1;
       goto exit;
    }
 
    if (wolfSSL_BIO_puts(bio, "\nsubject name      : ") <= 0)
    {
-      log_ssl_errors(LOG_LEVEL_ERROR,
-         "wolfSSL_BIO_puts() for subject name failed");
+      log_error(LOG_LEVEL_ERROR,
+         "wolfSSL_BIO_puts() for subject name failed.");
       ret = -1;
       goto exit;
    }
@@ -446,46 +447,46 @@ static int ssl_store_cert(struct client_state *csp, X509 *cert)
    {
       if (wolfSSL_BIO_puts(bio, "none") <= 0)
       {
-         log_ssl_errors(LOG_LEVEL_ERROR,
-            "wolfSSL_BIO_puts() for subject name failed");
+         log_error(LOG_LEVEL_ERROR,
+            "wolfSSL_BIO_puts() for subject name failed.");
          ret = -1;
          goto exit;
       }
    }
    else if (wolfSSL_X509_NAME_print_ex(bio, subject_name, 0, 0) < 0)
    {
-      log_ssl_errors(LOG_LEVEL_ERROR,
-         "wolfSSL_X509_NAME_print_ex() for subject name failed");
+      log_error(LOG_LEVEL_ERROR,
+         "wolfSSL_X509_NAME_print_ex() for subject name failed.");
       ret = -1;
       goto exit;
    }
 
    if (wolfSSL_BIO_puts(bio, "\nissued  on        : ") <= 0)
    {
-      log_ssl_errors(LOG_LEVEL_ERROR,
-         "wolfSSL_BIO_puts() for issued on failed");
+      log_error(LOG_LEVEL_ERROR,
+         "wolfSSL_BIO_puts() for issued on failed.");
       ret = -1;
       goto exit;
    }
    if (!wolfSSL_ASN1_TIME_print(bio, wolfSSL_X509_get_notBefore(cert)))
    {
-      log_ssl_errors(LOG_LEVEL_ERROR,
-         "wolfSSL_ASN1_TIME_print() for issued on failed");
+      log_error(LOG_LEVEL_ERROR,
+         "wolfSSL_ASN1_TIME_print() for issued on failed.");
       ret = -1;
       goto exit;
    }
 
    if (wolfSSL_BIO_puts(bio, "\nexpires on        : ") <= 0)
    {
-      log_ssl_errors(LOG_LEVEL_ERROR,
-         "wolfSSL_BIO_puts() for expires on failed");
+      log_error(LOG_LEVEL_ERROR,
+         "wolfSSL_BIO_puts() for expires on failed.");
       ret = -1;
       goto exit;
    }
    if (!wolfSSL_ASN1_TIME_print(bio, wolfSSL_X509_get_notAfter(cert)))
    {
-      log_ssl_errors(LOG_LEVEL_ERROR,
-         "wolfSSL_ASN1_TIME_print() for expires on failed");
+      log_error(LOG_LEVEL_ERROR,
+         "wolfSSL_ASN1_TIME_print() for expires on failed.");
       ret = -1;
       goto exit;
    }
@@ -495,7 +496,7 @@ static int ssl_store_cert(struct client_state *csp, X509 *cert)
    pkey = wolfSSL_X509_get_pubkey(cert);
    if (!pkey)
    {
-      log_ssl_errors(LOG_LEVEL_ERROR, "wolfSSL_X509_get_pubkey() failed");
+      log_error(LOG_LEVEL_ERROR, "wolfSSL_X509_get_pubkey() failed.");
       ret = -1;
       goto exit;
    }
@@ -504,8 +505,8 @@ static int ssl_store_cert(struct client_state *csp, X509 *cert)
       wolfSSL_EVP_PKEY_bits(pkey));
    if (ret <= 0)
    {
-      log_ssl_errors(LOG_LEVEL_ERROR,
-         "wolfSSL_BIO_printf() for key size failed");
+      log_error(LOG_LEVEL_ERROR,
+         "wolfSSL_BIO_printf() for key size failed.");
       ret = -1;
       goto exit;
    }
@@ -519,8 +520,8 @@ static int ssl_store_cert(struct client_state *csp, X509 *cert)
       WOLFSSL_X509_EXTENSION *ex = wolfSSL_X509_get_ext(cert, loc);
       if (BIO_puts(bio, "\nbasic constraints : ") <= 0)
       {
-         log_ssl_errors(LOG_LEVEL_ERROR,
-            "BIO_printf() for basic constraints failed");
+         log_error(LOG_LEVEL_ERROR,
+            "BIO_printf() for basic constraints failed.");
          ret = -1;
          goto exit;
       }
@@ -530,8 +531,8 @@ static int ssl_store_cert(struct client_state *csp, X509 *cert)
                wolfSSL_X509_EXTENSION_get_data(ex),
                ASN1_STRFLGS_RFC2253))
          {
-            log_ssl_errors(LOG_LEVEL_ERROR,
-               "wolfSSL_ASN1_STRING_print_ex() for basic constraints failed");
+            log_error(LOG_LEVEL_ERROR,
+               "wolfSSL_ASN1_STRING_print_ex() for basic constraints failed.");
             ret = -1;
             goto exit;
          }
@@ -552,8 +553,8 @@ static int ssl_store_cert(struct client_state *csp, X509 *cert)
       }
       if (ret <= 0)
       {
-         log_ssl_errors(LOG_LEVEL_ERROR,
-            "wolfSSL_BIO_printf() for Subject Alternative Name failed");
+         log_error(LOG_LEVEL_ERROR,
+            "wolfSSL_BIO_printf() for Subject Alternative Name failed.");
          ret = -1;
          goto exit;
       }
@@ -570,8 +571,8 @@ static int ssl_store_cert(struct client_state *csp, X509 *cert)
       WOLFSSL_X509_EXTENSION *ex = wolfSSL_X509_get_ext(cert, loc);
       if (wolfSSL_BIO_puts(bio, "\ncert. type        : ") <= 0)
       {
-         log_ssl_errors(LOG_LEVEL_ERROR,
-            "wolfSSL_BIO_printf() for cert type failed");
+         log_error(LOG_LEVEL_ERROR,
+            "wolfSSL_BIO_printf() for cert type failed.");
          ret = -1;
          goto exit;
       }
@@ -581,8 +582,8 @@ static int ssl_store_cert(struct client_state *csp, X509 *cert)
                wolfSSL_X509_EXTENSION_get_data(ex),
                ASN1_STRFLGS_RFC2253))
          {
-            log_ssl_errors(LOG_LEVEL_ERROR,
-               "wolfSSL_ASN1_STRING_print_ex() for cert type failed");
+            log_error(LOG_LEVEL_ERROR,
+               "wolfSSL_ASN1_STRING_print_ex() for cert type failed.");
             ret = -1;
             goto exit;
          }
@@ -601,8 +602,8 @@ static int ssl_store_cert(struct client_state *csp, X509 *cert)
       WOLFSSL_X509_EXTENSION *extension = wolfSSL_X509_get_ext(cert, loc);
       if (BIO_puts(bio, "\nkey usage         : ") <= 0)
       {
-         log_ssl_errors(LOG_LEVEL_ERROR,
-            "wolfSSL_BIO_printf() for key usage failed");
+         log_error(LOG_LEVEL_ERROR,
+            "wolfSSL_BIO_printf() for key usage failed.");
          ret = -1;
          goto exit;
       }
@@ -612,8 +613,8 @@ static int ssl_store_cert(struct client_state *csp, X509 *cert)
                wolfSSL_X509_EXTENSION_get_data(extension),
                ASN1_STRFLGS_RFC2253))
          {
-            log_ssl_errors(LOG_LEVEL_ERROR,
-               "wolfSSL_ASN1_STRING_print_ex() for key usage failed");
+            log_error(LOG_LEVEL_ERROR,
+               "wolfSSL_ASN1_STRING_print_ex() for key usage failed.");
             ret = -1;
             goto exit;
          }
@@ -631,8 +632,8 @@ static int ssl_store_cert(struct client_state *csp, X509 *cert)
       WOLFSSL_X509_EXTENSION *ex = wolfSSL_X509_get_ext(cert, loc);
       if (wolfSSL_BIO_puts(bio, "\next key usage     : ") <= 0)
       {
-         log_ssl_errors(LOG_LEVEL_ERROR,
-            "wolfSSL_BIO_printf() for ext key usage failed");
+         log_error(LOG_LEVEL_ERROR,
+            "wolfSSL_BIO_printf() for ext key usage failed.");
          ret = -1;
          goto exit;
       }
@@ -642,8 +643,8 @@ static int ssl_store_cert(struct client_state *csp, X509 *cert)
                wolfSSL_X509_EXTENSION_get_data(ex),
                ASN1_STRFLGS_RFC2253))
          {
-            log_ssl_errors(LOG_LEVEL_ERROR,
-               "wolfSSL_ASN1_STRING_print_ex() for ext key usage failed");
+            log_error(LOG_LEVEL_ERROR,
+               "wolfSSL_ASN1_STRING_print_ex() for ext key usage failed.");
             ret = -1;
             goto exit;
          }
@@ -662,8 +663,8 @@ static int ssl_store_cert(struct client_state *csp, X509 *cert)
       WOLFSSL_X509_EXTENSION *ex = wolfSSL_X509_get_ext(cert, loc);
       if (wolfSSL_BIO_puts(bio, "\ncertificate policies : ") <= 0)
       {
-         log_ssl_errors(LOG_LEVEL_ERROR,
-            "wolfSSL_BIO_printf() for certificate policies failed");
+         log_error(LOG_LEVEL_ERROR,
+            "wolfSSL_BIO_printf() for certificate policies failed.");
          ret = -1;
          goto exit;
       }
@@ -673,8 +674,8 @@ static int ssl_store_cert(struct client_state *csp, X509 *cert)
                wolfSSL_X509_EXTENSION_get_data(ex),
                ASN1_STRFLGS_RFC2253))
          {
-            log_ssl_errors(LOG_LEVEL_ERROR,
-               "wolfSSL_ASN1_STRING_print_ex() for certificate policies failed");
+            log_error(LOG_LEVEL_ERROR,
+               "wolfSSL_ASN1_STRING_print_ex() for certificate policies failed.");
             ret = -1;
             goto exit;
          }
@@ -690,7 +691,7 @@ static int ssl_store_cert(struct client_state *csp, X509 *cert)
    if (len <= 0)
    {
       log_error(LOG_LEVEL_ERROR, "BIO_get_mem_data() returned %ld "
-         "while gathering certificate information", len);
+         "while gathering certificate information.", len);
       ret = -1;
       goto exit;
    }
@@ -698,7 +699,7 @@ static int ssl_store_cert(struct client_state *csp, X509 *cert)
    if (encoded_text == NULL)
    {
       log_error(LOG_LEVEL_ERROR,
-         "Failed to HTML-encode the certificate information");
+         "Failed to HTML-encode the certificate information.");
       ret = -1;
       goto exit;
    }
@@ -724,8 +725,8 @@ exit:
  *
  * Function    :  host_to_hash
  *
- * Description :  Creates MD5 hash from host name. Host name is loaded
- *                from structure csp and saved again into it.
+ * Description :  Creates a sha256 hash from host name. The host name
+ *                is taken from the csp structure and stored into it.
  *
  * Parameters  :
  *          1  :  csp = Current client state (buffers, headers, etc...)
@@ -736,45 +737,17 @@ exit:
  *********************************************************************/
 static int host_to_hash(struct client_state *csp)
 {
-   wc_Md5 md5;
    int ret;
-   size_t i;
 
-   ret = wc_InitMd5(&md5);
+   ret = wc_Sha256Hash((const byte *)csp->http->host,
+      (word32)strlen(csp->http->host), (byte *)csp->http->hash_of_host);
    if (ret != 0)
    {
-      return -1;
+        return -1;
    }
 
-   ret = wc_Md5Update(&md5, (const byte *)csp->http->host,
-      (word32)strlen(csp->http->host));
-   if (ret != 0)
-   {
-      return -1;
-   }
+   return create_hexadecimal_hash_of_host(csp);
 
-   ret = wc_Md5Final(&md5, csp->http->hash_of_host);
-   if (ret != 0)
-   {
-      return -1;
-   }
-
-   wc_Md5Free(&md5);
-
-   /* Converting hash into string with hex */
-   for (i = 0; i < 16; i++)
-   {
-      ret = snprintf((char *)csp->http->hash_of_host_hex + 2 * i,
-         sizeof(csp->http->hash_of_host_hex) - 2 * i,
-         "%02x", csp->http->hash_of_host[i]);
-      if (ret < 0)
-      {
-         log_error(LOG_LEVEL_ERROR, "sprintf() failed. Return value: %d", ret);
-         return -1;
-      }
-   }
-
-   return 0;
 }
 
 
@@ -852,7 +825,7 @@ extern int create_client_ssl_connection(struct client_state *csp)
    ssl_attr->wolfssl_attr.ctx = wolfSSL_CTX_new(wolfSSLv23_method());
    if (ssl_attr->wolfssl_attr.ctx == NULL)
    {
-      log_ssl_errors(LOG_LEVEL_ERROR, "Unable to create TLS context");
+      log_error(LOG_LEVEL_ERROR, "Unable to create TLS context.");
       ret = -1;
       goto exit;
    }
@@ -861,8 +834,8 @@ extern int create_client_ssl_connection(struct client_state *csp)
    if (wolfSSL_CTX_use_certificate_file(ssl_attr->wolfssl_attr.ctx,
          cert_file, SSL_FILETYPE_PEM) != WOLFSSL_SUCCESS)
    {
-      log_ssl_errors(LOG_LEVEL_ERROR,
-         "Loading host certificate %s failed", cert_file);
+      log_error(LOG_LEVEL_ERROR,
+         "Loading host certificate %s failed.", cert_file);
       ret = -1;
       goto exit;
    }
@@ -870,8 +843,8 @@ extern int create_client_ssl_connection(struct client_state *csp)
    if (wolfSSL_CTX_use_PrivateKey_file(ssl_attr->wolfssl_attr.ctx,
          key_file, SSL_FILETYPE_PEM) != WOLFSSL_SUCCESS)
    {
-      log_ssl_errors(LOG_LEVEL_ERROR,
-         "Loading host certificate private key %s failed", key_file);
+      log_error(LOG_LEVEL_ERROR,
+         "Loading host certificate private key %s failed.", key_file);
       ret = -1;
       goto exit;
    }
@@ -882,8 +855,8 @@ extern int create_client_ssl_connection(struct client_state *csp)
 
    if (wolfSSL_set_fd(ssl, csp->cfd) != WOLFSSL_SUCCESS)
    {
-      log_ssl_errors(LOG_LEVEL_ERROR,
-         "wolfSSL_set_fd() failed to set the client socket");
+      log_error(LOG_LEVEL_ERROR,
+         "wolfSSL_set_fd() failed to set the client socket.");
       ret = -1;
       goto exit;
    }
@@ -892,8 +865,8 @@ extern int create_client_ssl_connection(struct client_state *csp)
    {
       if (!wolfSSL_set_cipher_list(ssl, csp->config->cipher_list))
       {
-         log_ssl_errors(LOG_LEVEL_ERROR,
-            "Setting the cipher list '%s' for the client connection failed",
+         log_error(LOG_LEVEL_ERROR,
+            "Setting the cipher list '%s' for the client connection failed.",
             csp->config->cipher_list);
          ret = -1;
          goto exit;
@@ -977,8 +950,7 @@ static void shutdown_connection(WOLFSSL *ssl, const char *type)
       if (WOLFSSL_SUCCESS != ret)
       {
          log_error(LOG_LEVEL_CONNECT, "Failed to shutdown %s connection "
-            "on socket %d. Attempts so far: %d, ret: %d", type, fd,
-            shutdown_attempts, ret);
+            "on socket %d. Attempts so far: %d.", type, fd, shutdown_attempts);
       }
    } while (ret == WOLFSSL_SHUTDOWN_NOT_DONE &&
       shutdown_attempts < MAX_SHUTDOWN_ATTEMPTS);
@@ -986,10 +958,15 @@ static void shutdown_connection(WOLFSSL *ssl, const char *type)
    {
       char buffer[80];
       int error = wolfSSL_get_error(ssl, ret);
-      log_error(LOG_LEVEL_ERROR, "Failed to shutdown %s connection "
+      log_error(LOG_LEVEL_CONNECT, "Failed to shutdown %s connection "
          "on socket %d after %d attempts. ret: %d, error: %d, %s",
          type, fd, shutdown_attempts, ret, error,
          wolfSSL_ERR_error_string((unsigned long)error, buffer));
+   }
+   else if (shutdown_attempts > 1)
+   {
+      log_error(LOG_LEVEL_CONNECT, "Succeeded to shutdown %s connection "
+         "on socket %d after %d attempts.", type, fd, shutdown_attempts);
    }
 }
 
@@ -1112,7 +1089,7 @@ extern int create_server_ssl_connection(struct client_state *csp)
    ssl_attrs->ctx = wolfSSL_CTX_new(wolfSSLv23_method());
    if (ssl_attrs->ctx == NULL)
    {
-      log_ssl_errors(LOG_LEVEL_ERROR, "TLS context creation failed");
+      log_error(LOG_LEVEL_ERROR, "TLS context creation failed");
       ret = -1;
       goto exit;
    }
@@ -1124,7 +1101,7 @@ extern int create_server_ssl_connection(struct client_state *csp)
    else if (wolfSSL_CTX_load_verify_locations(ssl_attrs->ctx,
       csp->config->trusted_cas_file, NULL) != WOLFSSL_SUCCESS)
    {
-      log_ssl_errors(LOG_LEVEL_ERROR, "Loading trusted CAs file %s failed",
+      log_error(LOG_LEVEL_ERROR, "Loading trusted-cas-file '%s' failed.",
          csp->config->trusted_cas_file);
       ret = -1;
       goto exit;
@@ -1136,8 +1113,8 @@ extern int create_server_ssl_connection(struct client_state *csp)
 
    if (wolfSSL_set_fd(ssl, csp->server_connection.sfd) != WOLFSSL_SUCCESS)
    {
-      log_ssl_errors(LOG_LEVEL_ERROR,
-         "wolfSSL_set_fd() failed to set the server socket");
+      log_error(LOG_LEVEL_ERROR,
+         "wolfSSL_set_fd() failed to set the server socket.");
       ret = -1;
       goto exit;
    }
@@ -1146,8 +1123,8 @@ extern int create_server_ssl_connection(struct client_state *csp)
    {
       if (wolfSSL_set_cipher_list(ssl, csp->config->cipher_list) != WOLFSSL_SUCCESS)
       {
-         log_ssl_errors(LOG_LEVEL_ERROR,
-            "Setting the cipher list '%s' for the server connection failed",
+         log_error(LOG_LEVEL_ERROR,
+            "Setting the cipher list '%s' for the server connection failed.",
             csp->config->cipher_list);
          ret = -1;
          goto exit;
@@ -1158,7 +1135,7 @@ extern int create_server_ssl_connection(struct client_state *csp)
       csp->http->host, (unsigned short)strlen(csp->http->host));
    if (ret != WOLFSSL_SUCCESS)
    {
-      log_ssl_errors(LOG_LEVEL_ERROR, "Failed to set use of SNI");
+      log_error(LOG_LEVEL_ERROR, "Failed to set use of SNI.");
       ret = -1;
       goto exit;
    }
@@ -1179,7 +1156,7 @@ extern int create_server_ssl_connection(struct client_state *csp)
 #warning wolfssl has been compiled with HAVE_SECURE_RENEGOTIATION while you probably want HAVE_RENEGOTIATION_INDICATION
    if(wolfSSL_UseSecureRenegotiation(ssl) != WOLFSSL_SUCCESS)
    {
-      log_ssl_errors(LOG_LEVEL_ERROR,
+      log_error(LOG_LEVEL_ERROR,
          "Failed to enable 'Secure' Renegotiation. Continuing anyway.");
    }
 #endif
