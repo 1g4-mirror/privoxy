@@ -177,8 +177,8 @@ MITMOPT="--with-openssl"
 
 # brotli
 # Get the brotli library from  https://github.com/google/brotli/releases
-inc="/source/brotli-1.0.9/c/include"
-lib="/source/brotli-1.0.9/.libs"
+inc="/source/brotli-1.1.0/build/installed/include"
+lib="/source/brotli-1.1.0/build/installed/lib"
 BROTLIOPT="--with-brotli"
 CPPFLAGS="${CPPFLAGS} -I${inc}"
 LDFLAGS="${LDFLAGS} -L${lib}"
