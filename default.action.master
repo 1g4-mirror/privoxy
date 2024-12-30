@@ -684,7 +684,8 @@ adob*.
 adrenaline.
 adtp*.
 adv[oia]*.
-adventure*.
+# URL = https://adventurist.me/posts/00328
+adventur*.
 .*road*.
 .olympiad*.
 .*load*.
