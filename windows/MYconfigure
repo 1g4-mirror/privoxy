@@ -146,9 +146,9 @@ usepcre2=yes
 #
 if [ "$usepcre2" = "yes" ]; then
     PCREOPT=""
-    inc="/source/pcre2-10.43/src/"
+    inc="/source/pcre2-10.44/src/"
       # need pcre2.h
-    lib="/source/pcre2-10.43/.libs"
+    lib="/source/pcre2-10.44/.libs"
       # need libpcre2-8.a & libpcre2-posix.a
 else
     PCREOPT="--disable-pcre2"
@@ -194,6 +194,7 @@ echo "LDFLAGS=${LDFLAGS}"
 #    --target: only used to build a cross-compiling toolchain.
 
 ./configure  --host=i686-w64-mingw32  --enable-mingw32  --enable-zlib \
+             --enable-compression  \
              --enable-extended-statistics \
              ${PCREOPT} \
              --enable-pcre-host-patterns \
