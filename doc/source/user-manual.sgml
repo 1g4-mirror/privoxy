@@ -412,27 +412,21 @@ MAKENSIS = /&lt;root-dir>/nsis/makensis.exe
 </screen>
 
       <para>
-        Get the latest 8.x PCRE code from
-        <ulink url="https://sourceforge.net/projects/pcre/files/pcre/">PCRE
-                    https://sourceforge.net/projects/pcre/files/pcre/</ulink>
+        Get the latest 10.x PCRE code from
+        <ulink url="https://github.com/PCRE2Project/pcre2/releases">
+                    https://github.com/PCRE2Project/pcre2/releases</ulink>
         and build the static PCRE libraries with
 
         <screen>
 export CFLAGS="-O2 -fstack-protector-strong -D_FORTIFY_SOURCE=2"
 export LDFLAGS="-fstack-protector-strong"
-export CPPFLAGS="-DPCRE_STATIC"
+export CPPFLAGS="-DPCRE2_STATIC"
 
 ./configure  --host=i686-w64-mingw32 \
              --prefix=/usr/local/i686-w64-mingw32 \
-             --enable-utf  --enable-unicode-properties \
              --enable-jit \
              --enable-newline-is-anycrlf \
-             --enable-pcre16 \
-             --enable-pcre32 \
-             --disable-pcregrep-libbz2 \
-             --disable-pcregrep-libz \
-             --disable-pcretest-libreadline \
-             --disable-stack-for-recursion  \
+             --with-gnu-ld \
              --enable-static --disable-shared \
   &&  make
 </screen>
