@@ -385,7 +385,8 @@ git clone https://www.privoxy.org/git/privoxy.git
 </screen>
 
       <para>
-        Get the source code (.zip or .tar.gz) for tidy from
+        If you want to build the documentation,
+        get the source code (tar.gz) for tidy from
         <ulink url="https://github.com/htacg/tidy-html5/releases">
                     https://github.com/htacg/tidy-html5/releases</ulink>,
         unzip into &lt;root-dir> and build the software:
