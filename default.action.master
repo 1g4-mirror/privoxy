@@ -120,7 +120,7 @@
 # wouldn't fit here.
 #
 # Perl compatible regular expressions are used. See the pcre/docs/ directory or
-# man perlre (also available at http://perldoc.perl.org/perlre.html) for
+# man perlre (also available at https://perldoc.perl.org/perlre) for
 # details. The appendix to our User Manual also has some detail.
 #
 # Please note that matching in the path is CASE INSENSITIVE by default, but
