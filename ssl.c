@@ -213,7 +213,7 @@ extern int ssl_recv_data(struct ssl_attr *ssl_attr, unsigned char *buf, size_t m
       if (ret == MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY)
       {
          log_error(LOG_LEVEL_CONNECT, "The peer notified us that "
-            "the connection on socket %d is going to be closed",
+            "the connection on socket %d is going to be closed.",
             ssl_attr->mbedtls_attr.socket_fd.fd);
          return 0;
       }
@@ -407,7 +407,7 @@ extern int create_client_ssl_connection(struct client_state *csp)
       if (ssl_attr->mbedtls_attr.ciphersuites_list == NULL)
       {
          log_error(LOG_LEVEL_ERROR,
-            "Setting the cipher list '%s' for the client connection failed",
+            "Setting the cipher list '%s' for the client connection failed.",
             csp->config->cipher_list);
          ret = -1;
          goto exit;
@@ -659,7 +659,7 @@ extern int create_server_ssl_connection(struct client_state *csp)
       if (ssl_attr->mbedtls_attr.ciphersuites_list == NULL)
       {
          log_error(LOG_LEVEL_ERROR,
-            "Setting the cipher list '%s' for the server connection failed",
+            "Setting the cipher list '%s' for the server connection failed.",
             csp->config->cipher_list);
          ret = -1;
          goto exit;
@@ -700,7 +700,7 @@ extern int create_server_ssl_connection(struct client_state *csp)
     * Handshake with server
     */
    log_error(LOG_LEVEL_CONNECT,
-      "Performing the TLS/SSL handshake with the server");
+      "Performing the TLS/SSL handshake with the server.");
 
    while ((ret = mbedtls_ssl_handshake(&(ssl_attr->mbedtls_attr.ssl))) != 0)
    {
@@ -874,7 +874,7 @@ static int write_certificate(mbedtls_x509write_cert *crt, const char *output_fil
     */
    if ((f = fopen(output_file, "w")) == NULL)
    {
-      log_error(LOG_LEVEL_ERROR, "Opening file %s to save certificate failed",
+      log_error(LOG_LEVEL_ERROR, "Opening file %s to save certificate failed.",
          output_file);
       return -1;
    }
@@ -882,7 +882,7 @@ static int write_certificate(mbedtls_x509write_cert *crt, const char *output_fil
    if (fwrite(cert_buf, 1, len, f) != len)
    {
       log_error(LOG_LEVEL_ERROR,
-         "Writing certificate into file %s failed", output_file);
+         "Writing certificate into file %s failed.", output_file);
       fclose(f);
       return -1;
    }
@@ -951,7 +951,7 @@ static int write_private_key(mbedtls_pk_context *key, unsigned char **ret_buf,
    {
       fclose(f);
       log_error(LOG_LEVEL_ERROR,
-         "Writing private key into file %s failed",
+         "Writing private key into file %s failed.",
          key_file_path);
       ret = -1;
       goto exit;
@@ -1065,7 +1065,7 @@ static int generate_key(struct client_state *csp, unsigned char **key_buf)
    if ((ret = write_private_key(&key, key_buf, key_opt.key_file_path)) < 0)
    {
       log_error(LOG_LEVEL_ERROR,
-         "Writing private key into file %s failed", key_opt.key_file_path);
+         "Writing private key into file %s failed.", key_opt.key_file_path);
       ret = -1;
       goto exit;
    }
@@ -1352,7 +1352,7 @@ static int generate_host_certificate(struct client_state *csp)
    {
       freez(cert_opt.output_file);
       freez(cert_opt.subject_key);
-      log_error(LOG_LEVEL_ERROR, "Key generating failed");
+      log_error(LOG_LEVEL_ERROR, "Key generating failed.");
       return -1;
    }
 
@@ -1399,7 +1399,7 @@ static int generate_host_certificate(struct client_state *csp)
    if (ret < 0 || ret >= serial_num_size)
    {
       log_error(LOG_LEVEL_ERROR,
-         "Converting certificate serial number into string failed");
+         "Converting certificate serial number into string failed.");
       ret = -1;
       goto exit;
    }
@@ -1422,7 +1422,7 @@ static int generate_host_certificate(struct client_state *csp)
    if (get_certificate_valid_from_date(cert_valid_from, sizeof(cert_valid_from), VALID_DATETIME_FMT)
     || get_certificate_valid_to_date(cert_valid_to, sizeof(cert_valid_to), VALID_DATETIME_FMT))
    {
-      log_error(LOG_LEVEL_ERROR, "Generating one of the validity dates failed");
+      log_error(LOG_LEVEL_ERROR, "Generating one of the validity dates failed.");
       ret = -1;
       goto exit;
    }
@@ -1444,7 +1444,7 @@ static int generate_host_certificate(struct client_state *csp)
     */
    if (subject_key_len == 0)
    {
-      log_error(LOG_LEVEL_ERROR, "Subject key was already created");
+      log_error(LOG_LEVEL_ERROR, "Subject key was already created.");
       ret = 0;
       goto exit;
    }
@@ -1658,7 +1658,7 @@ static int generate_host_certificate(struct client_state *csp)
       mbedtls_ctr_drbg_random, &ctr_drbg);
    if (ret < 0)
    {
-      log_error(LOG_LEVEL_ERROR, "Writing certificate into file failed");
+      log_error(LOG_LEVEL_ERROR, "Writing certificate into file failed.");
       goto exit;
    }
 
@@ -1730,7 +1730,7 @@ static int ssl_verify_callback(void *csp_void, mbedtls_x509_crt *crt,
    if (MBEDTLS_ERR_BASE64_BUFFER_TOO_SMALL != ret)
    {
       log_error(LOG_LEVEL_ERROR,
-         "Failed to figure out the required X509 PEM certificate buffer size");
+         "Failed to figure out the required X509 PEM certificate buffer size.");
       return -1;
    }
    pem_buffer_length = olen;
@@ -1739,7 +1739,7 @@ static int ssl_verify_callback(void *csp_void, mbedtls_x509_crt *crt,
    if (last->file_buf == NULL)
    {
       log_error(LOG_LEVEL_ERROR,
-         "Failed to allocate %lu bytes to store the X509 PEM certificate",
+         "Failed to allocate %lu bytes to store the X509 PEM certificate.",
          pem_buffer_length);
       return -1;
    }
@@ -1773,7 +1773,7 @@ static int ssl_verify_callback(void *csp_void, mbedtls_x509_crt *crt,
       if (encoded_text == NULL)
       {
          log_error(LOG_LEVEL_ERROR,
-            "Failed to HTML-encode the certificate information");
+            "Failed to HTML-encode the certificate information.");
          return -1;
       }
       strlcpy(last->info_buf, encoded_text, sizeof(last->info_buf));
