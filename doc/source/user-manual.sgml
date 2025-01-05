@@ -8447,7 +8447,7 @@ clienttest.ssllabs.com
 <para>
  In our example, we use this for the following two use cases:
  <itemizedlist>
-  <listitem><para>Enable TOR anonymous proxy</para></listitem>
+  <listitem><para>Enable Tor anonymous proxy</para></listitem>
   <listitem><para>Enable https-inspection</para></listitem>
  </itemizedlist>
 </para>
