@@ -8270,16 +8270,18 @@ EXTERNAL-FILTER: citation-needed Adds a "[citation needed]" tag to an image. The
 <para>
  If the feature is not enabled, you may need to
  <link linkend="installation-source">build Privoxy from source</link>
- to enable it.  You can choose to use either
- <ulink url="https://www.trustedfirmware.org/projects/mbed-tls/">MbedTLS</ulink>
- or <ulink url="https://www.openssl.org/">OpenSSL</ulink>.  You can
- choose either one, as they both behave the same for HTTPS inspection.
+ to enable it.
+ You can choose to use <ulink url="https://www.libressl.org/">LibreSSL</ulink>,
+ <ulink url="https://www.trustedfirmware.org/projects/mbed-tls/">MbedTLS</ulink>,
+ <ulink url="https://www.openssl.org/">OpenSSL</ulink> or
+ <ulink url="https://www.wolfssl.com/">wolfSSL</ulink>.
+ You can choose either one, as they behave the same for HTTPS inspection.
 </para>
 <para>
- After installing the development libraries for either OpenSSL or
- MbedTLS, you can run <command>./configure</command> with
- either the <command>--with-openssl</command> or
- <command>--with-mbedtls</command> option.
+ After installing the development libraries for the TLS library you
+ want to use, you can run <command>./configure</command> with
+ the <command>--with-openssl</command> for LibreSSL and OpenSSL or
+ <command>--with-mbedtls</command> or <command>--with-wolfssl</command> option.
 </para>
 <para>
  Check the output of <command>./configure</command>, it must contain
@@ -8289,6 +8291,7 @@ EXTERNAL-FILTER: citation-needed Adds a "[citation needed]" tag to an image. The
  <screen>
 configure: Detected OpenSSL. Enabling https inspection.
 configure: Detected mbedTLS. Enabling https inspection.
+configure: Detected wolfSSL. Enabling https inspection.
 </screen>
 <para>
  If you do not find any of these lines, the output of
