@@ -75,20 +75,21 @@
         check if this feature is enabled at <a href="http://config.privoxy.org/show-status" target=
         "_top">http://config.privoxy.org/show-status</a> in the "Conditional #defines" section.</p>
         <p>If the feature is not enabled, you may need to <a href="installation.html#INSTALLATION-SOURCE">build Privoxy
-        from source</a> to enable it. You can choose to use either <a href=
-        "https://www.trustedfirmware.org/projects/mbed-tls/" target="_top">MbedTLS</a> or <a href=
-        "https://www.openssl.org/" target="_top">OpenSSL</a>. You can choose either one, as they both behave the same
-        for HTTPS inspection.</p>
-        <p>After installing the development libraries for either OpenSSL or MbedTLS, you can run <b class=
-        "COMMAND">./configure</b> with either the <b class="COMMAND">--with-openssl</b> or <b class=
-        "COMMAND">--with-mbedtls</b> option.</p>
+        from source</a> to enable it. You can choose to use <a href="https://www.libressl.org/" target=
+        "_top">LibreSSL</a>, <a href="https://www.trustedfirmware.org/projects/mbed-tls/" target="_top">MbedTLS</a>,
+        <a href="https://www.openssl.org/" target="_top">OpenSSL</a> or <a href="https://www.wolfssl.com/" target=
+        "_top">wolfSSL</a>. You can choose either one, as they behave the same for HTTPS inspection.</p>
+        <p>After installing the development libraries for the TLS library you want to use, you can run <b class=
+        "COMMAND">./configure</b> with the <b class="COMMAND">--with-openssl</b> for LibreSSL and OpenSSL or <b class=
+        "COMMAND">--with-mbedtls</b> or <b class="COMMAND">--with-wolfssl</b> option.</p>
         <p>Check the output of <b class="COMMAND">./configure</b>, it must contain one of these the following two
         lines, otherwise HTTPS inspection will not work:</p>
         <table border="0" bgcolor="#E0E0E0" width="100%">
           <tr>
             <td>
               <pre class="SCREEN">  configure: Detected OpenSSL. Enabling https inspection.
-  configure: Detected mbedTLS. Enabling https inspection.</pre>
+  configure: Detected mbedTLS. Enabling https inspection.
+  configure: Detected wolfSSL. Enabling https inspection.</pre>
             </td>
           </tr>
         </table>
