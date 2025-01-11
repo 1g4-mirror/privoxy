@@ -57,10 +57,10 @@ runtests_wrapper() {
     curl_setup_is_sane "${curl_source_directory}" || exit 1
 
     # Defaults that can be changed through arguments
-    privoxy_ip=127.0.0.1
+    privoxy_ip=127.0.0.1 # changing this currently doesn't work
     privoxy_port=9119
     a_flag="-a"
-    proxy_args="-P http://${privoxy_ip}:${privoxy_port}/ -o HOSTIP=${privoxy_ip}"
+    proxy_args="-P http://${privoxy_ip}:${privoxy_port}/"
     exclude_file_args="-E ${privoxy_source_directory}/tests/cts/curl-test-manifest-for-privoxy"
     testdir_args="-o TESTDIR=${privoxy_source_directory}/tests/cts/data"
     keyword=HTTP
@@ -85,7 +85,7 @@ runtests_wrapper() {
                 shift
                 privoxy_ip="$1"
                 shift
-                proxy_args="-P http://${privoxy_ip}:${privoxy_port}/ -o HOSTIP=${privoxy_ip}"
+                proxy_args="-P http://${privoxy_ip}:${privoxy_port}/"
                 ;;
             "-T")
                 echo "Not setting TESTDIR"
@@ -102,7 +102,7 @@ runtests_wrapper() {
                 shift
                 privoxy_port="$1"
                 shift
-                proxy_args="-P http://${privoxy_ip}:${privoxy_port}/ -o HOSTIP=${privoxy_ip}"
+                proxy_args="-P http://${privoxy_ip}:${privoxy_port}/"
                 ;;
             "-P")
                 # "Obviously" -P means not setting -P
