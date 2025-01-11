@@ -110,9 +110,9 @@
       misidentifies the size of the destination buffer, estimating to hold
       only a single char while in fact the buffer stretches beyond the end of
       the struct socks_op.
-      The issue was originally reported in the NixOS issue tracker at
-      https://github.com/NixOS/nixpkgs/issues/265654
-      prompted by an upgrade of glibc from 2.37-39 to 2.38-0.
+      The issue was originally reported in the
+      <ulink url="https://github.com/NixOS/nixpkgs/issues/265654">NixOS
+      issue tracker</ulink> prompted by an upgrade of glibc from 2.37-39 to 2.38-0.
       Patch submitted by Ingo Blechschmid, joint work with
       @esclear and @richi235.
      </para>
