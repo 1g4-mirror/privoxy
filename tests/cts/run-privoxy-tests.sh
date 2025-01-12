@@ -5,7 +5,7 @@
 #
 # Runs the Privoxy tests based on curl's runtests.pl framework.
 #
-# Copyright (c) 2021 Fabian Keil <fk@fabiankeil.de>
+# Copyright (c) 2021-2025 Fabian Keil <fk@fabiankeil.de>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
