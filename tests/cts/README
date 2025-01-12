@@ -10,7 +10,7 @@ Privoxy sources do:
  git clone https://github.com/curl/curl.git
 
  cd curl
- git checkout -b before-cts-regressions 073268a6de3
+ git checkout -b cts-compatible-with-privoxy-tests curl-7_85_0
 
  # Build curl as described in GIT-INFO. Note that the configure
  # call needs to explicitly choose a TLS library. For example
