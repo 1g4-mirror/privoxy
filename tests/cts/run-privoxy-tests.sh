@@ -119,10 +119,17 @@ main() {
     local test_scenario=""
     local test_scenarios=""
     local start_privoxy=true
+    local ignore_errors=false
+    local scenarios_with_errors=""
 
     while [ -n "$1" ];
     do
         case "$1" in
+            "-c")
+                echo "Continuing in case of test failures."
+                ignore_errors=true
+                shift
+                ;;
             "-r")
                 echo "Not starting privoxy."
                 start_privoxy=false
@@ -146,11 +153,20 @@ main() {
 
     for test_scenario in ${test_scenarios}; do
         if [ "${test_scenario}" = "${UPSTREAM_TEST_SCENARIO}" ]; then
-            run_upstream_tests ${start_privoxy} || exit 1
+            run_upstream_tests ${start_privoxy}
         else
-            run_privoxy_tests ${start_privoxy} "${test_scenario}" || exit 1
+            run_privoxy_tests ${start_privoxy} "${test_scenario}"
+        fi
+        if [ $? != 0 ]; then
+            scenarios_with_errors="${scenarios_with_errors} ${test_scenario}"
+            ${ignore_errors} || exit 1
         fi
     done
+
+    if [ -n "${scenarios_with_errors}" ]; then
+       echo "The following test scenarios had at least one error:${scenarios_with_errors}"
+       exit 1
+    fi
 
     exit 0
 }
