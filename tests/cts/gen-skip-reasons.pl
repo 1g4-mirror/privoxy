@@ -7,7 +7,7 @@
 # Generates an exclude file that can be passed to runtests.pl to skip certain
 # tests that aren't expected to work when run through Privoxy.
 #
-# Copyright (c) 2012-2022 Fabian Keil <fk@fabiankeil.de>
+# Copyright (c) 2012-2025 Fabian Keil <fk@fabiankeil.de>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
