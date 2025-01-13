@@ -68,6 +68,8 @@ sub main() {
             $why = "Known to fail. Uses https and test does not expect the 'Connection established' response from Privoxy";
         } elsif ($testnum eq 339 or $testnum eq 347 or $testnum eq 1591) {
             $why = "Chunked transfer with trailers which Privoxy does not understand. Needs investigating.";
+        } elsif ($testnum eq 389) {
+            $why = "Known to fail depending on the DNS resolver on the system as Privoxy does not implement RFC6761 internally.";
         } elsif ($testnum eq 1052) {
             $why = "Expected to fail. Connection header expected in one response but not in the other. Not yet covered by runtests.pl's proxy mode.";
         } elsif ($testnum eq 1118) {
