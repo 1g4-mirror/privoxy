@@ -35,7 +35,7 @@ test:1310: Known to fail. NTLM-related. Cause not properly diagnosed yet. Privox
 test:1433: Expected to fail. Privoxy will enforce a valid HTTP version number
 test:1506, 1510: Expected to fail when using a proxy. Hardcoded addresses in expected output.
 test:1533: Sends an invalid method. Needs investigating.
-test:1543: Expected to fail as the URL contains spaces. XXX: investigate
+test:1543: Expected to fail as the URL contains spaces. XXX: Looks like a curl bug that should be investigated.
 test:155: Known to fail. Not yet analyzed.
 test:1556: Known to fail. Body value changes from 100008 to 100009. Needs investigating.
 test:158, 246, 565, 579: Known to fail. Not properly analyzed. Looks like Privoxy's continue hack is insufficient.
@@ -60,6 +60,7 @@ test:3014, 3015: Known to fail. Curl adds a Proxy-Connection header while test e
 test:309: Known to fail. Uses https and test does not expect the 'Connection established' response from Privoxy
 test:31, 1105, 1160: Expected to fail. Privoxy normalizes white-space in a cookie.
 test:339, 347, 1591: Chunked transfer with trailers which Privoxy does not understand. Needs investigating.
+test:389: Known to fail depending on the DNS resolver on the system as Privoxy does not implement RFC6761 internally.
 test:412, 413: Known to fail as curl is tunneling the request even though it's vanilla HTTP.
 test:415: Known to fail. Control code in Content-Length header.
 test:435: Expected to fail. Uses %{remote_port} and expects the port of the server and not the one from Privoxy.
