@@ -8271,11 +8271,14 @@ EXTERNAL-FILTER: citation-needed Adds a "[citation needed]" tag to an image. The
  If the feature is not enabled, you may need to
  <link linkend="installation-source">build Privoxy from source</link>
  to enable it.
- You can choose to use <ulink url="https://www.libressl.org/">LibreSSL</ulink>,
+ FEATURE_HTTPS_INSPECTION relies on a TLS library.
+ You can choose between <ulink url="https://www.libressl.org/">LibreSSL</ulink>,
  <ulink url="https://www.trustedfirmware.org/projects/mbed-tls/">MbedTLS</ulink>,
- <ulink url="https://www.openssl.org/">OpenSSL</ulink> or
+ <ulink url="https://www.openssl.org/">OpenSSL</ulink> and
  <ulink url="https://www.wolfssl.com/">wolfSSL</ulink>.
- You can choose either one, as they behave the same for HTTPS inspection.
+ Which TLS library is the best choice depends on various factors
+ including operating system, cpu and license preference so there isn't
+ any recommendation here.
 </para>
 <para>
  After installing the development libraries for the TLS library you
