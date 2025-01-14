@@ -1259,6 +1259,10 @@ cas.criteo.com/
 trc*.taboola.com/
 # Blocked URL = https://aax-eu.amazon-adsystem.com/s/iu3?d=imdb.com&a1=&a2=&cb=453310028601&pId=&r=1&rP=https%3A%2F%2Fwww.imdb.com%2Fname%2Fnm0117857%2F%3Fref_%3Dtt_cl_t_6&encoding=server&prid=0101ff30386eadcce1be353b6dd0ce30239fc4dca18ca56529951fd9f5776995a685&gdpr=1&gdpr_consent=&gdpr_consent_avl=
 .amazon-adsystem.com/
+# Blocked URL = https://html-load.com/contents/linux.slashdot.org/-1/70/984/a/dggnaga6a6acaysuuaga652aw2g7ydg9gag75uygsy2gna66gaayeagg7aya6au26gsgegig9ay2yayagdg7a6g9g7gwl
+html-load.com/
+# Blocked URL = https://1.html-load.com/contents/tech.slashdot.org/-1/70/984/583/a/irrr5ffovojo2uuobhp5fh0h8oph83hudhphy3h0uhkhtdh1hto8th4o8f32ogo9dosojh8huoj5d3fnoyorovhynoyorh0huhto8y2htg5fyobhx5osobolxh2oaoyp9oyphx53ojfo8huh0h4osfh4hy5hpojh8huoj5d3fhp32ghxh8huo8gshugh4ojosnolh6noyoyh4o8opo3wnoyoynolhmhxo6htdf5osh299hx5h4htg5fosoz99
+1.html-load.com/
 
 
 #----------------------------------------------------------------------------
