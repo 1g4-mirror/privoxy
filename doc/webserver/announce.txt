@@ -101,10 +101,13 @@ ChangeLog for Privoxy 4.0.0
   - windows/MYconfigure: Have gcc diagnostics in color.
 
 - Action file improvements:
-  - Block requests for .amazon-adsystem.com/
-  - Block requests to track.venatusmedia.com/
+  - Block requests to .amazon-adsystem.com/
+  - Block requests to 0.css-load.com/
+  - Block requests to html-load.com/ and 1.html-load.com/
+  - Block requests to b.6sc.co/
   - Block requests to i.clean.gg/
   - Block requests to s.cpx.to/
+  - Block requests to track.venatusmedia.com/
   - Block requests to secure-eu.nmrodam.com/
   - Block requests to o2.mouseflow.com/
   - Disable fast-redirects for services.akteneinsichtsportal.de/
