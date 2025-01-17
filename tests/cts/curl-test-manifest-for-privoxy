@@ -50,7 +50,7 @@ test:1933: Known to fail. Modified signature in Authorization header. Needs inve
 test:2032, 2033: Known to fail due to a limitation of the test which doesn't properly deal with interleaved output from two parallel connections
 test:2049, 2052, 2053, 2054: Uses --connect-to. Need investigating.
 test:207: Expected to fail. Test doesn't handle Privoxy's error message. Privoxy doesn't behave correctly, though.
-test:2082, 2084, 2085: Known to fail. Uses %HTTPPORT and does not expect Privoxy's port but the remote one.
+test:2082, 2084, 2085: Known to fail. Uses %%HTTPPORT and does not expect Privoxy's port but the remote one.
 test:2100: Known to fail. Use DNS-over-HTTP.
 test:260: Known to fail. Looks like a curl bug. The URL passed to Privoxy is invalid but the test expect a valid one when not using a proxy
 test:262: Not supposed to work with Privoxy. Privoxy doesn't support nul bytes in headers and neither does the spec.
@@ -63,7 +63,7 @@ test:339, 347, 1591: Chunked transfer with trailers which Privoxy does not under
 test:389: Known to fail depending on the DNS resolver on the system as Privoxy does not implement RFC6761 internally.
 test:412, 413: Known to fail as curl is tunneling the request even though it's vanilla HTTP.
 test:415: Known to fail. Control code in Content-Length header.
-test:435: Expected to fail. Uses %{remote_port} and expects the port of the server and not the one from Privoxy.
+test:435: Expected to fail. Uses %%{remote_port} and expects the port of the server and not the one from Privoxy.
 test:46: Invalid URL and use of --resolv.
 test:501: Not relevant for a proxy.
 test:507: Expected to fail. DNS failures cause a Privoxy error message the test doesn't handle.

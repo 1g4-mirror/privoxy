@@ -157,6 +157,7 @@ sub main() {
         }
 
         next unless defined $why;
+        $why =~ s/%/%%/g; # quote %, since this is used in sprintf() format string
 
         if (exists $related_tests{$why}) {
             $related_tests{$why} = $related_tests{$why} . ", $testnum";
