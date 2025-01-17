@@ -52,7 +52,7 @@ runtests_wrapper() {
     test_dir="$(realpath "${directory_name}")"
     privoxy_source_directory="$(realpath "${test_dir}"/../..)"
     privoxy_lib="${privoxy_source_directory}/tests/cts/privoxy-runtests.pm"
-    curl_source_directory="$(realpath "${privoxy_source_directory}"/../curl)"
+    curl_source_directory=${CURL_SOURCE_DIRECTORY:-"$(realpath "${privoxy_source_directory}"/../curl)"}
 
     curl_setup_is_sane "${curl_source_directory}" || exit 1
 
