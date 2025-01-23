@@ -2303,6 +2303,28 @@ and related issues?</title>
 </para>
 </sect2>
 
+<sect2 renderas="sect3" id="supposedly-infected-tarball">
+<title>Is the Privoxy source tarball infected by a virus?</title>
+
+<para>
+ If you verified the OpenPGP signature the tarball should be fine.
+</para>
+<para>
+ Starting with the 4.0.0 release the source tarball contains a
+ new test framework.
+ Some of the test cases contain hex-encoded data, for exampe see
+ <ulink url="https://www.privoxy.org/gitweb/?p=privoxy.git;a=blob;f=tests/cts/gzip-compression/data/test10;hb=HEAD">gzip decompression test 10</ulink>.
+ While none of the test cases contain viruses they may contain
+ patterns that viruses also contain, for example there is a
+ <ulink url="https://www.privoxy.org/gitweb/?p=privoxy.git;a=blob;f=tests/cts/content-filters/data/test33;hb=HEAD">test
+  case for the obsolete ie-exploits filter</ulink>.
+</para>
+<para>
+ The tests don't get executed automatically and if you feel
+ safer you can remove the tests/cts directory before building
+ Privoxy ...
+</para>
+</sect2>
 
 </sect1>
 
