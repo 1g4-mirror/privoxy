@@ -628,6 +628,7 @@ jb_err parse_http_request(const char *req, struct http_request *http)
 static jb_err compile_pattern(const char *pattern, enum regex_anchoring anchoring,
                               struct pattern_spec *url, pcre2_code **regex)
 {
+   PCRE2_UCHAR error_message[120];
    int errcode;
    const char *fmt = NULL;
    char *rebuf;
@@ -671,8 +672,9 @@ static jb_err compile_pattern(const char *pattern, enum regex_anchoring anchorin
       &error_offset, NULL);
    if (*regex == NULL)
    {
-      log_error(LOG_LEVEL_ERROR, "error compiling %s from %s: %s",
-         pattern, url->spec, rebuf);
+      pcre2_get_error_message(errcode, error_message, sizeof(error_message));
+      log_error(LOG_LEVEL_ERROR, "Failed to compile '%s' (%s) from '%s': %s",
+         pattern, rebuf, url->spec, error_message);
       freez(rebuf);
 
       return JB_ERR_PARSE;
@@ -683,9 +685,10 @@ static jb_err compile_pattern(const char *pattern, enum regex_anchoring anchorin
    if ((ret = pcre2_jit_compile(*regex, PCRE2_JIT_COMPLETE)) &&
        (ret != PCRE2_ERROR_JIT_BADOPTION))
    {
+      pcre2_get_error_message(ret, error_message, sizeof(error_message));
       log_error(LOG_LEVEL_ERROR,
-         "Unexpected error enabling JIT compilation for %s from %s: %s",
-         pattern, url->spec, rebuf);
+         "Failed to JIT-compile '%s' (%s) from '%s': %s",
+         pattern, rebuf, url->spec, error_message);
       freez(rebuf);
 
       return JB_ERR_PARSE;
