@@ -2202,7 +2202,15 @@ static jb_err show_defines(struct map *exports)
 #else
          0,
 #endif
-      }
+      },
+      {
+         "FEATURE_ZSTD",
+#ifdef FEATURE_ZSTD
+         1,
+#else
+         0,
+#endif
+      },
    };
 
    for (i = 0; i < SZ(features); i++)

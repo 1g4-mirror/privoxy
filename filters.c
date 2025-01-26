@@ -2486,6 +2486,9 @@ static jb_err prepare_for_filtering(struct client_state *csp)
 #ifdef FEATURE_BROTLI
       || (csp->content_type & CT_BROTLI)
 #endif
+#ifdef FEATURE_ZSTD
+      || (csp->content_type & CT_ZSTD)
+#endif
        )
    {
       if (0 == csp->iob->eod - csp->iob->cur)
@@ -2511,6 +2514,9 @@ static jb_err prepare_for_filtering(struct client_state *csp)
          csp->content_type &= ~CT_DEFLATE;
 #ifdef FEATURE_BROTLI
          csp->content_type &= ~CT_BROTLI;
+#endif
+#ifdef FEATURE_ZSTD
+         csp->content_type &= ~CT_ZSTD;
 #endif
       }
    }

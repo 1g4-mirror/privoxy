@@ -67,6 +67,9 @@
 #ifdef FEATURE_BROTLI
 #include <brotli/decode.h>
 #endif
+#ifdef FEATURE_ZSTD
+#include <zstd.h>
+#endif
 
 #if !defined(_WIN32)
 #include <unistd.h>
@@ -497,6 +500,98 @@ static jb_err decompress_iob_with_brotli(struct client_state *csp)
 }
 #endif
 
+
+#ifdef FEATURE_ZSTD
+/*********************************************************************
+ *
+ * Function    :  decompress_iob_with_zstd
+ *
+ * Description :  Decompress buffered page using zstd.
+ *
+ * Parameters  :
+ *          1  :  csp = Current client state (buffers, headers, etc...)
+ *
+ * Returns     :  JB_ERR_OK on success,
+ *                JB_ERR_MEMORY if out-of-memory limit reached, and
+ *                JB_ERR_COMPRESS if error decompressing buffer.
+ *
+ *********************************************************************/
+static jb_err decompress_iob_with_zstd(struct client_state *csp)
+{
+   ZSTD_DCtx *dctx;
+   ZSTD_inBuffer zstd_input;
+   ZSTD_outBuffer zstd_output;
+   char *decoded_buffer;
+   size_t result;
+   size_t decoded_buffer_size;
+   size_t encoded_size;
+   enum { MAX_COMPRESSION_FACTOR = 15 };
+
+   dctx = ZSTD_createDCtx();
+   if (dctx == NULL)
+   {
+      log_error(LOG_LEVEL_ERROR,
+         "Failed to zstd-decompress content. ZSTD_createDCtx() failed!");
+      return JB_ERR_COMPRESS;
+   }
+
+   encoded_size = (size_t)(csp->iob->eod - csp->iob->cur);
+   decoded_buffer_size = encoded_size * MAX_COMPRESSION_FACTOR;
+
+   if (decoded_buffer_size > csp->config->buffer_limit)
+   {
+      log_error(LOG_LEVEL_ERROR,
+         "Buffer limit reached before decompressing iob with zstd");
+      return JB_ERR_MEMORY;
+   }
+
+   decoded_buffer = malloc(decoded_buffer_size);
+   if (decoded_buffer == NULL)
+   {
+      log_error(LOG_LEVEL_ERROR,
+         "Failed to allocate %lu bytes for zstd decompression",
+         decoded_buffer_size);
+      return JB_ERR_MEMORY;
+   }
+
+   zstd_input.src = csp->iob->cur;
+   zstd_input.size = encoded_size;
+   zstd_input.pos = 0;
+
+   zstd_output.dst = decoded_buffer;
+   zstd_output.size = decoded_buffer_size;
+   zstd_output.pos = 0;
+
+   result = ZSTD_decompressStream(dctx, &zstd_output , &zstd_input);
+   ZSTD_freeDCtx(dctx);
+   if (result == 0)
+   {
+      /*
+       * Update the iob, since the decompression was successful.
+       */
+      freez(csp->iob->buf);
+      csp->iob->buf  = decoded_buffer;
+      csp->iob->cur  = csp->iob->buf;
+      csp->iob->eod  = csp->iob->cur + zstd_output.pos;
+      csp->iob->size = decoded_buffer_size;
+
+      log_error(LOG_LEVEL_RE_FILTER,
+         "Decompression successful. Old size: %lu, new size: %lu.",
+         encoded_size, zstd_output.pos);
+
+      return JB_ERR_OK;
+   }
+   else
+   {
+      log_error(LOG_LEVEL_ERROR, "Failed to decompress buffer with zstd");
+      freez(decoded_buffer);
+
+      return JB_ERR_COMPRESS;
+   }
+}
+#endif
+
+
 /*********************************************************************
  *
  * Function    :  decompress_iob
@@ -556,6 +651,13 @@ jb_err decompress_iob(struct client_state *csp)
    if (csp->content_type & CT_BROTLI)
    {
       return decompress_iob_with_brotli(csp);
+   }
+#endif
+
+#ifdef FEATURE_ZSTD
+   if (csp->content_type & CT_ZSTD)
+   {
+      return decompress_iob_with_zstd(csp);
    }
 #endif
 
@@ -2666,6 +2768,15 @@ static jb_err server_content_encoding(struct client_state *csp, char **header)
       csp->content_type |= CT_TABOO;
 #endif
    }
+   else if (strstr(*header, "zstd"))
+   {
+#ifdef FEATURE_ZSTD
+      /* Mark for zstd decompression */
+      csp->content_type |= CT_ZSTD;
+#else
+      csp->content_type |= CT_TABOO;
+#endif
+   }
    else if (strstr(*header, "compress"))
    {
       /*
@@ -2735,6 +2846,9 @@ static jb_err server_adjust_content_encoding(struct client_state *csp, char **he
       && ((csp->content_type & (CT_GZIP | CT_DEFLATE))
 #ifdef FEATURE_BROTLI
          || (csp->content_type & CT_BROTLI)
+#endif
+#ifdef FEATURE_ZSTD
+         || (csp->content_type & CT_ZSTD)
 #endif
          )
       )

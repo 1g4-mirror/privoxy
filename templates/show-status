@@ -395,6 +395,12 @@
               <td>Allows to decompress gzip and zlib compressed documents for filtering.
                 Requires external zlib library.</td>
             </tr>
+            <tr>
+              <td><code>FEATURE_ZSTD</code></td>
+              <td>@if-FEATURE_ZSTD-then@ Yes @else-not-FEATURE_ZSTD@ No @endif-FEATURE_ZSTD@</td>
+              <td>Allows to decompress Zstandard-compressed content for filtering.
+                Requires external zstd library.</td>
+            </tr>
           </table>
       </td>
     </tr>

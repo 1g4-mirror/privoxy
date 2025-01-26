@@ -513,13 +513,14 @@ struct iob
 #define CT_GZIP    0x0010U /**< gzip-compressed data. */
 #define CT_DEFLATE 0x0020U /**< zlib-compressed data. */
 #define CT_BROTLI  0x0040U /**< Brotli-compressed data. */
+#define CT_ZSTD    0x0080U /**< Zstandard-compressed data. */
 
 /**
  * Flag to signal that the server declared the content type,
  * so we can differentiate between unknown and undeclared
  * content types.
  */
-#define CT_DECLARED 0x0080U
+#define CT_DECLARED 0x0100U
 
 /**
  * The mask which includes all actions.
