@@ -5,7 +5,7 @@
  * Purpose     :  Declares functions to match URLs against URL
  *                patterns.
  *
- * Copyright   :  Written by and Copyright (C) 2001-2020
+ * Copyright   :  Written by and Copyright (C) 2001-2025
  *                the Privoxy team. https://www.privoxy.org/
  *
  *                Based on the Internet Junkbuster originally written
