@@ -79,9 +79,9 @@ dnl set status to "UNRELEASED" whenever git differs from the last
 dnl release and no new release is near.
 
 VERSION_MAJOR=4
-VERSION_MINOR=0
+VERSION_MINOR=1
 VERSION_POINT=0
-CODE_STATUS="stable"
+CODE_STATUS="UNRELEASED"
 
 dnl Timestamp (date +%s) used by the mtree-spec target.
 dnl Should be updated before releases but forgetting it isn't critical.
