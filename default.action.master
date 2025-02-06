@@ -283,7 +283,6 @@
 #     quicktime-kioskmode: Make Quicktime movies saveable.
 #     fun:                 Text replacements for subversive browsing fun!
 #     crude-parental:      Crude parental filtering. Note that this filter doesn't work reliably.
-#     ie-exploits:         Disable some known Internet Explorer bug exploits.
 #     site-specifics:      Cure for site-specific problems. Don't apply generally!
 #     no-ping:             Removes non-standard ping attributes in <a> and <area> tags.
 #     google:              CSS-based block for Google text ads. Also removes a width limitation and the toolbar advertisement.
@@ -566,7 +565,6 @@ standard.Cautious
 +filter{banners-by-size} \
 +filter{webbugs} \
 +filter{jumping-windows} \
-+filter{ie-exploits} \
 +hide-from-header{block} \
 +hide-referrer{conditional-block} \
 +session-cookies-only \
