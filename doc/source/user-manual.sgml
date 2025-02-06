@@ -4453,10 +4453,6 @@ another.example.com/testing
    </para>
     <screen>+filter{crude-parental}      # Crude parental filtering. Note that this filter doesn't work reliably.</screen>
    <para>
-    <anchor id="filter-ie-exploits">
-   </para>
-    <screen>+filter{ie-exploits}         # Disable some known Internet Explorer bug exploits.</screen>
-   <para>
     <anchor id="filter-site-specifics">
    </para>
     <screen>+filter{site-specifics}      # Cure for site-specific problems. Don't apply generally!</screen>
@@ -7857,20 +7853,6 @@ pre-defined filters for your convenience:
  </varlistentry>
 
  <varlistentry>
-  <term><emphasis>ie-exploits</emphasis></term>
-  <listitem>
-   <para>
-    An experimental collection of text replacements to disable malicious HTML and JavaScript
-    code that exploits known security holes in Internet Explorer.
-   </para>
-   <para>
-    Presently, it only protects against Nimda and a cross-site scripting bug, and
-    would need active maintenance to provide more substantial protection.
-   </para>
-  </listitem>
- </varlistentry>
-
- <varlistentry>
   <term><emphasis>site-specifics</emphasis></term>
   <listitem>
    <para>
@@ -9183,7 +9165,6 @@ In file: default.action <guibutton>[ View ]</guibutton> <guibutton>[ Edit ]</gui
  +filter {banners-by-size}
  +filter {webbugs}
  +filter {jumping-windows}
- +filter {ie-exploits}
  +hide-from-header {block}
  +hide-referrer {forge}
  +session-cookies-only
@@ -9292,7 +9273,6 @@ Final results:
 +filter {banners-by-size}
 +filter {webbugs}
 +filter {jumping-windows}
-+filter {ie-exploits}
 -filter {google}
 -filter {yahoo}
 -filter {msn}
@@ -9407,7 +9387,6 @@ In file: default.action <guibutton>[ View ]</guibutton> <guibutton>[ Edit ]</gui
  +filter {banners-by-size}
  +filter {webbugs}
  +filter {jumping-windows}
- +filter {ie-exploits}
  -filter {google}
  -filter {yahoo}
  -filter {msn}
