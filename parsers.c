@@ -1793,6 +1793,51 @@ static jb_err filter_header(struct client_state *csp, char **header)
 
 /*********************************************************************
  *
+ * Function    :  connection_header_contains_keep_alive_keyword
+ *
+ * Description :  Checks wether or not a Connection header contains
+ *                the keep-alive keyword.
+ *
+ * Parameters  :
+ *          1  :  header = The Connection header to check.
+ *
+ * Returns     :  TRUE or FALSE.
+ *
+ *********************************************************************/
+static int connection_header_contains_keep_alive_keyword(const char *header)
+{
+   char *header_content;
+   char *keywords[4];
+   int segments;
+   int keep_alive_keyword_present = FALSE;
+
+   header_content = strdup(header+11);
+   if (header_content == NULL)
+   {
+      log_error(LOG_LEVEL_ERROR,
+         "Out of memory while looking for keep-alive keyword in %s", header);
+      return FALSE;
+   }
+
+   segments = ssplit(header_content, " ,", keywords, SZ(keywords));
+   while (segments-- > 0)
+   {
+      if (!strcmpic(keywords[segments], "keep-alive"))
+      {
+         keep_alive_keyword_present = TRUE;
+         break;
+      }
+   }
+
+   freez(header_content);
+
+   return keep_alive_keyword_present;
+
+}
+
+
+/*********************************************************************
+ *
  * Function    :  server_connection
  *
  * Description :  Makes sure a proper "Connection:" header is
@@ -1811,7 +1856,7 @@ static jb_err filter_header(struct client_state *csp, char **header)
  *********************************************************************/
 static jb_err server_connection(struct client_state *csp, char **header)
 {
-   if (!strcmpic(*header, "Connection: keep-alive")
+   if (connection_header_contains_keep_alive_keyword(*header)
 #ifdef FEATURE_CONNECTION_KEEP_ALIVE
     && !(csp->flags & CSP_FLAG_SERVER_SOCKET_TAINTED)
 #endif
