@@ -1870,8 +1870,20 @@ static jb_err server_connection(struct client_state *csp, char **header)
 
       if ((csp->flags & CSP_FLAG_CLIENT_CONNECTION_KEEP_ALIVE))
       {
-         log_error(LOG_LEVEL_HEADER,
-            "Keeping the server header '%s' around.", *header);
+         if (!strcmpic(*header, "Connection: keep-alive"))
+         {
+            log_error(LOG_LEVEL_HEADER,
+               "Keeping the server header '%s' around.", *header);
+         }
+         else
+         {
+            char *old_header = *header;
+
+            *header = strdup_or_die("Connection: keep-alive");
+            log_error(LOG_LEVEL_HEADER, "Replaced: \'%s\' with \'%s\'",
+               old_header, *header);
+            freez(old_header);
+         }
       }
       else
 #endif /* FEATURE_CONNECTION_KEEP_ALIVE */
