@@ -2373,14 +2373,6 @@ media.example.com/.*banners
  for the beginning of a line).
 </para>
 
-<para>
- Please also note that matching in the path is <emphasis>CASE INSENSITIVE</emphasis>
- by default, but you can switch to case sensitive at any point in the pattern by using the
- <quote>(?-i)</quote> switch: <literal>www.example.com/(?-i)PaTtErN.*</literal> will match
- only documents whose path starts with <literal>PaTtErN</literal> in
- <emphasis>exactly</emphasis> this capitalization.
-</para>
-
 <variablelist>
  <varlistentry>
   <term><literal>.example.com/.*</literal></term>

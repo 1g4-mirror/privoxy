@@ -123,18 +123,6 @@
 # man perlre (also available at https://perldoc.perl.org/perlre) for
 # details. The appendix to our User Manual also has some detail.
 #
-# Please note that matching in the path is CASE INSENSITIVE by default, but
-# you can switch to case sensitive by starting the pattern with the "(?-i)"
-# switch:
-#
-# www.example.com/(?-i)PaTtErN.*
-#   will match only documents whose path starts with PaTtErN in exactly this
-#   capitalization.
-#
-# Partially case-sensitive and partially case-insensitive patterns are
-# possible, but the rules about splitting them up are extremely complex
-# - see the PCRE documentation for more information.
-#
 #############################################################################
 # Action Syntax
 #############################################################################
