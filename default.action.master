@@ -546,6 +546,7 @@ allow-ads   = -block -filter{banners-by-size} -filter{banners-by-link}
 +client-header-tagger{image-requests} \
 +client-header-tagger{range-requests} \
 +hide-from-header{block} \
++server-header-tagger{content-type} \
 +set-image-blocker{pattern} \
 }
 standard.Cautious
@@ -567,6 +568,7 @@ standard.Cautious
 +filter{jumping-windows} \
 +hide-from-header{block} \
 +hide-referrer{conditional-block} \
++server-header-tagger{content-type} \
 +session-cookies-only \
 +set-image-blocker{pattern} \
 }
@@ -608,6 +610,7 @@ standard.Medium
 +hide-referrer{conditional-block} \
 +limit-connect{,} \
 +overwrite-last-modified{randomize} \
++server-header-tagger{content-type} \
 +set-image-blocker{pattern} \
 }
 standard.Advanced
