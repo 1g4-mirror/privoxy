@@ -38,6 +38,9 @@ export CPPFLAGS=""
 export LDFLAGS=""
 # start with initially empty flags
 
+export LIBS=""
+# start with initially empty flags
+
 
 CFLAGS="${CFLAGS} -fdiagnostics-color=always"
 # Have gcc diagnostics be in color even if stderr is not going to a terminal.
@@ -158,22 +161,28 @@ fi
 CPPFLAGS="${CPPFLAGS} -I${inc}"
 LDFLAGS="${LDFLAGS} -L${lib}"
 
+# pick a library for doing https interception (ie. playing man-in-the-middle)
+#   mbedtls
+#   none
+mitmlib="mbedtls"
+
+if [ "$mitmlib" = "mbedtls" ]; then
+MITMOPT="--with-mbedtls"
+
 # mbedtls
-## https://github.com/Mbed-TLS/mbedtls/releases/tag/v2.16.12
-##   This is the last release of the 2.16 long-time support branch.
-##   Users who want a long-time branch should move to mbedtls-2.28,
-##   which is backward-compatible and will be supported for at least
-##   3 years.
-# Get the 2.28.x mbedtls library from  https://github.com/Mbed-TLS/mbedtls/tags
-# Release Notes: https://github.com/Mbed-TLS/mbedtls/releases/tag/v2.28.4
+# Get the 3.6.x mbedtls library from  https://github.com/Mbed-TLS/mbedtls/tags
+# Release Notes: https://github.com/Mbed-TLS/mbedtls/releases?q=3.6.3
 
-##MITMOPT="--with-mbedtls"
-##inc="/source/mbedtls-2.28.4/include"
-##lib="/source/mbedtls-2.28.4/library"
-##CPPFLAGS="${CPPFLAGS} -I${inc}"
-##LDFLAGS="${LDFLAGS} -L${lib}"
+inc="/source/mbedtls-3.6.3/include"
+lib="/source/mbedtls-3.6.3/library"
+CPPFLAGS="${CPPFLAGS} -I${inc}"
+LDFLAGS="${LDFLAGS} -L${lib}"
+LIBS="${LIBS} -lbcrypt"
+#  fixes the  undefined reference to `BCryptGenRandom@16'
 
-MITMOPT="--with-openssl"
+else
+  MITMOPT=""
+fi
 
 # brotli
 # Get the brotli library from  https://github.com/google/brotli/releases
