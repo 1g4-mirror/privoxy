@@ -163,6 +163,7 @@ LDFLAGS="${LDFLAGS} -L${lib}"
 
 # pick a library for doing https interception (ie. playing man-in-the-middle)
 #   mbedtls
+#   openssl
 #   none
 mitmlib="mbedtls"
 
