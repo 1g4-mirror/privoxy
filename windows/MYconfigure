@@ -180,6 +180,14 @@ LDFLAGS="${LDFLAGS} -L${lib}"
 LIBS="${LIBS} -lbcrypt"
 #  fixes the  undefined reference to `BCryptGenRandom@16'
 
+
+elif [ "$mitmlib" = "openssl" ]; then
+MITMOPT="--with-openssl"
+
+# OpenSSL
+#   using the cygwin supplied mingw32 openssl library
+
+
 else
   MITMOPT=""
 fi
