@@ -599,7 +599,7 @@ s@(<div) (class="hx_cookie-banner)@$1 style="display:none;" $2@
 #################################################################################
 FILTER: imdb Removes some ads on IMDb.
 
-s@(<div id="top_ad_wrapper")@$1 style="display:none"@
+s@(<div id="inline20_responsive_wrapper")[^>]*@$1 style="display:none"@
 s@<iframe[^>]*id="top_ad"[^>]*>.*</iframe>@<!-- Iframe removed by Privoxy's imdb filter -->@
 s@<iframe[^>]*onload="doWithAds.call[^>]*></iframe>@<!-- Iframe removed by Privoxy's imdb filter -->@g
 

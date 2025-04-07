@@ -19,7 +19,7 @@ X-Control: swsclose
 
 # pcrs command 1:
 
-<div id="top_ad_wrapper"
+<div id="inline20_responsive_wrapper" class="slot_wrapper nas-spacing nas-dark" style="position:relative">
 
 # pcrs command 2:
 
@@ -38,13 +38,13 @@ Date: Thu, 22 Jul 2010 11:22:33 GMT
 Connection: close
 Content-Type: text/html
 X-Control: swsclose
-Content-Length: 259
+Content-Length: 273
 
 # Here are some strings the imdb filter should filter:
 
 # pcrs command 1:
 
-<div id="top_ad_wrapper" style="display:none"
+<div id="inline20_responsive_wrapper" style="display:none">
 
 # pcrs command 2:
 
