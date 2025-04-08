@@ -2231,6 +2231,13 @@ sub handle_loglevel_error($) {
 
         # The socks connection timed out after 60 seconds.
         $c =~ s@(?<=after )(\d+)@$h{'Number'}$1$h{'Standard'}@;
+
+    } elsif ($c =~ m/^Skipped filter /) {
+
+        # Skipped filter 'banners-by-size' after job number 1: match limit exceeded (-47)
+        $c =~ s@(?<=filter ')([^']+)@$h{'Filter'}$1$h{'Standard'}@;
+        $c =~ s@(?<=number )(\d+)@$h{'Number'}$1$h{'Standard'}@;
+        $c =~ s@(?<=exceeded \(-)(\d+)@$h{'Number'}$1$h{'Standard'}@;
     }
 
     # XXX: There are probably more messages that deserve highlighting.
