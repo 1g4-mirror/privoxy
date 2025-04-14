@@ -175,6 +175,7 @@ sub getpartattr {
 # about unknown tests
 sub logmsg {
     for (@_) {
+        next unless defined($_);
         next if /^Warning: test\d+ not present in/;
         print "$_";
     }
