@@ -3975,7 +3975,8 @@ static void handle_established_connection(struct client_state *csp)
 
             if (!csp->headers->first->str)
             {
-               log_error(LOG_LEVEL_ERROR, "header search: csp->headers->first->str == NULL, assert will be called");
+               log_error(LOG_LEVEL_ERROR, "Header search failed unexpectedly: "
+                  "csp->headers->first->str == NULL.");
             }
             assert(csp->headers->first->str);
 
