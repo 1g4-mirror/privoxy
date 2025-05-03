@@ -4137,9 +4137,7 @@ static void handle_established_connection(struct client_state *csp)
                       * to the client... it probably can't hear us anyway.
                       */
                      mark_server_socket_tainted(csp);
-#ifdef FEATURE_HTTPS_INSPECTION
                      close_client_and_server_ssl_connections(csp);
-#endif
                      return;
                   }
                }
