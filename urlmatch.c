@@ -122,6 +122,7 @@ jb_err init_domain_components(struct http_request *http)
    size_t size;
    char *p;
 
+   assert(http->dbuffer == NULL);
    http->dbuffer = strdup_or_die(http->host);
 
    /* map to lower case */
@@ -146,6 +147,7 @@ jb_err init_domain_components(struct http_request *http)
    /* save a copy of the pointers in dvec */
    size = (size_t)http->dcount * sizeof(*http->dvec);
 
+   assert(http->dvec == NULL);
    http->dvec = malloc_or_die(size);
 
    memcpy(http->dvec, vec, size);
