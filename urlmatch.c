@@ -326,6 +326,11 @@ jb_err parse_http_url(const char *url, struct http_request *http, int require_pr
 
    if (!host_available)
    {
+      if (!require_protocol)
+      {
+         log_error(LOG_LEVEL_ERROR, "No host found in request line.");
+         return JB_ERR_PARSE;
+      }
       /* Without host, there is nothing left to do here */
       return JB_ERR_OK;
    }
