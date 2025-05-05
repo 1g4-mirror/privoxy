@@ -5698,7 +5698,7 @@ int main(int argc, char **argv)
       }
       else
 
-#endif /* defined(_WIN32) && !defined(_WIN_CONSOLE) */
+#endif /* !defined(_WIN32) || defined(_WIN_CONSOLE) */
       {
          configfile = argv[argc_pos];
       }
