@@ -1895,6 +1895,22 @@ static jb_err server_connection(struct client_state *csp, char **header)
          freez(old_header);
       }
    }
+   else
+   {
+      if (strcmpic(*header, "Connection: close"))
+      {
+         /*
+          * This can happen if there are "too many" keywords
+          * in the connection header.
+          */
+         char *old_header = *header;
+
+         *header = strdup_or_die("Connection: close");
+         log_error(LOG_LEVEL_HEADER, "Replaced: \'%s\' with \'%s\'",
+            old_header, *header);
+         freez(old_header);
+      }
+   }
 
    /* Signal server_connection_adder() to return early. */
    csp->flags |= CSP_FLAG_SERVER_CONNECTION_HEADER_SET;
