@@ -1793,7 +1793,7 @@ static jb_err filter_header(struct client_state *csp, char **header)
 
 /*********************************************************************
  *
- * Function    :  connection_header_contains_keep_alive_keyword
+ * Function    :  keep_alive_keyword_detected
  *
  * Description :  Checks wether or not a Connection header contains
  *                the keep-alive keyword.
@@ -1801,10 +1801,11 @@ static jb_err filter_header(struct client_state *csp, char **header)
  * Parameters  :
  *          1  :  header = The Connection header to check.
  *
- * Returns     :  TRUE or FALSE.
+ * Returns     :  TRUE or FALSE. FALSE is also returned if "too many"
+ *                keywords are present.
  *
  *********************************************************************/
-static int connection_header_contains_keep_alive_keyword(const char *header)
+static int keep_alive_keyword_detected(const char *header)
 {
    char *header_content;
    char *keywords[4];
@@ -1856,7 +1857,7 @@ static int connection_header_contains_keep_alive_keyword(const char *header)
  *********************************************************************/
 static jb_err server_connection(struct client_state *csp, char **header)
 {
-   if (connection_header_contains_keep_alive_keyword(*header)
+   if (keep_alive_keyword_detected(*header)
 #ifdef FEATURE_CONNECTION_KEEP_ALIVE
     && !(csp->flags & CSP_FLAG_SERVER_SOCKET_TAINTED)
 #endif
