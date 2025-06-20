@@ -2672,11 +2672,6 @@ tr.anp.se/
 {+filter{tiny-textforms}}
 .sourceforge.net/tracker
 
-{+downgrade-http-version}
-#MASTER# COMMENTS: This section not checked 10/17/06 HB
-#MASTER# REMARKS: This is work-around for CUPS http configuration.
-:631
-
 #MASTER# REMARKS: If Privoxy is disabled, requests for config.privoxy.org/
 #MASTER# REMARKS: reach privoxy.org and are redirected to privoxy.org/config.
 #MASTER# REMARKS: The instructions tell the user to reload the page with
