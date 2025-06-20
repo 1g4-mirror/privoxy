@@ -2731,7 +2731,7 @@ config.privoxy.org/
 .yimg.com/g/combo/1\?event-custom/
 
 {-filter{content-cookies}}
-# Sticky Actions = -block
+# Sticky Actions = -filter{content-cookies}
 # URL = http://www.flickr.com/
 .flickr.com/
 
