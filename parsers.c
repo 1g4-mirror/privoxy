@@ -1857,6 +1857,14 @@ static int keep_alive_keyword_detected(const char *header)
  *********************************************************************/
 static jb_err server_connection(struct client_state *csp, char **header)
 {
+   if ((csp->flags & CSP_FLAG_SERVER_CONNECTION_HEADER_SET) != 0)
+   {
+      log_error(LOG_LEVEL_HEADER,
+         "Removing \'%s\' header to only parse and forward one.", *header);
+      freez(*header);
+
+      return JB_ERR_OK;
+   }
    if (keep_alive_keyword_detected(*header)
 #ifdef FEATURE_CONNECTION_KEEP_ALIVE
     && !(csp->flags & CSP_FLAG_SERVER_SOCKET_TAINTED)
