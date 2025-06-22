@@ -768,7 +768,8 @@ clean:
 	$(RM) a.out $(OBJS) $(W32_FILES) $(W32_INIS) $(PROGRAM) default.action \
 		config.base config.tmp \
 		`find . \( -name TAGS -o -name tags \) -a -not -path "./.git/*"` \
-		`find . -name "*.orig" -a -not -path "./.git/*"`
+		`find . -name "*.orig" -a -not -path "./.git/*"` \
+		`find ./tests/cts/logs/ -name "*.log"`
 
 clean-editor-files:
 	$(RM) `find . -name "*~"`
