@@ -1,6 +1,7 @@
 privoxy (4.1.0~gitsnapshot-1) UNRELEASED; urgency=medium
 
   * Unreleased GIT snapshot.
+  * Update 25_standard_medium to changed upstream.
 
  -- Roland Rosenfeld <roland@debian.org>  Sun, 22 Jun 2025 15:12:38 +0200
 
