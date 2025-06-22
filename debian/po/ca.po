@@ -1,0 +1,34 @@
+# Catalan translation of privoxy's debconf messages
+# Copyright © 2025 Free Software Foundation, Inc.
+# This file is distributed under the same license as the privoxy package.
+# poc senderi <pocsenderi@protonmail.com>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: privoxy\n"
+"Report-Msgid-Bugs-To: privoxy@packages.debian.org\n"
+"POT-Creation-Date: 2016-04-08 17:17+0200\n"
+"PO-Revision-Date: 2025-01-26 23:35+0100\n"
+"Language: ca\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Last-Translator: poc senderi <pocsenderi@protonmail.com>\n"
+"Language-Team: Catalan <debian-l10n-catalan@lists.debian.org>\n"
+"X-Generator: Poedit 2.4.2\n"
+
+#. Type: string
+#. Description
+#: ../templates:1001
+msgid "Adresses on with Privoxy listens:"
+msgstr "Adreces on el Privoxy escolta:"
+
+#. Type: string
+#. Description
+#: ../templates:1001
+msgid ""
+"Please enter a space separated list of address:port combinations on which "
+"Privoxy will listen for client requests."
+msgstr ""
+"Introduïu una llista separada per espais amb les combinacions adreça:port "
+"en què el Privoxy escoltarà les sol·licituds del clients."

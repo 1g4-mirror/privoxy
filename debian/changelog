@@ -1,8 +1,17 @@
-privoxy (4.0.1~gitsnapshot-1) UNRELEASED; urgency=medium
+privoxy (4.1.0~gitsnapshot-1) UNRELEASED; urgency=medium
 
   * Unreleased GIT snapshot.
 
- -- Roland Rosenfeld <roland@debian.org>  Fri, 31 Jan 2025 16:05:14 +0100
+ -- Roland Rosenfeld <roland@debian.org>  Sun, 22 Jun 2025 15:12:38 +0200
+
+privoxy (4.0.0-2) unstable; urgency=medium
+
+  * Add ca debconf translation.  Thanks to Carles Pina i Estany.
+  * Update debian/upstream/signing-key.asc.
+  * d/test/check-ssl : handle http proxy configuration (LP: #2097351).
+    Thanks to Hector Cao <hector.cao@canonical.com> for providing a patch.
+
+ -- Roland Rosenfeld <roland@debian.org>  Wed, 05 Feb 2025 17:38:23 +0100
 
 privoxy (4.0.0-1) unstable; urgency=medium
 

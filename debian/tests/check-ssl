@@ -3,7 +3,7 @@
 # Run privoxy-regression-test.pl --check-bad-ssl
 # and check https://www.howsmyssl.com/
 #
-# (c) 2024 Roland Rosenfeld <roland@debian.org>
+# (c) 2024-2025 Roland Rosenfeld <roland@debian.org>
 
 PORT=8119
 
@@ -58,6 +58,24 @@ sed -e "s/^listen-address.*/listen-address 127.0.0.1:$PORT/" \
     -e "s%^#trusted-cas-file.*%trusted-cas-file $CASFILE%" \
     < /usr/share/privoxy/config > "$CONFIG"
 echo "actionsfile $ACTION" >> "$CONFIG"
+
+# some autopkgtest execution environment uses proxy for internet access
+# in that case, this makes this test fail because privoxy cannot access
+# different internet resources
+# we have to configure privoxy to use the proxy configuration if present
+# in order to do that, we use the forward primitive in the privoxy configuration
+# file
+if [ -n "$http_proxy" ]; then
+    # remove http:// and https:// prefix to be compliant with forward
+    # directive input format
+    proxy_url=$(echo "${http_proxy}" | sed -E 's/^\s*.*:\/\///g')
+    if [ -n "${proxy_url}" ]; then
+        forward_conf_snippet="forward  /  ${proxy_url}"
+    fi
+fi
+if [ -n "${forward_conf_snippet}" ]; then
+    echo "${forward_conf_snippet}" >> "$CONFIG"
+fi
 
 echo "Starting privoxy on port $PORT"
 $PRIVOXY --pidfile "$PIDFILE" --no-daemon "$CONFIG" > "$DAEMONOUT" 2>&1 &
