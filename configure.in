@@ -887,8 +887,8 @@ AC_CHECK_LIB(pcre2-8, pcre2_compile_8, [
       AC_EGREP_HEADER(pcre2_pattern_info, pcre2.h,[have_pcre2=yes; AC_DEFINE(HAVE_PCRE2)], [AC_MSG_WARN([[pcre2 old version installed]]); have_pcre2=no])
    ], [
       AC_CHECK_HEADER(pcre2/pcre2.h, [
-         AC_EGREP_HEADER(pcre2_pattern_info, pcre2/pcre2.h, [have_pcre2=yes; AC_DEFINE(PCRE2_H_IN_SUBDIR)], [AC_MSG_WARN([[pcre2 old version installed]]); have_pcre2=no])
-      ], [have_pcre2=no])
+         AC_EGREP_HEADER(pcre2_pattern_info, pcre2/pcre2.h, [have_pcre2=yes; AC_DEFINE(HAVE_PCRE2) AC_DEFINE(PCRE2_H_IN_SUBDIR)], [AC_MSG_WARN([[pcre2 old version installed]]); have_pcre2=no])
+      ], [have_pcre2=no], [#define PCRE2_CODE_UNIT_WIDTH 8])
    ], [#define PCRE2_CODE_UNIT_WIDTH 8])
 ], [have_pcre2=no])
 

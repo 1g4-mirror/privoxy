@@ -36,7 +36,11 @@
 #define PCRE2_CODE_UNIT_WIDTH 8
 #define PCREn(x) PCRE2_ ## x
 #ifndef _PCRE2_H
-#include <pcre2.h>
+#  ifdef PCRE2_H_IN_SUBDIR
+#    include <pcre2/pcre2.h>
+#  else
+#    include <pcre2.h>
+#  endif
 #endif
 
 /*
