@@ -2492,6 +2492,8 @@ kggp.de/
 freebsdfoundation.org/
 # URL = https://freiheitsfoo.de/2022/10/03/wahlplakat-show-nds-ltw-2022/
 .freiheitsfoo.de/
+# URL = https://github.com/AFLplusplus/AFLplusplus/
+github.com/
 
 {-filter{banners-by-link}}
 # Sticky Actions = -filter{banners-by-link}
