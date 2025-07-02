@@ -2699,7 +2699,7 @@ static jb_err process_encrypted_request_headers(struct client_state *csp)
    request_line = get_header(csp->client_iob);
    if (request_line == NULL)
    {
-      log_error(LOG_LEVEL_ERROR, "Failed to get the encrypted request line");
+      log_error(LOG_LEVEL_ERROR, "Failed to get the encrypted request line.");
       ssl_send_data_delayed(&(csp->ssl_client_attr),
          (const unsigned char *)CHEADER, strlen(CHEADER), get_write_delay(csp));
       return JB_ERR_PARSE;
@@ -2767,7 +2767,7 @@ static jb_err process_encrypted_request_headers(struct client_state *csp)
        * elsewhere failed.
        */
       log_error(LOG_LEVEL_ERROR,
-         "Failed to get the encrypted request destination");
+         "Failed to get the encrypted request destination.");
       ssl_send_data_delayed(&(csp->ssl_client_attr),
          (const unsigned char *)CHEADER, strlen(CHEADER), get_write_delay(csp));
       destroy_list(headers);
@@ -2844,7 +2844,7 @@ static jb_err process_encrypted_request_headers(struct client_state *csp)
       return JB_ERR_PARSE;
    }
 
-   log_error(LOG_LEVEL_HEADER, "Encrypted request headers processed");
+   log_error(LOG_LEVEL_HEADER, "Encrypted request headers processed.");
    log_error(LOG_LEVEL_REQUEST, "https://%s%s", csp->http->hostport,
       csp->http->path);
 
