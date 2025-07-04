@@ -1423,7 +1423,7 @@ struct configuration_spec * load_config(void)
  * *************************************************************************/
          case hash_listen_backlog :
             /*
-             * We don't enfore an upper or lower limit because on
+             * We don't enforce an upper or lower limit because on
              * many platforms all values are valid and negative
              * number mean "use the highest value allowed".
              */

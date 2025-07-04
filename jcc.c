@@ -3034,7 +3034,7 @@ static void continue_https_chat(struct client_state *csp)
  * Parameters  :
  *          1  :  csp = Current client state (buffers, headers, etc...)
  *
- * Returns     :  0 on succes, -1 on error.
+ * Returns     :  0 on success, -1 on error.
  *
  *********************************************************************/
 static int send_server_headers(struct client_state *csp)
@@ -3183,7 +3183,7 @@ static void handle_established_connection(struct client_state *csp)
          is_ssl_pending(&(csp->ssl_client_attr)))
       {
          /*
-          * The TLS libray may also consume all of the remaining data
+          * The TLS library may also consume all of the remaining data
           * from the client when we're shuffling the data from an
           * unbuffered request body to the server.
           */

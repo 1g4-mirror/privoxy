@@ -1208,8 +1208,8 @@ extern int create_server_ssl_connection(struct client_state *csp)
                   log_error(LOG_LEVEL_ERROR,
                      "ssl_store_cert() failed for cert %d", i);
                   /*
-                   * ssl_send_certificate_error() wil not be able to show
-                   * the certificate but the user will stil get the error
+                   * ssl_send_certificate_error() will not be able to show
+                   * the certificate but the user will still get the error
                    * description.
                    */
                }
@@ -1334,7 +1334,7 @@ static void log_ssl_errors(int debuglevel, const char* fmt, ...)
  *          4  :  src = Source buffer
  *          5  :  slen = Amount of data to be encoded
  *
- * Returns     :  0 on success, error code othervise
+ * Returns     :  0 on success, error code otherwise
  *
  *********************************************************************/
 extern int ssl_base64_encode(unsigned char *dst, size_t dlen, size_t *olen,
@@ -1774,7 +1774,7 @@ static int set_subject_alternative_name(struct Cert *certificate, const char *ho
  *
  * Parameters  :
  *          1  :  csp = Current client state (buffers, headers, etc...)
- *          2  :  certificate_path = Path to the certficate to generate.
+ *          2  :  certificate_path = Path to the certificate to generate.
  *          3  :  rsa_key_path = Path to the key to generate for the
  *                               certificate.
  *

@@ -696,7 +696,7 @@ extern int get_certificate_valid_to_date(char *buffer, size_t buffer_size, const
  * Description :  Makes sure the certificate state is sane.
  *
  * Parameters  :
- *          1  :  certificate = Path to the potentionally existing certifcate.
+ *          1  :  certificate = Path to the potentionally existing certificate.
  *          2  :  key = Path to the potentionally existing key.
  *
  * Returns     :   -1 => Error

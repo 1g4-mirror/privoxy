@@ -1416,7 +1416,7 @@ int accept_connection(struct client_state * csp, jb_socket fds[])
    if (!csp->ip_addr_str || retval)
    {
       log_error(LOG_LEVEL_ERROR, "Can not save csp->ip_addr_str: %s",
-         (csp->ip_addr_str) ? gai_strerror(retval) : "Insuffcient memory");
+         (csp->ip_addr_str) ? gai_strerror(retval) : "Insufficient memory");
       freez(csp->ip_addr_str);
    }
 #undef client

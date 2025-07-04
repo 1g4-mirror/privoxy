@@ -1818,7 +1818,7 @@ struct http_response *alloc_http_response(void)
  * Function    :  free_http_response
  *
  * Description :  Free the memory occupied by an http_response
- *                and its depandant structures.
+ *                and its dependent structures.
  *
  * Parameters  :
  *          1  :  rsp = pointer to http_response to be freed

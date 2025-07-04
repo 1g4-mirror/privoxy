@@ -1897,7 +1897,7 @@ static jb_err filter_header(struct client_state *csp, char **header)
  *
  * Function    :  keep_alive_keyword_detected
  *
- * Description :  Checks wether or not a Connection header contains
+ * Description :  Checks whether or not a Connection header contains
  *                the keep-alive keyword.
  *
  * Parameters  :
@@ -4699,7 +4699,7 @@ int strclean(char *string, const char *substring)
  * Function    :  parse_header_time
  *
  * Description :  Parses time formats used in HTTP header strings
- *                to get the numerical respresentation.
+ *                to get the numerical representation.
  *
  * Parameters  :
  *          1  :  header_time = HTTP header time as string.
@@ -4808,7 +4808,7 @@ static jb_err parse_header_time(const char *header_time, time_t *result)
  * Function    :  parse_time_header
  *
  * Description :  Parses the time in an HTTP time header to get
- *                the numerical respresentation.
+ *                the numerical representation.
  *
  * Parameters  :
  *          1  :  header = HTTP header with a time value

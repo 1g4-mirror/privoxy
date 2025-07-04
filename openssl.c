@@ -1288,7 +1288,7 @@ static void log_ssl_errors(int debuglevel, const char* fmt, ...)
  *          4  :  src = Source buffer
  *          5  :  slen = Amount of data to be encoded
  *
- * Returns     :  0 on success, error code othervise
+ * Returns     :  0 on success, error code otherwise
  *
  *********************************************************************/
 extern int ssl_base64_encode(unsigned char *dst, size_t dlen, size_t *olen,

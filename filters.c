@@ -2195,7 +2195,7 @@ static int get_bytes_to_next_chunk_start(char *buffer, size_t size, size_t offse
 
    /*
     * To get to the start of the next chunk size we have to skip
-    * the line with the current chunk size followed by "\r\n" followd
+    * the line with the current chunk size followed by "\r\n" followed
     * by the actual data and another "\r\n" following the data.
     */
    bytes_to_skip = (int)(p - chunk_start) + 2 + (int)chunk_size + 2;
@@ -2443,7 +2443,7 @@ static jb_err remove_chunked_transfer_coding(char *buffer, size_t *size)
  * Function    :  prepare_for_filtering
  *
  * Description :  If necessary, de-chunks and decompresses
- *                the content so it can get filterd.
+ *                the content so it can get filtered.
  *
  * Parameters  :
  *          1  :  csp = Current client state (buffers, headers, etc...)
@@ -2625,7 +2625,7 @@ char *execute_content_filters(struct client_state *csp)
  *          2  :  content_length = content length. Upon successful filtering
  *                the passed value is updated with the new content length.
  *
- * Returns     :  1 if the content has been filterd. 0 if it hasn't.
+ * Returns     :  1 if the content has been filtered. 0 if it hasn't.
  *
  *********************************************************************/
 int execute_client_body_filters(struct client_state *csp, size_t *content_length)
