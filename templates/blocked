@@ -61,7 +61,7 @@
 #    The path part of the blocked request's URL, url-encoded.
 #
 #
-# CONDITIONAL SYMBOLS FOR THIS TEMPLATE AND THEIR DEPANDANT SYMBOLS:
+# CONDITIONAL SYMBOLS FOR THIS TEMPLATE AND THEIR DEPENDENT SYMBOLS:
 # ------------------------------------------------------------------
 #
 #  unstable:

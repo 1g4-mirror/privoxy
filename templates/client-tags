@@ -51,7 +51,7 @@
 #    What we would have rewritten this request to, if this had not
 #    been intercepted.
 #
-# CONDITIONAL SYMBOLS FOR THIS TEMPLATE AND THEIR DEPANDANT SYMBOLS:
+# CONDITIONAL SYMBOLS FOR THIS TEMPLATE AND THEIR DEPENDENT SYMBOLS:
 # ------------------------------------------------------------------
 #
 #  unstable:

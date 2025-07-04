@@ -59,7 +59,7 @@
 #    or (in the future) "" for direct connections to the forwarder.
 #
 #
-# CONDITIONAL SYMBOLS FOR THIS TEMPLATE AND THEIR DEPANDANT SYMBOLS:
+# CONDITIONAL SYMBOLS FOR THIS TEMPLATE AND THEIR DEPENDENT SYMBOLS:
 # ------------------------------------------------------------------
 #
 #  unstable:

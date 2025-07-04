@@ -56,7 +56,7 @@
 #    The URL to local online Privoxy documentation, if define in the
 #    'config' file
 #
-# CONDITIONAL SYMBOLS FOR THIS TEMPLATE AND THEIR DEPANDANT SYMBOLS:
+# CONDITIONAL SYMBOLS FOR THIS TEMPLATE AND THEIR DEPENDENT SYMBOLS:
 # ------------------------------------------------------------------
 #
 #  unstable:
