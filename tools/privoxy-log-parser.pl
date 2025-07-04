@@ -118,7 +118,7 @@ my $line_end;
 
 sub prepare_our_stuff() {
 
-    # Syntax Higlight hash
+    # Syntax Highlight hash
     @all_colours = (
         'red', 'green', 'brown', 'blue', 'purple', 'cyan',
         'light_gray', 'light_red', 'light_green', 'yellow',
@@ -728,7 +728,7 @@ sub highlight_matched_url($$) {
 
 sub highlight_matched_host($$) {
 
-    my ($result, $regex) = @_; # XXX: result ist stupid name;
+    my ($result, $regex) = @_; # XXX: result is stupid name;
 
     if ($result =~ m@(.*?)($regex)(.*)@) {
         $result = $1 . $h{host} . $2 . $h{Standard} . $3;
@@ -1553,7 +1553,7 @@ sub handle_loglevel_connect($) {
     } elsif ($c =~ m/^write header to client failed:/) {
 
         # write header to client failed: Broken pipe
-        # XXX: Stil in use?
+        # XXX: Still in use?
         $c =~ s@(?<=failed: )(.*)@$h{'Error'}$1$h{'Standard'}@;
 
     } elsif ($c =~ m/^socks4_connect:/) {
@@ -2612,7 +2612,7 @@ sub print_stats() {
         print "Requested URLs:\n";
         foreach my $resource (sort {$stats{'resource'}{$b} <=> $stats{'resource'}{$a}} keys %{$stats{'resource'}}) {
             if ($stats{'resource'}{$resource} < $cli_options{'url-statistics-threshold'}) {
-                print "Skipped statistics for URLs below the treshold.\n";
+                print "Skipped statistics for URLs below the threshold.\n";
                 last;
             }
             printf "%d : %s\n", $stats{'resource'}{$resource}, $resource;
@@ -2626,7 +2626,7 @@ sub print_stats() {
         foreach my $passed_url (sort {$stats{'passed-request-url'}{$b} <=> $stats{'passed-request-url'}{$a}}
                                 keys %{$stats{'passed-request-url'}}) {
             if ($stats{'passed-request-url'}{$passed_url} < $cli_options{'passed-request-statistics-threshold'}) {
-                print "Skipped statistics for passed URLs below the treshold.\n";
+                print "Skipped statistics for passed URLs below the threshold.\n";
                 last;
             }
             printf "%d : %s\n", $stats{'passed-request-url'}{$passed_url}, $passed_url;
@@ -2638,7 +2638,7 @@ sub print_stats() {
         print "Requested Hosts:\n";
         foreach my $host (sort {$stats{'hosts'}{$b} <=> $stats{'hosts'}{$a}} keys %{$stats{'hosts'}}) {
             if ($stats{'hosts'}{$host} < $cli_options{'host-statistics-threshold'}) {
-                print "Skipped statistics for Hosts below the treshold.\n";
+                print "Skipped statistics for Hosts below the threshold.\n";
                 last;
             }
             printf "%d : %s\n", $stats{'hosts'}{$host}, $host;
