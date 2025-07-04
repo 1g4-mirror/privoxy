@@ -487,7 +487,7 @@ https://www.privoxy.org/donate
      Interested donors: 0.
 
 190) The socks5 authentication code should send user name an password
-     seperately or we should increase the cbuf size to allow longer
+     separately or we should increase the cbuf size to allow longer
      user names and passwords.
 
 191) The cipher-list directive should be split into cipher-list-server
