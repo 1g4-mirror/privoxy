@@ -1840,6 +1840,11 @@ sub handle_loglevel_connect($) {
         $c =~ s@(?<=Drained )(\d+)@$h{'Number'}$1$h{'Standard'}@;
         $c =~ s@(?<=socket )(\d+)@$h{'Number'}$1$h{'Standard'}@;
 
+    } elsif ($c =~ m/^Giving up draining socket \d+/) {
+
+        # Giving up draining socket 35.
+        $c =~ s@(?<=socket )(\d+)@$h{'Number'}$1$h{'Standard'}@;
+
     } elsif ($c =~ m/^Tainting client socket/ or
              $c =~ m/^Failed to shutdown socket/) {
 
