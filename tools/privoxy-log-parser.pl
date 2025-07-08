@@ -1262,6 +1262,15 @@ sub handle_loglevel_tagging($) {
         $c =~ s@(?<=added tag \')([^\']*)@$h{'tag'}$1$h{'Standard'}@;
         $c =~ s@(?<=Action bits )(updated)@$h{'action-bits-update'}$1$h{'Standard'}@;
 
+    } elsif ($c =~ /^Tagger \'([^\']*)\' didn\'t add tag \'([^\']*)\'/) {
+
+        # Tagger 'http-method' didn't add tag 'POST': suppressed
+        # Tagger 'revalidation' didn't add tag 'REVALIDATION-REQUEST'. Tag already present
+        # XXX: Save tag and tagger
+
+        $c =~ s@(?<=^Tagger \')([^\']*)@$h{'tag'}$1$h{'Standard'}@;
+        $c =~ s@(?<=didn['']t add tag \')([^\']*)@$h{'tagger'}$1$h{'Standard'}@;
+
     } elsif ($c =~ /^Enlisting tag/) {
 
         # Enlisting tag 'forward-directly' for client 127.0.0.1.
