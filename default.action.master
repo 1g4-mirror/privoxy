@@ -2543,6 +2543,8 @@ schneegans.de/sv/\?url=referer
 .rubberslug.com
 #MASTER# REMARKS: Actionsfile feedback item #2040467, allow animated gifs from wikipedia.org
 .wikipedia.org/
+# URL = https://raw.githubusercontent.com/asomers/ztop/master/doc/demo.gif
+.githubusercontent.com/
 
 #----------------------------------------------------------------------------
 # The "site-specifics" filter has special cures for problems found here:
