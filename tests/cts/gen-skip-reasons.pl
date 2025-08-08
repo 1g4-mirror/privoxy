@@ -30,7 +30,9 @@ sub main() {
 
     for my $testnum (1..3500) {
         my $why;
-        if ($testnum eq 8) {
+        if ($testnum eq 2) {
+            $why = "Expected to fail. Missing space after status code that gets added by Privoxy.";
+        } elsif ($testnum eq 8) {
             $why = "Expected to fail. Tab in cookie that Privoxy converts to a space which the test does not expect.";
         } elsif ($testnum eq 16 or
             $testnum eq 45 or
@@ -66,7 +68,7 @@ sub main() {
             $why = "Known to fail. Uses chunk trailers which Privoxy currently doesn't support.";
         } elsif ($testnum eq 309) {
             $why = "Known to fail. Uses https and test does not expect the 'Connection established' response from Privoxy";
-        } elsif ($testnum eq 339 or $testnum eq 347 or $testnum eq 1591) {
+        } elsif ($testnum eq 339 or $testnum eq 347 or $testnum eq 1482 or $testnum eq 1483 or $testnum eq 1591) {
             $why = "Chunked transfer with trailers which Privoxy does not understand. Needs investigating.";
         } elsif ($testnum eq 389) {
             $why = "Known to fail depending on the DNS resolver on the system as Privoxy does not implement RFC6761 internally.";
@@ -86,6 +88,12 @@ sub main() {
             $why = "Known to fail. Control code in Content-Length header.";
         } elsif ($testnum eq 435) {
             $why = "Expected to fail. Uses %{remote_port} and expects the port of the server and not the one from Privoxy.";
+        } elsif ($testnum eq 439) {
+            $why = "Expected to fail. Privoxy adds a 'Connection established' response the test does not expect.";
+        } elsif ($testnum eq 461) {
+            $why = "Expected to fail. Privoxy adds a 'Host' header.";
+        } elsif ($testnum eq 471 or $testnum eq 1704) {
+            $why = "Expected to fail. Uses HTTP/2 which Privoxy does not support.";
         } elsif ($testnum eq 507) {
             $why = "Expected to fail. DNS failures cause a Privoxy error message the test doesn't handle.";
         } elsif ($testnum eq 501) {
@@ -101,6 +109,8 @@ sub main() {
             $why = "Expected to fail. POST request doesn't make it to the server. Needs investigating.";
         } elsif ($testnum eq 655) {
             $why = "Expected to fail. Uses tool. Failure reason not yet analyzed";
+        } elsif ($testnum eq 696) {
+            $why = "Expected to fail. Test uses tool that does not support proxies.";
         } elsif ($testnum eq 970 or $testnum eq 972) {
             $why = "Expected to fail. Privoxy adds a Proxy-Connection header which results in a modified num_headers value in the JSON output";
         } elsif ($testnum eq 1074) {
@@ -120,6 +130,10 @@ sub main() {
             $why = "Expected to fail. Privoxy unfolds the folded headers which the test does not expect.";
         } elsif ($testnum eq 1433) {
             $why = "Expected to fail. Privoxy will enforce a valid HTTP version number";
+        } elsif ($testnum eq 1479) {
+            $why = "Expected to fail. Uses HTTP/0.9 response.";
+        } elsif ($testnum eq 1480) {
+            $why = "Expected to fail. Uses HTTP Continue response but no final response.";
         } elsif ($testnum eq 1506 or $testnum eq 1510) {
             $why = "Expected to fail when using a proxy. Hardcoded addresses in expected output.";
         } elsif ($testnum eq 1156) {
@@ -128,12 +142,18 @@ sub main() {
             $why = "Expected to fail as Privoxy does not support HTTP/0.9.";
         } elsif ($testnum eq 1292) {
             $why = "Expected to fail as Privoxy replaces the empty Host header.";
+        } elsif ($testnum eq 1499) {
+            $why = "Expected to fail. Privoxy does not support chunked trailers.";
         } elsif ($testnum eq 1533) {
             $why = "Sends an invalid method. Needs investigating.";
+        } elsif ($testnum eq 1542) {
+            $why = "Expected to fail. Expects HTTPPORT in logs which gets replaced by Privoxy's listening port.";
         } elsif ($testnum eq 1543) {
             $why = "Expected to fail as the URL contains spaces. XXX: Looks like a curl bug that should be investigated.";
         } elsif ($testnum eq 1556) {
             $why = "Known to fail. Body value changes from 100008 to 100009. Needs investigating.";
+        } elsif ($testnum eq 1598) {
+            $why = "Expected to fail. Privoxy does not support chunk-encoded POST requests with trailers.";
         } elsif ($testnum eq 1671) {
             $why = "Known to fail as curl adds a Proxy-Connection header to the JSON output which the test doesn't expect.";
         } elsif ($testnum eq 1915) {
@@ -150,6 +170,8 @@ sub main() {
             $why = "Test 96 is incomplete";
         } elsif ($testnum eq 1901 or $testnum eq 1902 or $testnum eq 1903) {
             $why = "Known to fail due to different response orders.";
+        } elsif ($testnum eq 1960) {
+            $why = "Known to fail. Test does not expect proxy request.";
         } elsif ($testnum eq 2100) {
             $why = "Known to fail. Use DNS-over-HTTP.";
         } elsif ($testnum eq 3014 or $testnum eq 3015) {
@@ -186,6 +208,7 @@ sub main() {
     printf("keyword:%s: Tests with keyword '%s' aren't expected to work with Privoxy running in a jail without IPv6 connectivity.\n", 'IPv6', 'IPv6');
 
     printf("keyword:%s: Tests with keyword '%s' don't work with Privoxy as they use the OPTIONS method which is currently not properly supported (TODO #186).\n", '--request-target', '--request-target');
+    printf("keyword:%s: Tests with keyword '%s' don't work with Privoxy.\n", 'DOH', 'DOH');
 
     printf("keyword:%s: Tests with keyword '%s' obviously should be skipped. Check the full keyword for details.\n", 'skip', 'skip');
 
