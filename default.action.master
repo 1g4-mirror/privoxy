@@ -2319,6 +2319,8 @@ accounts.bahn.de/
 .creator-spring.com/_next/image
 # URL = https://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion/iu/?u=https%3A%2F%2Ftse4.mm.bing.net%2Fth%3Fid%3DOIP.JNbKidcpiIxSgywXqxj1GAHaFC%26pid%3DApi&f=1&ipt=3754158f389c998b95c12d25e257114f092a3830762e99ba45a66f75b9a0cd3f&ipo=images
 duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion/
+# URL = https://report.error-report.com/modal?eventId=&error=Failed%20to%20fetch%20script%3A%20Error%3A%20Error%3A%20script%20malformed.%20source%20length%3A%20401759%2C%20X-Length%3A%20401622&domain=as.slashdot.org&urlhttps%3A%2F%2Fyro.slashdot.org%2Fstory%2F25%2F08%2F26%2F0354217%2Fclass-action-lawsuit-targets-movie-ownership
+report.error-report.com/
 
 {+redirect{s@.*url=@http://@} -block}
 # Sticky Actions = +redirect -block
