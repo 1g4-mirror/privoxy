@@ -2498,6 +2498,8 @@ freebsdfoundation.org/
 .freiheitsfoo.de/
 # URL = https://github.com/AFLplusplus/AFLplusplus/
 github.com/
+# URL = https://www.jwz.org/blog/2025/08/the-pigs-who-stare-at-crosswalks/
+.jwz.org/
 
 {-filter{banners-by-link}}
 # Sticky Actions = -filter{banners-by-link}
