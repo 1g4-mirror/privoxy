@@ -6020,7 +6020,7 @@ example.com/.*toChange=(?!bar)
 i[0-9][0-9][0-9][0-9]*/
 
 # Redirect requests for the old Tor Hidden Service of the Privoxy website to the new one
-{+redirect{s@^http://jvauzb4sb3bwlsnc.onion/@http://l3tczdiiwoo63iwxty4lhs6p7eaxop5micbn7vbliydgv63x5zrrrfyd.onion/@}}
+{+redirect{s@^http://jvauzb4sb3bwlsnc.onion/@http://privoxy5wtwbtk4wwyrdbg6oxeghvhghghmokcx2iawydkqmaztfbbid.onion/@}}
 jvauzb4sb3bwlsnc.onion/
 
 # Redirect remote requests for this manual
