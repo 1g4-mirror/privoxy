@@ -914,9 +914,9 @@ struct http_response *error_response(struct client_state *csp,
    }
    err = string_append(&path, csp->http->path);
 
+   if (!err) err = map(exports, "path", 1, html_encode_and_free_original(path), 0);
    if (!err) err = map(exports, "host", 1, html_encode(csp->http->host), 0);
    if (!err) err = map(exports, "hostport", 1, html_encode(csp->http->hostport), 0);
-   if (!err) err = map(exports, "path", 1, html_encode_and_free_original(path), 0);
    if (!err) err = map(exports, "protocol", 1, csp->http->ssl ? "https://" : "http://", 1);
    if (!err)
    {
