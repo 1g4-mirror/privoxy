@@ -4060,7 +4060,7 @@ static jb_err client_host_adder(struct client_state *csp)
    /*
     * remove 'user:pass@' from 'proto://user:pass@host'
     */
-   if ((p = strchr( csp->http->hostport, '@')) != NULL)
+   if ((p = strchr(csp->http->hostport, '@')) != NULL)
    {
       p++;
    }
