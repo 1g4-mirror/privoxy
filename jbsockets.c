@@ -1442,6 +1442,9 @@ int accept_connection(struct client_state * csp, jb_socket fds[])
          "Server name (%s) and port number (%d) ASCII decimal representation "
          "don't fit into %lu bytes",
          host_addr, csp->config->hport[i], listen_addr_size);
+      freez(csp->ip_addr_str);
+      freez(csp->listen_addr_str);
+      close_socket(csp->cfd);
       return 0;
    }
 
