@@ -589,7 +589,7 @@ static jb_err get_request_destination_elsewhere(struct client_state *csp, struct
 
       return JB_ERR_PARSE;
    }
-   else if (JB_ERR_OK == get_destination_from_headers(headers, csp->http))
+   else if (JB_ERR_OK == get_destination_from_headers(headers, csp->http, FALSE))
    {
       /* Split the domain we just got for pattern matching */
       init_domain_components(csp->http);
@@ -2760,7 +2760,7 @@ static jb_err process_encrypted_request_headers(struct client_state *csp)
       freez(p);
    }
 
-   if (JB_ERR_OK != get_destination_from_https_headers(headers, csp->http))
+   if (JB_ERR_OK != get_destination_from_headers(headers, csp->http, TRUE))
    {
       /*
        * Our attempts to get the request destination

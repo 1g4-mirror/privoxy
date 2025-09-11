@@ -4889,13 +4889,14 @@ static jb_err parse_time_header(const char *header, time_t *result)
  *          1  :  headers = List of headers (one of them hopefully being
  *                the "Host:" header)
  *          2  :  http = storage for the result (host, port and hostport).
+ *          3  :  https_request = Whether or not the request was received through https
  *
  * Returns     :  JB_ERR_MEMORY (or terminates) in case of memory problems,
  *                JB_ERR_PARSE if the host header couldn't be found or parsed,
  *                JB_ERR_OK otherwise.
  *
  *********************************************************************/
-jb_err get_destination_from_headers(const struct list *headers, struct http_request *http)
+jb_err get_destination_from_headers(const struct list *headers, struct http_request *http, int https_request)
 {
    char *q;
    char *p;
@@ -4958,14 +4959,21 @@ jb_err get_destination_from_headers(const struct list *headers, struct http_requ
    }
    else
    {
-      http->port = 80;
+      http->port = https_request ? 443 : 80;
    }
 
    /* Rebuild request URL */
    freez(http->url);
-   http->url = strdup("http://");
-   string_append(&http->url, http->hostport);
-   string_append(&http->url, http->path);
+   if (https_request)
+   {
+      http->url = strdup(http->path);
+   }
+   else
+   {
+      http->url = strdup("http://");
+      string_append(&http->url, http->hostport);
+      string_append(&http->url, http->path);
+   }
    if (http->url == NULL)
    {
       return JB_ERR_MEMORY;
@@ -4994,120 +5002,6 @@ jb_err get_destination_from_headers(const struct list *headers, struct http_requ
    return JB_ERR_OK;
 
 }
-
-
-#ifdef FEATURE_HTTPS_INSPECTION
-/*********************************************************************
- *
- * Function    :  get_destination_from_https_headers
- *
- * Description :  Parse the previously encrypted "Host:" header to
- *                get the request's destination.
- *
- * Parameters  :
- *          1  :  headers = List of headers (one of them hopefully being
- *                the "Host:" header)
- *          2  :  http = storage for the result (host, port and hostport).
- *
- * Returns     :  JB_ERR_MEMORY (or terminates) in case of memory problems,
- *                JB_ERR_PARSE if the host header couldn't be found,
- *                JB_ERR_OK otherwise.
- *
- *********************************************************************/
-jb_err get_destination_from_https_headers(const struct list *headers, struct http_request *http)
-{
-   char *q;
-   char *p;
-   char *host;
-
-   host = get_header_value(headers, "Host:");
-
-   if (NULL == host)
-   {
-      log_error(LOG_LEVEL_ERROR, "No \"Host:\" header found.");
-      return JB_ERR_PARSE;
-   }
-
-   p = string_tolower(host);
-   if (p == NULL)
-   {
-      return JB_ERR_MEMORY;
-   }
-   chomp(p);
-   q = strdup_or_die(p);
-
-   freez(http->hostport);
-   http->hostport = p;
-   freez(http->host);
-   http->host = q;
-   if (*p == '[')
-   {
-      /* Numeric IPv6 address delimited by brackets */
-      p++;
-
-      q = strchr(p, ']');
-      if (q == NULL)
-      {
-         /* Missing closing bracket */
-         return JB_ERR_PARSE;
-      }
-
-      *q++ = '\0';
-
-      if (*q == '\0')
-      {
-         q = NULL;
-      }
-      else if (*q != ':')
-      {
-         /* Garbage after closing bracket */
-         return JB_ERR_PARSE;
-      }
-   }
-   else
-   {
-      /* Plain non-escaped hostname */
-      q = strchr(http->host, ':');
-   }
-   if (q != NULL)
-   {
-      /* Terminate hostname and evaluate port string */
-      *q++ = '\0';
-      http->port = atoi(q);
-   }
-   else
-   {
-      http->port = 443;
-   }
-
-   /* Rebuild request URL */
-   freez(http->url);
-   http->url = strdup_or_die(http->path);
-
-   log_error(LOG_LEVEL_HEADER,
-      "Destination extracted from \"Host\" header. New request URL: %s",
-      http->url);
-
-   /*
-    * Regenerate request line in "proxy format"
-    * to make rewrites more convenient.
-    */
-   assert(http->cmd != NULL);
-   freez(http->cmd);
-   http->cmd = strdup_or_die(http->gpc);
-   string_append(&http->cmd, " ");
-   string_append(&http->cmd, http->url);
-   string_append(&http->cmd, " ");
-   string_append(&http->cmd, http->version);
-   if (http->cmd == NULL)
-   {
-      return JB_ERR_MEMORY;
-   }
-
-   return JB_ERR_OK;
-
-}
-#endif /* def FEATURE_HTTPS_INSPECTION */
 
 
 /*********************************************************************
