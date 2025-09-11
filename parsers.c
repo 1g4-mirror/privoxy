@@ -3763,7 +3763,36 @@ static jb_err client_host(struct client_state *csp, char **header)
       csp->http->hostport = p;
       freez(csp->http->host);
       csp->http->host = q;
-      q = strchr(csp->http->host, ':');
+
+      if (*p == '[')
+      {
+         /* Numeric IPv6 address delimited by brackets */
+         p++;
+
+         q = strchr(p, ']');
+         if (q == NULL)
+         {
+            /* Missing closing bracket */
+            return JB_ERR_PARSE;
+         }
+
+         *q++ = '\0';
+
+         if (*q == '\0')
+         {
+            q = NULL;
+         }
+         else if (*q != ':')
+         {
+            /* Garbage after closing bracket */
+            return JB_ERR_PARSE;
+         }
+      }
+      else
+      {
+         /* Plain non-escaped hostname */
+         q = strchr(csp->http->host, ':');
+      }
       if (q != NULL)
       {
          /* Terminate hostname and evaluate port string */
