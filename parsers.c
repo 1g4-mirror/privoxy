@@ -5040,7 +5040,35 @@ jb_err get_destination_from_https_headers(const struct list *headers, struct htt
    http->hostport = p;
    freez(http->host);
    http->host = q;
-   q = strchr(http->host, ':');
+   if (*p == '[')
+   {
+      /* Numeric IPv6 address delimited by brackets */
+      p++;
+
+      q = strchr(p, ']');
+      if (q == NULL)
+      {
+         /* Missing closing bracket */
+         return JB_ERR_PARSE;
+      }
+
+      *q++ = '\0';
+
+      if (*q == '\0')
+      {
+         q = NULL;
+      }
+      else if (*q != ':')
+      {
+         /* Garbage after closing bracket */
+         return JB_ERR_PARSE;
+      }
+   }
+   else
+   {
+      /* Plain non-escaped hostname */
+      q = strchr(http->host, ':');
+   }
    if (q != NULL)
    {
       /* Terminate hostname and evaluate port string */
