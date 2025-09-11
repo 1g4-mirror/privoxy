@@ -4891,7 +4891,7 @@ static jb_err parse_time_header(const char *header, time_t *result)
  *          2  :  http = storage for the result (host, port and hostport).
  *
  * Returns     :  JB_ERR_MEMORY (or terminates) in case of memory problems,
- *                JB_ERR_PARSE if the host header couldn't be found,
+ *                JB_ERR_PARSE if the host header couldn't be found or parsed,
  *                JB_ERR_OK otherwise.
  *
  *********************************************************************/
@@ -4921,7 +4921,35 @@ jb_err get_destination_from_headers(const struct list *headers, struct http_requ
    http->hostport = p;
    freez(http->host);
    http->host = q;
-   q = strchr(http->host, ':');
+   if (*p == '[')
+   {
+      /* Numeric IPv6 address delimited by brackets */
+      p++;
+
+      q = strchr(p, ']');
+      if (q == NULL)
+      {
+         /* Missing closing bracket */
+         return JB_ERR_PARSE;
+      }
+
+      *q++ = '\0';
+
+      if (*q == '\0')
+      {
+         q = NULL;
+      }
+      else if (*q != ':')
+      {
+         /* Garbage after closing bracket */
+         return JB_ERR_PARSE;
+      }
+   }
+   else
+   {
+      /* Plain non-escaped hostname */
+      q = strchr(http->host, ':');
+   }
    if (q != NULL)
    {
       /* Terminate hostname and evaluate port string */
