@@ -1937,6 +1937,11 @@ sub handle_loglevel_connect($) {
         $c =~ s@(?<=timeout )(\d+)@$h{'Number'}$1$h{'Standard'}@;
         $c = highlight_matched_url($c, "(?<=reached: ).*")
 
+    } elsif ($c =~ m/^Socket \d+ timed out/) {
+
+        # Socket 8 timed out while waiting for client headers.
+        $c =~ s@(?<=Socket )(\d+)@$h{'Number'}$1$h{'Standard'}@;
+
     } elsif ($c =~ m/^Prepared to read up to /) {
 
         # Prepared to read up to 157 bytes of encrypted request body from the client.
