@@ -657,7 +657,8 @@ count*.
 *counter.
 #MASTER# BLOCK-REFERRER: http://tech.cybernetnews.com/
 # Blocked URL = http://metrics.performancing.com/
-metrics.
+# Blocked URL = https://cdn.prod.metrics.imdb.com/tr?fcn=IMDbNext-Client&ht=actionOnly&hr=https%3A%2F%2Fwww.imdb.com%2Ftitle%2Ftt1499372%2F%3Fref_%3Dtt_ov_ep_nx&isu=true&mid=A1EVAM02EL8SFB&ip=45.84.107.198&pa=vp-browser-blocked-autoplay&pc=vi2983640345&pt=title&ref=&sid=134-5211317-7699348&st=1758273618592&spt=main&ua=Mozilla%2F5.0+%28X11%3B+Linux+x86_64%3B+rv%3A128.0%29+Gecko%2F20100101+Firefox%2F128.0&pat=main&lang=en-US&cor=AQ&sv=web&sc=200&sn=www.imdb.com&pi=%2Ftitle%2Ftt1499371%2F&qs=ref_%3Dtt_ov_ep_nx&rrid=CA38A5FB680849E98903
+.metrics.
 
 #############################################################################
 # Generic unblockers by host:
