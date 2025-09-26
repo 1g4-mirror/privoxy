@@ -7,9 +7,6 @@ HTTP GET
 </info>
 
 <client>
-<server>
-none
-</server>
 <name>
 CGI request for the user manual while delivery has been disabled by specifying a https:// URL
 </name>

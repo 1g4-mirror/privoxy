@@ -22,9 +22,6 @@ Date: Sun, 28 Mar 2021 09:35:05 GMT
 </proxy-reply>
 
 <client>
-<server>
-none
-</server>
 <name>
 Confirm that the cors-allowed-origin directives results in headers being are added to CGI responses.
 </name>

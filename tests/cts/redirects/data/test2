@@ -29,9 +29,6 @@ Date: Sun, 10 Jan 2021 08:13:02 GMT
 </proxy-reply>
 
 <client>
-<server>
-none
-</server>
 <name>
 Redirect to https://www.privoxy.org
 </name>

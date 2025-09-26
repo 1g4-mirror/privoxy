@@ -7,9 +7,6 @@ HTTP GET
 </info>
 
 <client>
-<server>
-none
-</server>
 <name>
 Request to blocked URL with now client-tags active
 </name>

@@ -34,9 +34,6 @@ function FindProxyForURL(url, host) {
 </proxy-reply>
 
 <client>
-<server>
-none
-</server>
 <name>
 CGI request for PAC file
 </name>

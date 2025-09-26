@@ -28,9 +28,6 @@ Bad request. Messed up with header filters.
 </proxy-reply>
 
 <client>
-<server>
-none
-</server>
 <name>
 Rewrite behind the client's back: unsupported http version
 </name>
