@@ -50,6 +50,11 @@ sub main() {
             $why = "Expected to fail with Privoxy. In case of missing server headers Privoxy generates an error message the test doesn't expect.";
         } elsif ($testnum eq 31 or $testnum eq 1105 or $testnum eq 1160) {
             $why = "Expected to fail. Privoxy normalizes white-space in a cookie.";
+        } elsif ($testnum eq 34 or
+                 $testnum eq 457 or
+                 $testnum eq 1417 or
+                 $testnum eq 1493) {
+            $why = "Expected to fail with Privoxy. Test contains non-standard 'Connection: mooo' header that Privoxy replaces with 'Connection: close'.";
         } elsif ($testnum eq 46) {
             $why = "Invalid URL and use of --resolv.";
         } elsif ($testnum eq 59) {
