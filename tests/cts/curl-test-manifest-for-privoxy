@@ -68,6 +68,7 @@ test:3014, 3015: Known to fail. Curl adds a Proxy-Connection header while test e
 test:309: Known to fail. Uses https and test does not expect the 'Connection established' response from Privoxy
 test:31, 1105, 1160: Expected to fail. Privoxy normalizes white-space in a cookie.
 test:339, 347, 1482, 1483, 1591: Chunked transfer with trailers which Privoxy does not understand. Needs investigating.
+test:34, 457, 1417, 1493: Expected to fail with Privoxy. Test contains non-standard 'Connection: mooo' header that Privoxy replaces with 'Connection: close'.
 test:389: Known to fail depending on the DNS resolver on the system as Privoxy does not implement RFC6761 internally.
 test:412, 413: Known to fail as curl is tunneling the request even though it's vanilla HTTP.
 test:415: Known to fail. Control code in Content-Length header.
