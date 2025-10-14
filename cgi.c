@@ -1747,9 +1747,10 @@ struct http_response *finish_http_response(struct client_state *csp, struct http
        * is older than Privoxy's error message, the server would send status code
        * 304 and the browser would display the outdated error message again and again.
        *
-       * For documents delivered with status code 403, 404 and 503 we set "Last-Modified"
-       * to Tim Berners-Lee's birthday, which predates the age of any page on the web
-       * and can be safely used to "revalidate" without getting a status code 304.
+       * For documents delivered with status code 403, 404, 502, 503 and
+       * 504 we set "Last-Modified" to Tim Berners-Lee's birthday, which
+       * predates the age of any page on the web and can be safely used to
+       * "revalidate" without getting a status code 304.
        *
        * There is no need to let the useless If-Modified-Since header reach the
        * server, it is therefore stripped by client_if_modified_since in parsers.c.
