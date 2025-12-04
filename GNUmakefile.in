@@ -696,6 +696,10 @@ web-faq:
 	@$(ECHO) Updating the FAQ on the webserver ...
 	@$(RSYNC) doc/webserver/faq/*.html shell.sourceforge.net:$(WWW_ROOT)/htdocs/faq
 
+web-robots.txt:
+	@$(ECHO) "Updating the robots.txt only ..."
+	@$(RSYNC) doc/webserver/robots.txt shell.sourceforge.net:$(WWW_ROOT)/htdocs/
+
 web-sponsors:
 	@$(ECHO) "Updating the sponsor page (index.html) only ..."
 	@$(RSYNC) doc/webserver/sponsors/index.html shell.sourceforge.net:$(WWW_ROOT)/htdocs/sponsors/
