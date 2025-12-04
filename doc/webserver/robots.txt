@@ -12,6 +12,3 @@ User-agent: *
 Disallow: /config/
 Disallow: /actions/
 Disallow: /submit/
-
-
-
