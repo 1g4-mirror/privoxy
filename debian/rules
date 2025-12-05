@@ -33,6 +33,7 @@ override_dh_auto_configure:
 		--enable-compression \
 		--with-openssl \
 		--with-brotli \
+		--with-zstd \
 		--with-docbook=/usr/share/sgml/docbook/stylesheet/dsssl/modular
 
 override_dh_auto_build:
