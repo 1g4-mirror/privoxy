@@ -704,7 +704,7 @@ s@<title(?:\s+type=\'text\')?>([^<]*)(?:\.\.\.)?\s*</title>\s*\
 #
 #################################################################################
 FILTER: bundeswehr.de Hide the cookie and privacy info banner on bundeswehr.de
-s@<div class="privacy-protection-banner__container"@$0 style="display: none"@
+s@<dialog id="PrivacyProtectionBanner" class="PrivacyProtectionBanner"@$0 style="display: none"@
 
 #################################################################################
 #
