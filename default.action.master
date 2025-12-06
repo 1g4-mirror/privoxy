@@ -687,6 +687,8 @@ countr*.
 #MASTER# REMARKS: We still like tor
 # URL = http://metrics.torproject.org/consensus-graphs.html
 metrics.torproject.org/
+# URL = https://metrics.1aeo.com/platform/ElectroBSD/
+metrics.1aeo.com/
 # URL = http://linuxcounter.net/
 linuxcounter.net/
 # URL = http://adinablafasel.example.org/
