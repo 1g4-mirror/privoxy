@@ -5037,8 +5037,9 @@ static void serve(struct client_state *csp)
 #endif /* def FEATURE_CONNECTION_SHARING */
    int continue_chatting = 0;
 
-   log_error(LOG_LEVEL_CONNECT, "Accepted connection from %s on socket %d",
-      csp->ip_addr_str, csp->cfd);
+   log_error(LOG_LEVEL_CONNECT,
+      "Accepted connection from %s on socket %d connected through %s.",
+      csp->ip_addr_str, csp->cfd, csp->listen_addr_str);
 
    do
    {
