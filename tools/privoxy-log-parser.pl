@@ -1529,6 +1529,8 @@ sub handle_loglevel_connect($) {
     } elsif ($c =~ m/^[Aa]ccepted connection from .*/ or
              $c =~ m/^OK/) {
 
+        # Privoxy >=4.1.0:
+        # Accepted connection from 127.0.0.1 on socket 9 connected through 127.0.1.1:8118.
         # Privoxy 3.0.20:
         # Accepted connection from 10.0.0.1 on socket 5
         # Privoxy between 3.0.20 and 3.0.6:
@@ -1537,6 +1539,7 @@ sub handle_loglevel_connect($) {
         # OK
         $c = highlight_matched_host($c, '(?<=connection from )[^ ]*');
         $c = highlight_matched_pattern($c, 'Number', '(?<=socket )\d+');
+        $c = highlight_matched_host($c, '(?<=through )[^ ]*');
 
     } elsif ($c =~ m/^Closing client socket/) {
 
