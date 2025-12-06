@@ -1084,7 +1084,8 @@ int bind_port(const char *hostnam, int portnum, int backlog, jb_socket *pfd)
  * Function    :  get_host_information
  *
  * Description :  Determines the IP address the client used to
- *                reach us and the hostname associated with it.
+ *                reach us, the hostname associated with it and
+ *                the listening address and port.
  *
  *                XXX: Most of the code has been copy and pasted
  *                from accept_connection() and not all of the

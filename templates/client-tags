@@ -114,8 +114,8 @@
             This page shows the configured
             <a title="Lookup client-specific-tag directive in the user-manual"
              href="@user-manual@config.html#CLIENT-SPECIFIC-TAG">client-specific tags</a>,
-            and whether or not they are enabled for the address your request came from
-            (@client-ip-addr@):
+            and whether or not they are enabled for requests from
+            @client-ip-addr@ that arrive on @my-ip-address@:@my-port@:
           </p>
 
         @client-tags@

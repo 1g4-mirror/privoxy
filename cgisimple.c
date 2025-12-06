@@ -374,7 +374,8 @@ jb_err cgi_show_client_tags(struct client_state *csp,
          int tag_state;
 
          privoxy_mutex_lock(&client_tags_mutex);
-         tag_state = client_has_requested_tag(csp->client_address, this_tag->name);
+         tag_state = client_has_requested_tag(csp->client_address,
+            csp->listen_addr_str, this_tag->name);
          privoxy_mutex_unlock(&client_tags_mutex);
          if (!err) err = string_append(&client_tag_status, "<tr><td>");
          if (!err) err = string_append(&client_tag_status, this_tag->name);
@@ -404,7 +405,7 @@ jb_err cgi_show_client_tags(struct client_state *csp,
          return JB_ERR_MEMORY;
       }
    }
-   refresh_delay = get_next_tag_timeout_for_client(csp->client_address);
+   refresh_delay = get_next_tag_timeout_for_client(csp->client_address, csp->listen_addr_str);
    if (refresh_delay != 0)
    {
       snprintf(buf, sizeof(buf), "%u", csp->config->client_tag_lifetime);

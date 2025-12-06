@@ -1942,7 +1942,8 @@ static jb_err receive_client_request(struct client_state *csp)
 #ifdef FEATURE_CLIENT_TAGS
    /* XXX: If the headers were enlisted sooner, passing csp would do. */
    set_client_address(csp, headers);
-   get_tag_list_for_client(csp->client_tags, csp->client_address);
+   get_tag_list_for_client(csp->client_tags, csp->client_address,
+      csp->listen_addr_str);
 #endif
 
    /*
@@ -2783,7 +2784,8 @@ static jb_err process_encrypted_request_headers(struct client_state *csp)
    if (csp->client_address == NULL)
    {
       set_client_address(csp, headers);
-      get_tag_list_for_client(csp->client_tags, csp->client_address);
+      get_tag_list_for_client(csp->client_tags, csp->client_address,
+         csp->listen_addr_str);
    }
 #endif
 
