@@ -45,11 +45,11 @@ Rewrite host behind the client's back
 
 <verify>
 <protocol>
-GET /%TESTNUMBER HTTP/1.1
-Host: www.example.org
-User-Agent: curl/%VERSION
-Accept: */*
-
+GET /%TESTNUMBER HTTP/1.1%CR
+Host: www.example.org%CR
+User-Agent: curl/%VERSION%CR
+Accept: */*%CR
+%CR
 </protocol>
 </verify>
 </testcase>

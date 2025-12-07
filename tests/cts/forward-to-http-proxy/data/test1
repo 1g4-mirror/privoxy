@@ -49,11 +49,11 @@ http://www.example.org/%TESTNUMBER
 
 <verify>
 <protocol>
-GET http://www.example.org/%TESTNUMBER HTTP/1.1
-Host: www.example.org
-User-Agent: curl/%VERSION
-Accept: */*
-
+GET http://www.example.org/%TESTNUMBER HTTP/1.1%CR
+Host: www.example.org%CR
+User-Agent: curl/%VERSION%CR
+Accept: */*%CR
+%CR
 </protocol>
 </verify>
 </testcase>

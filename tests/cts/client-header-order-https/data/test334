@@ -46,11 +46,11 @@ HTTP client header order 3 through https. Only a few headers to sort.
 
 <verify>
 <protocol>
-GET /%TESTNUMBER HTTP/1.1
-Host: %HOSTIP:%HTTPSPORT
-User-Agent: curl/%VERSION
-Accept: */*
-
+GET /%TESTNUMBER HTTP/1.1%CR
+Host: %HOSTIP:%HTTPSPORT%CR
+User-Agent: curl/%VERSION%CR
+Accept: */*%CR
+%CR
 </protocol>
 </verify>
 </testcase>

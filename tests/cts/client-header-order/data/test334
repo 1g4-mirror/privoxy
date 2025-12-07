@@ -31,12 +31,12 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 
 <verify>
 <protocol>
-GET /%TESTNUMBER HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
-Accept: */*
-Connection: close
-
+GET /%TESTNUMBER HTTP/1.1%CR
+Host: %HOSTIP:%HTTPPORT%CR
+User-Agent: curl/%VERSION%CR
+Accept: */*%CR
+Connection: close%CR
+%CR
 </protocol>
 </verify>
 </testcase>
