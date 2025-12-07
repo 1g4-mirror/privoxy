@@ -77,6 +77,7 @@ test:439: Expected to fail. Privoxy adds a 'Connection established' response the
 test:46: Invalid URL and use of --resolv.
 test:461: Expected to fail. Privoxy adds a 'Host' header.
 test:471, 1704: Expected to fail. Uses HTTP/2 which Privoxy does not support.
+test:500: Known to fail when curl has been build with TrackMemory suppport. Proxy use results in 'TOO MANY ALLOCS'.
 test:501: Not relevant for a proxy.
 test:507: Expected to fail. DNS failures cause a Privoxy error message the test doesn't handle.
 test:530, 584: Known to fail. Test server expects pipelined requests and doesn't respond otherwise.
