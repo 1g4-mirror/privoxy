@@ -205,7 +205,7 @@ LDFLAGS="${LDFLAGS} -L${lib}"
 
 # zstd
 # Get the zstd library from  https://github.com/facebook/zstd
-inc="/source/zstd-1.5.7/"
+inc="/source/zstd-1.5.7/lib"
 lib="/source/zstd-1.5.7/lib"
 CPPFLAGS="${CPPFLAGS} -I${inc}"
 LDFLAGS="${LDFLAGS} -L${lib}"
