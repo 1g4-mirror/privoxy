@@ -87,3 +87,6 @@
 
 {+filter{sourceforge}}
 /sourceforge/
+
+{+filter{bundeswehr.de}}
+/bundeswehr.de/
