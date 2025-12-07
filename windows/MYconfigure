@@ -203,6 +203,14 @@ BROTLIOPT="--with-brotli"
 CPPFLAGS="${CPPFLAGS} -I${inc}"
 LDFLAGS="${LDFLAGS} -L${lib}"
 
+# zstd
+# Get the zstd library from  https://github.com/facebook/zstd
+inc="/source/zstd-1.5.7/"
+lib="/source/zstd-1.5.7/lib"
+CPPFLAGS="${CPPFLAGS} -I${inc}"
+LDFLAGS="${LDFLAGS} -L${lib}"
+
+
 ###
 echo "CFLAGS=${CFLAGS}"
 echo "CPPFLAGS=${CPPFLAGS}"
@@ -222,6 +230,7 @@ echo "LDFLAGS=${LDFLAGS}"
              --enable-strptime-sanity-checks \
              --disable-pthread  \
              --with-brotli  \
+             --with-zstd  \
              ${MITMOPT} \
              --with-docbook=yes
 
