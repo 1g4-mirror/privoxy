@@ -47,7 +47,7 @@ CFLAGS="${CFLAGS} -fdiagnostics-color=always"
 # It's nice having warnings in color even if I run a script that does
 #   'make 2>&1 | tee log.make'
 
-CFLAGS="${CFLAGS} -fstack-protector-strong -D_FORTIFY_SOURCE=2"
+CFLAGS="${CFLAGS} -fstack-protector-strong"
 LDFLAGS="${LDFLAGS} -fstack-protector-strong"
 # -fstack-protector-strong:  enable stack checking.
 # NOTE: need to specify when compiling _and_ linking
@@ -57,7 +57,9 @@ LDFLAGS="${LDFLAGS} -fstack-protector-strong"
 # see : https://en.wikipedia.org/wiki/Buffer_overflow_protection
 # NOTE: needs static linking or the following in the path:
 #         /usr/i686-w64-mingw32/sys-root/mingw/bin/libssp-0.dll
-#
+
+CFLAGS="${CFLAGS} -D_FORTIFY_SOURCE=3"
+# https://www.gnu.org/software/libc/manual/html_node/Source-Fortification.html
 # -D_FORTIFY_SOURCE:  detect some buffer overflow errors
 #     ***>> requires compiler optimization level 1 or above <<***
 # see : https://gcc.gnu.org/legacy-ml/gcc-patches/2004-09/msg02055.html
