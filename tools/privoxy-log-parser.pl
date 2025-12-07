@@ -188,6 +188,7 @@ sub prepare_our_stuff() {
         'HOST'               => HEADER_DEFAULT_COLOUR,
         'tls-version'        => 'pink',
         'cipher-suite'       => 'light_cyan',
+        'listen-address'     => 'light_cyan',
     );
 
     %h_colours = %h;
@@ -1273,10 +1274,14 @@ sub handle_loglevel_tagging($) {
 
     } elsif ($c =~ /^Enlisting tag/) {
 
+        # >= 4.2.0:
+        # Enlisting tag 'allow-cookies' for client 127.0.0.1 using 127.0.1.1:8120.
+        # < 4.2.0:
         # Enlisting tag 'forward-directly' for client 127.0.0.1.
 
         $c =~ s@(?<=tag \')([^\']*)@$h{'tag'}$1$h{'Standard'}@;
-        $c = highlight_matched_host($c, '[^\s]+(?=\.$)');
+        $c = highlight_matched_host($c, '(?<=for client )[^\s]+');
+        $c =~ s@(?<=using )(.*)(?=\.$)@$h{'listen-address'}$1$h{'Standard'}@;
 
     } elsif ($c =~ /^Tag/) {
 
