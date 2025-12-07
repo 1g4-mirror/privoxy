@@ -99,6 +99,8 @@ sub main() {
             $why = "Expected to fail. Privoxy adds a 'Host' header.";
         } elsif ($testnum eq 471 or $testnum eq 1704) {
             $why = "Expected to fail. Uses HTTP/2 which Privoxy does not support.";
+        } elsif ($testnum eq 500) {
+            $why = "Known to fail when curl has been build with TrackMemory suppport. Proxy use results in 'TOO MANY ALLOCS'.";
         } elsif ($testnum eq 507) {
             $why = "Expected to fail. DNS failures cause a Privoxy error message the test doesn't handle.";
         } elsif ($testnum eq 501) {
