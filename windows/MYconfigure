@@ -151,9 +151,9 @@ usepcre2=yes
 #
 if [ "$usepcre2" = "yes" ]; then
     PCREOPT=""
-    inc="/source/pcre2-10.44/src/"
+    inc="/source/pcre2-10.47/src/"
       # need pcre2.h
-    lib="/source/pcre2-10.44/.libs"
+    lib="/source/pcre2-10.47/.libs"
       # need libpcre2-8.a & libpcre2-posix.a
 else
     PCREOPT="--disable-pcre2"
@@ -176,8 +176,8 @@ MITMOPT="--with-mbedtls"
 # Get the 3.6.x mbedtls library from  https://github.com/Mbed-TLS/mbedtls/tags
 # Release Notes: https://github.com/Mbed-TLS/mbedtls/releases?q=3.6.3
 
-inc="/source/mbedtls-3.6.3/include"
-lib="/source/mbedtls-3.6.3/library"
+inc="/source/mbedtls-3.6.5/include"
+lib="/source/mbedtls-3.6.5/library"
 CPPFLAGS="${CPPFLAGS} -I${inc}"
 LDFLAGS="${LDFLAGS} -L${lib}"
 LIBS="${LIBS} -lbcrypt"
@@ -197,8 +197,8 @@ fi
 
 # brotli
 # Get the brotli library from  https://github.com/google/brotli/releases
-inc="/source/brotli-1.1.0/build/installed/include"
-lib="/source/brotli-1.1.0/build/installed/lib"
+inc="/source/brotli-1.2.0/build/installed/include"
+lib="/source/brotli-1.2.0/build/installed/lib"
 BROTLIOPT="--with-brotli"
 CPPFLAGS="${CPPFLAGS} -I${inc}"
 LDFLAGS="${LDFLAGS} -L${lib}"
