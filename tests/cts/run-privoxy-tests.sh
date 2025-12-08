@@ -141,7 +141,8 @@ main() {
                 shift
                 ;;
             *)
-                echo "Invalid parameter: $1"
+                echo "Invalid argument: $1"
+                echo "Supported arguments: -c -r -t test-scenario"
                 exit 1
                 ;;
         esac
