@@ -255,7 +255,8 @@
             <tr>
               <td><code>FEATURE_BROTLI</code></td>
               <td>@if-FEATURE_BROTLI-then@ Yes @else-not-FEATURE_BROTLI@ No @endif-FEATURE_BROTLI@</td>
-              <td>Allows to decompress content with Brotli before filtering it. Requires external brotli library.</td>
+              <td>Allows to decompress content with Brotli before filtering it.
+              Requires external <a href="https://github.com/google/brotli">brotli library</a>.</td>
             </tr>
             <tr>
               <td><code>FEATURE_CGI_EDIT_ACTIONS</code></td>
@@ -393,13 +394,13 @@
               <td><code>FEATURE_ZLIB</code></td>
               <td>@if-FEATURE_ZLIB-then@ Yes @else-not-FEATURE_ZLIB@ No @endif-FEATURE_ZLIB@</td>
               <td>Allows to decompress gzip and zlib compressed documents for filtering.
-                Requires external zlib library.</td>
+                Requires external <a href="https://zlib.net/">zlib library</a>.</td>
             </tr>
             <tr>
               <td><code>FEATURE_ZSTD</code></td>
               <td>@if-FEATURE_ZSTD-then@ Yes @else-not-FEATURE_ZSTD@ No @endif-FEATURE_ZSTD@</td>
               <td>Allows to decompress Zstandard-compressed content for filtering.
-                Requires external zstd library.</td>
+                Requires external <a href="https://facebook.github.io/zstd/">zstd library</a>.</td>
             </tr>
           </table>
       </td>
