@@ -94,7 +94,7 @@ runtests_wrapper() {
                 ;;
             "-t")
                 shift
-                echo "Overwriting default TESTDIR with $1"
+                echo "Setting TESTDIR to ${1}"
                 testdir_args="-o TESTDIR=$1"
                 shift
                 ;;
