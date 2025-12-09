@@ -118,7 +118,9 @@ runtests_wrapper() {
     extra_args="$*"
     
     cd "${curl_source_directory}/tests" || exit 1
-    ./runtests.pl -L "${privoxy_lib}" $proxy_args $exclude_file_args $testdir_args $a_flag -n $keyword !skip $extra_args
+    ./runtests.pl -c "${curl_source_directory}/src/curl" \
+                  -L "${privoxy_lib}" \
+                  $proxy_args $exclude_file_args $testdir_args $a_flag -n $keyword !skip $extra_args
 }
 
 main() {
