@@ -40,7 +40,7 @@ containing the test files.
 
 The tests are written using the "curl test suite file format"
 described at:
-https://github.com/curl/curl/blob/master/tests/FILEFORMAT.md
+https://github.com/curl/curl/blob/master/docs/tests/FILEFORMAT.md
 
 One extension made is that a <proxy-reply> section is supported
 which will be used when checking the test results instead of using
