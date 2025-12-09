@@ -6,7 +6,7 @@
 # Wrapper around curl's runtests.pl that sets a couple of options
 # so Privoxy is being used.
 #
-# Copyright (c) 2013-2021 Fabian Keil <fk@fabiankeil.de>
+# Copyright (c) 2013-2025 Fabian Keil <fk@fabiankeil.de>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
