@@ -77,7 +77,7 @@ run_privoxy_tests() {
     echo "Test scenario: ${test_scenario}"
     $start_privoxy && start_privoxy "${test_dir}" "${test_scenario}"
 
-    "${test_dir}/runtests-wrapper.sh" -A -E -t "${test_dir}/${test_scenario}/data" HTTP HTTPS
+    "${test_dir}/runtests-wrapper.sh" -E -t "${test_dir}/${test_scenario}/data" HTTP HTTPS
     ret=$?
 
     $start_privoxy && stop_privoxy "${test_dir}" "${test_scenario}"
@@ -94,7 +94,7 @@ run_upstream_tests() {
     echo "Test scenario: ${UPSTREAM_TEST_SCENARIO}"
     $start_privoxy && start_privoxy "${test_dir}" "${UPSTREAM_TEST_SCENARIO}"
 
-    "${test_dir}/runtests-wrapper.sh" -A -T HTTP
+    "${test_dir}/runtests-wrapper.sh" -T HTTP
     ret=$?
 
     $start_privoxy && stop_privoxy "${test_dir}" "${UPSTREAM_TEST_SCENARIO}"
