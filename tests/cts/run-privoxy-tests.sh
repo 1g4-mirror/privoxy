@@ -169,6 +169,8 @@ main() {
        exit 1
     fi
 
+    echo "All test scenarios finished without errors."
+
     exit 0
 }
 
