@@ -1153,15 +1153,13 @@ extern int create_server_ssl_connection(struct client_state *csp)
    }
 
 #ifdef HAVE_SECURE_RENEGOTIATION
-#warning wolfssl has been compiled with HAVE_SECURE_RENEGOTIATION while you probably want HAVE_RENEGOTIATION_INDICATION
    if(wolfSSL_UseSecureRenegotiation(ssl) != WOLFSSL_SUCCESS)
    {
       log_error(LOG_LEVEL_ERROR,
          "Failed to enable 'Secure' Renegotiation. Continuing anyway.");
    }
-#endif
-#ifndef HAVE_RENEGOTIATION_INDICATION
-#warning Looks like wolfssl has been compiled without HAVE_RENEGOTIATION_INDICATION
+#else
+#warning Looks like wolfssl has been compiled without HAVE_SECURE_RENEGOTIATION
 #endif
 
    log_error(LOG_LEVEL_CONNECT,
