@@ -1086,7 +1086,7 @@ extern int create_server_ssl_connection(struct client_state *csp)
    csp->server_cert_verification_result = SSL_CERT_NOT_VERIFIED;
    csp->server_certs_chain.next = NULL;
 
-   ssl_attrs->ctx = wolfSSL_CTX_new(wolfSSLv23_method());
+   ssl_attrs->ctx = wolfSSL_CTX_new(wolfTLS_client_method());
    if (ssl_attrs->ctx == NULL)
    {
       log_error(LOG_LEVEL_ERROR, "TLS context creation failed");
