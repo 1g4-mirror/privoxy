@@ -36,7 +36,6 @@ test:1310: Known to fail. NTLM-related. Cause not properly diagnosed yet. Privox
 test:1433: Expected to fail. Privoxy will enforce a valid HTTP version number
 test:1479: Expected to fail. Uses HTTP/0.9 response.
 test:1480: Expected to fail. Uses HTTP Continue response but no final response.
-test:1499: Expected to fail. Privoxy does not support chunked trailers.
 test:1506, 1510: Expected to fail when using a proxy. Hardcoded addresses in expected output.
 test:1533: Sends an invalid method. Needs investigating.
 test:1542: Expected to fail. Expects HTTPPORT in logs which gets replaced by Privoxy's listening port.
@@ -46,6 +45,7 @@ test:1556: Known to fail. Body value changes from 100008 to 100009. Needs invest
 test:158, 246, 565, 579: Known to fail. Not properly analyzed. Looks like Privoxy's continue hack is insufficient.
 test:1598: Expected to fail. Privoxy does not support chunk-encoded POST requests with trailers.
 test:16, 45, 63: Not supposed to work with Privoxy. Expected forwarding failure. Workaround probably possible.
+test:1665: Expected to fail. Trigger Privoxy's MS IIS 5 hack which the test does not expect.
 test:1671: Known to fail as curl adds a Proxy-Connection header to the JSON output which the test doesn't expect.
 test:17: Not supposed to work with Privoxy. Invalid METHODs get rejected.
 test:187: Expected to fail. Test doesn't deal with Privoxy's error message in case of invalid URLs.
@@ -77,6 +77,7 @@ test:439: Expected to fail. Privoxy adds a 'Connection established' response the
 test:46: Invalid URL and use of --resolv.
 test:461: Expected to fail. Privoxy adds a 'Host' header.
 test:471, 1704: Expected to fail. Uses HTTP/2 which Privoxy does not support.
+test:473, 1499: Expected to fail. Privoxy does not support chunked trailers.
 test:500: Known to fail when curl has been build with TrackMemory suppport. Proxy use results in 'TOO MANY ALLOCS'.
 test:501: Not relevant for a proxy.
 test:507: Expected to fail. DNS failures cause a Privoxy error message the test doesn't handle.
