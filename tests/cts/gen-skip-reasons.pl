@@ -161,6 +161,8 @@ sub main() {
             $why = "Known to fail. Body value changes from 100008 to 100009. Needs investigating.";
         } elsif ($testnum eq 1598) {
             $why = "Expected to fail. Privoxy does not support chunk-encoded POST requests with trailers.";
+        } elsif ($testnum eq 1665) {
+            $why = "Expected to fail. Trigger Privoxy's MS IIS 5 hack which the test does not expect.";
         } elsif ($testnum eq 1671) {
             $why = "Known to fail as curl adds a Proxy-Connection header to the JSON output which the test doesn't expect.";
         } elsif ($testnum eq 1915) {
