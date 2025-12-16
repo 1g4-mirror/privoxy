@@ -4200,22 +4200,25 @@ static void handle_established_connection(struct client_state *csp)
                   "Applying the MS IIS5 hack didn't help.");
                log_error(LOG_LEVEL_CLF,
                   "%s - - [%T] \"%s\" 502 0", csp->ip_addr_str, http->cmd);
+               if (buffer_and_filter_content)
+               {
 #ifdef FEATURE_HTTPS_INSPECTION
-               /*
-                * Sending data with standard or secured connection (HTTP/HTTPS)
-                */
-               if (client_use_ssl(csp))
-               {
-                  ssl_send_data_delayed(&(csp->ssl_client_attr),
-                     (const unsigned char *)INVALID_SERVER_HEADERS_RESPONSE,
-                     strlen(INVALID_SERVER_HEADERS_RESPONSE),
-                     get_write_delay(csp));
-               }
-               else
+                  /*
+                   * Sending data with standard or secured connection (HTTP/HTTPS)
+                   */
+                  if (client_use_ssl(csp))
+                  {
+                     ssl_send_data_delayed(&(csp->ssl_client_attr),
+                        (const unsigned char *)INVALID_SERVER_HEADERS_RESPONSE,
+                        strlen(INVALID_SERVER_HEADERS_RESPONSE),
+                        get_write_delay(csp));
+                  }
+                  else
 #endif /* def FEATURE_HTTPS_INSPECTION */
-               {
-                  write_socket_delayed(csp->cfd, INVALID_SERVER_HEADERS_RESPONSE,
-                     strlen(INVALID_SERVER_HEADERS_RESPONSE), write_delay);
+                  {
+                     write_socket_delayed(csp->cfd, INVALID_SERVER_HEADERS_RESPONSE,
+                        strlen(INVALID_SERVER_HEADERS_RESPONSE), write_delay);
+                  }
                }
                mark_server_socket_tainted(csp);
 #ifdef FEATURE_HTTPS_INSPECTION
