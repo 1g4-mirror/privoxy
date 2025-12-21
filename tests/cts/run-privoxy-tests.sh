@@ -68,8 +68,8 @@ stop_privoxy() {
 }
 
 run_privoxy_tests() {
-    local start_privoxy="$1"
-    local test_scenario="$2"
+    local start_privoxy="${1}"; shift
+    local test_scenario="${1}"; shift
     local directory_name="$(dirname "$0")"
     local test_dir="$(realpath "${directory_name}")"
     local ret
@@ -77,7 +77,7 @@ run_privoxy_tests() {
     echo "Test scenario: ${test_scenario}"
     $start_privoxy && start_privoxy "${test_dir}" "${test_scenario}"
 
-    "${test_dir}/runtests-wrapper.sh" -E -t "${test_dir}/${test_scenario}/data" HTTP HTTPS
+    "${test_dir}/runtests-wrapper.sh" -E -t "${test_dir}/${test_scenario}/data" HTTP HTTPS "${@}"
     ret=$?
 
     $start_privoxy && stop_privoxy "${test_dir}" "${test_scenario}"
@@ -86,7 +86,7 @@ run_privoxy_tests() {
 }
 
 run_upstream_tests() {
-    local start_privoxy="$1"
+    local start_privoxy="${1}"; shift
     local directory_name="$(dirname "$0")"
     local test_dir="$(realpath "${directory_name}")"
     local ret
@@ -94,7 +94,7 @@ run_upstream_tests() {
     echo "Test scenario: ${UPSTREAM_TEST_SCENARIO}"
     $start_privoxy && start_privoxy "${test_dir}" "${UPSTREAM_TEST_SCENARIO}"
 
-    "${test_dir}/runtests-wrapper.sh" -T HTTP
+    "${test_dir}/runtests-wrapper.sh" -T HTTP "${@}"
     ret=$?
 
     $start_privoxy && stop_privoxy "${test_dir}" "${UPSTREAM_TEST_SCENARIO}"
@@ -140,9 +140,14 @@ main() {
                 test_scenarios="$1"
                 shift
                 ;;
+            "--")
+                shift
+                echo "Passing remaining arguments to runtests-wrapper.sh: ${@}"
+                break
+                ;;
             *)
                 echo "Invalid argument: $1"
-                echo "Supported arguments: -c -r -t test-scenario"
+                echo "Supported arguments: -c -r -t test-scenario -- Arguments for runtests-wrapper.sh"
                 exit 1
                 ;;
         esac
@@ -154,9 +159,9 @@ main() {
 
     for test_scenario in ${test_scenarios}; do
         if [ "${test_scenario}" = "${UPSTREAM_TEST_SCENARIO}" ]; then
-            run_upstream_tests ${start_privoxy}
+            run_upstream_tests ${start_privoxy} "$@"
         else
-            run_privoxy_tests ${start_privoxy} "${test_scenario}"
+            run_privoxy_tests ${start_privoxy} "${test_scenario}" "$@"
         fi
         if [ $? != 0 ]; then
             scenarios_with_errors="${scenarios_with_errors} ${test_scenario}"
