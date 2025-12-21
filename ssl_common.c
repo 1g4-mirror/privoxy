@@ -754,16 +754,18 @@ extern int enforce_sane_certificate_state(const char *certificate, const char *k
  *********************************************************************/
 int create_hexadecimal_hash_of_host(struct client_state *csp)
 {
-   int i;
+   unsigned int i;
    int ret;
 
    for (i = 0; i < HASH_OF_HOST_BUF_SIZE; i++)
    {
-      ret = sprintf((char *)csp->http->hash_of_host_hex + 2 * i, "%02x",
+      unsigned int j = 2 * i;
+      ret = snprintf((char *)csp->http->hash_of_host_hex + j,
+         sizeof(csp->http->hash_of_host_hex) - j, "%02x",
          csp->http->hash_of_host[i]);
       if (ret < 0)
       {
-         log_error(LOG_LEVEL_ERROR, "sprintf() return value: %d", ret);
+         log_error(LOG_LEVEL_ERROR, "snprintf() return value: %d", ret);
          return -1;
       }
    }
