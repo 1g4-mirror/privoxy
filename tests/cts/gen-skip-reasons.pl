@@ -149,7 +149,7 @@ sub main() {
             $why = "Expected to fail as Privoxy does not support HTTP/0.9.";
         } elsif ($testnum eq 1292) {
             $why = "Expected to fail as Privoxy replaces the empty Host header.";
-        } elsif ($testnum eq 1499) {
+        } elsif ($testnum eq 473 or $testnum eq 1499) {
             $why = "Expected to fail. Privoxy does not support chunked trailers.";
         } elsif ($testnum eq 1533) {
             $why = "Sends an invalid method. Needs investigating.";
