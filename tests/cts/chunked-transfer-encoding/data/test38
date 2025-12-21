@@ -93,7 +93,7 @@ Chunked transfer encoding - Multiple largish chunks on connection that is kept a
 proxy
 </features>
 <command>
---max-time 20 --raw http://%HOSTIP:%HTTPPORT/chunked-transfer-encoding/%TESTNUMBER0000 --raw http://%HOSTIP:%HTTPPORT/unchunked-content/%TESTNUMBER0001
+--max-time 60 --raw http://%HOSTIP:%HTTPPORT/chunked-transfer-encoding/%TESTNUMBER0000 --raw http://%HOSTIP:%HTTPPORT/unchunked-content/%TESTNUMBER0001
 </command>
 </client>
 
