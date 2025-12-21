@@ -1126,9 +1126,11 @@ extern int create_server_ssl_connection(struct client_state *csp)
    }
 #endif
    /* SNI extension */
-   if (!SSL_set_tlsext_host_name(ssl, csp->http->host))
+   if (!host_is_ip_address(csp->http->host) &&
+       !SSL_set_tlsext_host_name(ssl, csp->http->host))
    {
-      log_ssl_errors(LOG_LEVEL_ERROR, "SSL_set_tlsext_host_name failed");
+      log_ssl_errors(LOG_LEVEL_ERROR,
+         "SSL_set_tlsext_host_name() failed to set %s", csp->http->host);
       ret = -1;
       goto exit;
    }
