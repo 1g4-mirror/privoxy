@@ -1539,7 +1539,7 @@ sub handle_loglevel_connect($) {
         # OK
         $c = highlight_matched_host($c, '(?<=connection from )[^ ]*');
         $c = highlight_matched_pattern($c, 'Number', '(?<=socket )\d+');
-        $c = highlight_matched_host($c, '(?<=through )[^ ]*');
+        $c = highlight_matched_host($c, '(?<=through )[^ ]*(?=\.$)');
 
     } elsif ($c =~ m/^Closing client socket/) {
 
