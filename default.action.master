@@ -2775,7 +2775,7 @@ login.skype.com/login\?
 # URL = https://www.spotify.com/en/login/?forward_url=https%3A%2F%2Fwww.spotify.com%2Ffavicon.ico
 # URL = https://www.spotify.com/de/en/login/?forward_url=https%3A%2F%2Fwww.spotify.com%2Ffavicon.ico
 # URL = http://www.spotify.com/login/?forward_url=https%3A%2F%2Fwww.spotify.com%2Ffavicon.ico
-www.spotify.com/.*/login/\?
+www.spotify.com/.*login/\?
 # URL = https://www.reddit.com/login?dest=https%3A%2F%2Fwww.reddit.com%2Ffavicon.ico
 # URL = https://www.reddit.com/login/?dest=https%3A%2F%2Fwww.reddit.com%2Ffavicon.ico
 www.reddit.com/login
