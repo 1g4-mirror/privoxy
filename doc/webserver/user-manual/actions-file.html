@@ -4,7 +4,7 @@
 <head>
   <title>Actions Files</title>
   <meta name="GENERATOR" content="Modular DocBook HTML Stylesheet Version 1.79">
-  <link rel="HOME" title="Privoxy 4.0.0 User Manual" href="index.html">
+  <link rel="HOME" title="Privoxy 4.1.0 User Manual" href="index.html">
   <link rel="PREVIOUS" title="The Main Configuration File" href="config.html">
   <link rel="NEXT" title="Filter Files" href="filter-file.html">
   <link rel="STYLESHEET" type="text/css" href="../p_doc.css">
@@ -15,7 +15,7 @@
   <div class="NAVHEADER">
     <table summary="Header navigation table" width="100%" border="0" cellpadding="0" cellspacing="0">
       <tr>
-        <th colspan="3" align="center">Privoxy 4.0.0 User Manual</th>
+        <th colspan="3" align="center">Privoxy 4.1.0 User Manual</th>
       </tr>
       <tr>
         <td width="10%" align="left" valign="bottom"><a href="config.html" accesskey="P">Prev</a></td>
@@ -409,11 +409,6 @@
         <p>Note that the path pattern is automatically left-anchored at the <span class="QUOTE">"/"</span>, i.e. it
         matches as if it would start with a <span class="QUOTE">"^"</span> (regular expression speak for the beginning
         of a line).</p>
-        <p>Please also note that matching in the path is <span class="emphasis"><i class="EMPHASIS">CASE
-        INSENSITIVE</i></span> by default, but you can switch to case sensitive at any point in the pattern by using
-        the <span class="QUOTE">"(?-i)"</span> switch: <tt class="LITERAL">www.example.com/(?-i)PaTtErN.*</tt> will
-        match only documents whose path starts with <tt class="LITERAL">PaTtErN</tt> in <span class=
-        "emphasis"><i class="EMPHASIS">exactly</i></span> this capitalization.</p>
         <div class="VARIABLELIST">
           <dl>
             <dt><tt class="LITERAL">.example.com/.*</tt></dt>
@@ -1893,15 +1888,6 @@
                   </td>
                 </tr>
               </table>
-              <p><a name="FILTER-IE-EXPLOITS" id="FILTER-IE-EXPLOITS"></a></p>
-              <table border="0" bgcolor="#E0E0E0" width="90%">
-                <tr>
-                  <td>
-                    <pre class=
-                    "SCREEN">  +filter{ie-exploits}         # Disable some known Internet Explorer bug exploits.</pre>
-                  </td>
-                </tr>
-              </table>
               <p><a name="FILTER-SITE-SPECIFICS" id="FILTER-SITE-SPECIFICS"></a></p>
               <table border="0" bgcolor="#E0E0E0" width="90%">
                 <tr>
@@ -3048,7 +3034,7 @@
   i[0-9][0-9][0-9][0-9]*/
 
   # Redirect requests for the old Tor Hidden Service of the Privoxy website to the new one
-  {+redirect{s@^http://jvauzb4sb3bwlsnc.onion/@http://l3tczdiiwoo63iwxty4lhs6p7eaxop5micbn7vbliydgv63x5zrrrfyd.onion/@}}
+  {+redirect{s@^http://jvauzb4sb3bwlsnc.onion/@http://privoxy5wtwbtk4wwyrdbg6oxeghvhghghmokcx2iawydkqmaztfbbid.onion/@}}
   jvauzb4sb3bwlsnc.onion/
 
   # Redirect remote requests for this manual

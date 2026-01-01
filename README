@@ -4,7 +4,7 @@
  *
  * Purpose     :  Give a short intro about Privoxy.
  *
- * Copyright   :  Written by and Copyright (C) 2001-2021 the
+ * Copyright   :  Written by and Copyright (C) 2001-2026 the
  *                Privoxy team. https://www.privoxy.org/
  *
  *                Based on the Internet Junkbuster originally written
@@ -32,7 +32,7 @@
  *
  *********************************************************************/
 
-This README is included with Privoxy 4.0.0. See https://www.privoxy.org/ for
+This README is included with Privoxy 4.1.0. See https://www.privoxy.org/ for
 more information. The current code maturity level is "stable".
 
 -------------------------------------------------------------------------------
