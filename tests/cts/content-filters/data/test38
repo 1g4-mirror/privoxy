@@ -39,13 +39,13 @@ Date: Thu, 22 Jul 2010 11:22:33 GMT%CR
 Connection: close%CR
 Content-Type: text/html%CR
 X-Control: swsclose%CR
-Content-Length: 273%CR
+Content-Length: 240%CR
 %CR
 # Here are some strings the imdb filter should filter:
 
 # pcrs command 1:
 
-<div id="inline20_responsive_wrapper" style="display:none">
+<div style="display:none">
 
 # pcrs command 2:
 
