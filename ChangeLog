@@ -114,12 +114,12 @@ ChangeLog for Privoxy
   - Updated license info to deal with wolfSSL's license change to GPLv3.
   - Added new FAQ: 'Is the Privoxy source tarball infected by a virus?'.
   - Removed claims that path matching can be turned case-sensitive.
-    The suggested method didsn't actually work.
+    The suggested method didn't actually work.
 
 - Website improvements:
   - GNUmakefile.in: Add a web-robots.txt target to only transfer the robots.txt to the SF server.
   - robots.txt: Disallow /gitweb to hopefully reduce the load on the webserver
-  - robots.txt: Remvoe stray empty lines
+  - robots.txt: Remove stray empty lines
   - Added a vanity onion address for the privoxy.org onion service.
 
 - Tests:
