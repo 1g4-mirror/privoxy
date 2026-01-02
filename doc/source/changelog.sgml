@@ -383,7 +383,7 @@
     <listitem>
      <para>
       Removed claims that path matching can be turned case-sensitive.
-      The suggested method didsn't actually work.
+      The suggested method didn't actually work.
      </para>
      </listitem>
     </itemizedlist>
@@ -405,7 +405,7 @@
     </listitem>
     <listitem>
      <para>
-      robots.txt: Remvoe stray empty lines
+      robots.txt: Remove stray empty lines
      </para>
     </listitem>
     <listitem>
