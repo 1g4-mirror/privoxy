@@ -8544,7 +8544,7 @@ Requests</title>
  When compiled with FEATURE_HTTPS_INSPECTION (optional),
  Privoxy depends on a TLS library. The supported libraries are
  <ulink url="https://www.libressl.org/">LibreSSL</ulink>,
- <ulink url="https://github.com/Mbed-TLS/mbedtls/tags">mbed TLS 2.28.x</ulink> and
+ <ulink url="https://github.com/Mbed-TLS/mbedtls/">mbed TLS</ulink>,
  <ulink url="https://www.openssl.org/">OpenSSL</ulink> and
  <ulink url="https://www.wolfssl.com/">wolfSSL</ulink>.
 </para>
