@@ -8552,6 +8552,10 @@ Requests</title>
  When compiled with FEATURE_ZLIB (optional),
  Privoxy depends on <ulink url="https://zlib.net/">zlib</ulink>.
 </para>
+<para>
+ When compiled with FEATURE_ZSTD (optional),
+ Privoxy depends on <ulink url="https://facebook.github.io/zstd/">zstd</ulink>.
+</para>
 </sect3>
 
 </sect2>
