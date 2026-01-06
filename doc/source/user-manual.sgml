@@ -8,7 +8,7 @@
 <!entity contacting SYSTEM "contacting.sgml">
 <!entity history SYSTEM "history.sgml">
 <!entity copyright SYSTEM "copyright.sgml">
-<!entity license SYSTEM "license.sgml">
+<!entity license-explanation SYSTEM "license-explanation.sgml">
 <!entity GPLv2 SYSTEM "../../LICENSE">
 <!entity GPLv3 SYSTEM "../../LICENSE.GPLv3">
 <!entity p-authors SYSTEM "p-authors.sgml">
@@ -8509,27 +8509,8 @@ Requests</title>
  &copyright;
 <!-- end copyright -->
 
-<para>
- <application>Privoxy</application> is free software; you can
- redistribute and/or modify its source code under the terms
- of the <citetitle>GNU General Public License</citetitle>
- as published by the Free Software Foundation, either version 2
- of the license, or (at your option) any later version.
-</para>
-
-<para>
- The same is true for <application>Privoxy</application> binaries
- unless they are linked with a
- <ulink url="https://www.trustedfirmware.org/projects/mbed-tls/">mbed TLS</ulink> or
- <ulink url="https://www.openssl.org/">OpenSSL</ulink> version
- that is licensed under the Apache 2.0 license or against a
- <ulink url="https://github.com/wolfSSL/wolfssl/">wolfSSL</ulink> version
- that is licensed under the GPL 3 in which
- case you can redistribute and/or modify the <application>Privoxy</application>
- binaries under the terms of the <citetitle>GNU General Public License</citetitle>
- as published by the Free Software Foundation, either version 3
- of the license, or (at your option) any later version.
-</para>
+<!-- Include license-explanation.sgml: -->
+ &license-explanation;
 
 <para>
  Both licenses are included in the next section.

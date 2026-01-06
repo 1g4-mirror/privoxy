@@ -8,6 +8,7 @@
 <!entity history SYSTEM "history.sgml">
 <!entity copyright SYSTEM "copyright.sgml">
 <!entity license SYSTEM "license.sgml">
+<!entity license-explanation SYSTEM "license-explanation.sgml">
 <!entity p-version "4.1.0">
 <!entity p-status "stable">
 <!entity % p-not-stable "IGNORE">
