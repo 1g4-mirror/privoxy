@@ -148,6 +148,7 @@ DB_TXT     = $(JADEBIN) $(JADECAT) -ihtml -t sgml  -D.. -d ldp.dsl\#print
 DB2HTML    = @DB2HTML@
 MAN2HTML   = @MAN2HTML@
 G2H_CMD    = groff -mandoc -Thtml
+POD2MAN_CMD= pod2man
 TARGET_OS  = @host@
 PERL       = perl
 DOC_DIR    = doc/source
@@ -601,8 +602,18 @@ dok-index:
 	s/__copy/&copy;/' \
      doc/webserver/privoxy-index.html && $(RM) doc/webserver/*.bak
 
+dok-privoxy-tools:
+	cd tools && for privoxy_tool in *.pl; do \
+		echo Generating man page for $${privoxy_tool}; \
+		man_page=$${privoxy_tool%%.pl}.1; \
+		$(POD2MAN_CMD) $${privoxy_tool} > ../man/$${man_page}; \
+		html_man_page=../doc/webserver/man-page/$${man_page##*/}; \
+		html_man_page=$${html_man_page%%.pl}.html; \
+		$(G2H_CMD) ../man/$${man_page} | $(GREP) -v CreationDate > $${html_man_page}; \
+	done
+
 # Main documentation target.
-dok: dok-release dok-devel dok-user dok-faq dok-readme dok-webserver dok-authors dok-index
+dok: dok-release dok-devel dok-user dok-faq dok-readme dok-webserver dok-authors dok-index dok-privoxy-tools
 	@$(ECHO) Documentation created.
 
 ## Make AUTHORS file
