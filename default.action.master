@@ -804,6 +804,8 @@ support./(.*/)?track
 #MASTER# UNBLOCK-REFERRER: http://munirihsparrow.bandcamp.com/track/lamp-lighted
 # URL = http://popplers5.bandcamp.com/download/track?enc=mp3-128&fsig=bad421a4c31dda49faceefb0f3923630&id=342903379&stream=1&ts=1355881937.0
 /.*download
+# URL = https://gitlab.torproject.org/search/count?group_id=268&project_id=571&scope=users&search=src%2Ftest%2Ftest_util.c
+gitlab./search/count\?
 
 #----------------------------------------------------------------------------
 # Misc Web-bugs, JS and just plain Junk. Images here aren't normal images.
