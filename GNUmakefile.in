@@ -701,7 +701,7 @@ web-robots.txt:
 	@$(RSYNC) doc/webserver/robots.txt shell.sourceforge.net:$(WWW_ROOT)/htdocs/
 
 web-rss-feed:
-	@$(ECHO) "Updating the rss feed only only ..."
+	@$(ECHO) "Updating the rss feed only ..."
 	@$(RSYNC) doc/webserver/feeds/ shell.sourceforge.net:$(WWW_ROOT)/htdocs/feeds/
 
 web-sponsors:
