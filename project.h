@@ -1616,6 +1616,8 @@ struct configuration_spec
 
    /** Filename of trusted CAs certificates **/
    char *trusted_cas_file;
+
+   int elliptic_curve_keys;
 #endif
 };
 

@@ -7,7 +7,7 @@
  *                routine to load the configuration and the global
  *                variables it writes to.
  *
- * Copyright   :  Written by and Copyright (C) 2001-2022 the
+ * Copyright   :  Written by and Copyright (C) 2001-2026 the
  *                Privoxy team. https://www.privoxy.org/
  *
  *                Based on the Internet Junkbuster originally written
@@ -148,6 +148,7 @@ static struct file_list *current_configfile = NULL;
 #define hash_debug                            78263U /* "debug" */
 #define hash_default_server_timeout      2530089913U /* "default-server-timeout" */
 #define hash_deny_access                 1227333715U /* "deny-access" */
+#define hash_elliptic_curve_keys          258906537U /* "elliptic-curve-keys" */
 #define hash_enable_accept_filter        2909040407U /* "enable-accept-filter" */
 #define hash_enable_edit_actions         2517097536U /* "enable-edit-actions" */
 #define hash_enable_compression          3943696946U /* "enable-compression" */
@@ -678,6 +679,9 @@ struct configuration_spec * load_config(void)
 #endif
    config->feature_flags            &= ~RUNTIME_FEATURE_TOLERATE_PIPELINING;
    config->cors_allowed_origin       = NULL;
+#ifdef FEATURE_HTTPS_INSPECTION
+   config->elliptic_curve_keys = 1;
+#endif
 
    configfp = fopen(configfile, "r");
    if (NULL == configfp)
@@ -1026,6 +1030,15 @@ struct configuration_spec * load_config(void)
 
             break;
 #endif /* def FEATURE_ACL */
+
+#ifdef FEATURE_HTTPS_INSPECTION
+/* *************************************************************************
+ * elliptic-curve-keys 0|1
+ * *************************************************************************/
+         case hash_elliptic_curve_keys :
+            config->elliptic_curve_keys = parse_toggle_state(cmd, arg);
+            break;
+#endif /* def FEATURE_HTTPS_INSPECTION */
 
 #if defined(FEATURE_ACCEPT_FILTER) && defined(SO_ACCEPTFILTER)
 /* *************************************************************************

@@ -8,7 +8,7 @@
  *
  * Copyright   :  Written by and Copyright (c) 2020 Maxim Antonov <mantonov@gmail.com>
  *                Copyright (C) 2017 Vaclav Svec. FIT CVUT.
- *                Copyright (C) 2018-2024 by Fabian Keil <fk@fabiankeil.de>
+ *                Copyright (C) 2018-2026 by Fabian Keil <fk@fabiankeil.de>
  *
  *                This program is free software; you can redistribute it
  *                and/or modify it under the terms of the GNU General
@@ -1448,6 +1448,7 @@ static int generate_key(struct client_state *csp, char **key_buf)
 #if (OPENSSL_VERSION_NUMBER < 0x30000000L)
    BIGNUM *exp;
    RSA *rsa;
+   EC_KEY *ec_key;
 #endif
    EVP_PKEY *key;
 
@@ -1468,45 +1469,90 @@ static int generate_key(struct client_state *csp, char **key_buf)
    }
 
 #if (OPENSSL_VERSION_NUMBER < 0x30000000L)
-   exp = BN_new();
-   rsa = RSA_new();
    key = EVP_PKEY_new();
-   if (exp == NULL || rsa == NULL || key == NULL)
-   {
-      log_ssl_errors(LOG_LEVEL_ERROR, "RSA key memory allocation failure");
-      ret = -1;
-      goto exit;
-   }
-
-   if (BN_set_word(exp, RSA_KEY_PUBLIC_EXPONENT) != 1)
-   {
-      log_ssl_errors(LOG_LEVEL_ERROR, "Setting RSA key exponent failed");
-      ret = -1;
-      goto exit;
-   }
-
-   ret = RSA_generate_key_ex(rsa, RSA_KEYSIZE, exp, NULL);
-   if (ret == 0)
-   {
-      log_ssl_errors(LOG_LEVEL_ERROR, "RSA key generation failure");
-      ret = -1;
-      goto exit;
-   }
-
-   if (!EVP_PKEY_set1_RSA(key, rsa))
-   {
-      log_ssl_errors(LOG_LEVEL_ERROR,
-         "Error assigning RSA key pair to PKEY structure");
-      ret = -1;
-      goto exit;
-   }
-#else
-   key = EVP_RSA_gen(RSA_KEYSIZE);
    if (key == NULL)
    {
-      log_error(LOG_LEVEL_ERROR, "EVP_RSA_gen() failed");
+      log_ssl_errors(LOG_LEVEL_ERROR, "RSA/EC key memory allocation failure.");
       ret = -1;
       goto exit;
+   }
+   if (csp->config->elliptic_curve_keys)
+   {
+      ec_key = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
+      if (ec_key == NULL)
+      {
+         log_ssl_errors(LOG_LEVEL_ERROR, "EC key creation failed.");
+         ret = -1;
+         goto exit;
+      }
+      if (!EC_KEY_generate_key(ec_key))
+      {
+         log_ssl_errors(LOG_LEVEL_ERROR, "EC key generation failed.");
+         ret = -1;
+         goto exit;
+      }
+      if (!EVP_PKEY_set1_EC_KEY(key, ec_key))
+      {
+         log_ssl_errors(LOG_LEVEL_ERROR,
+            "Error assigning EC key pair to PKEY structure");
+         ret = -1;
+         goto exit;
+      }
+   }
+   else
+   {
+      exp = BN_new();
+      rsa = RSA_new();
+      if (exp == NULL || rsa == NULL)
+      {
+         log_ssl_errors(LOG_LEVEL_ERROR, "RSA key memory allocation failure");
+         ret = -1;
+         goto exit;
+      }
+
+      if (BN_set_word(exp, RSA_KEY_PUBLIC_EXPONENT) != 1)
+      {
+         log_ssl_errors(LOG_LEVEL_ERROR, "Setting RSA key exponent failed");
+         ret = -1;
+         goto exit;
+      }
+
+      ret = RSA_generate_key_ex(rsa, RSA_KEYSIZE, exp, NULL);
+      if (ret == 0)
+      {
+         log_ssl_errors(LOG_LEVEL_ERROR, "RSA key generation failure");
+         ret = -1;
+         goto exit;
+      }
+
+      if (!EVP_PKEY_set1_RSA(key, rsa))
+      {
+         log_ssl_errors(LOG_LEVEL_ERROR,
+            "Error assigning RSA key pair to PKEY structure");
+         ret = -1;
+         goto exit;
+      }
+   }
+#else
+   if (csp->config->elliptic_curve_keys)
+   {
+      key = EVP_EC_gen(SN_X9_62_prime256v1);
+      if (key == NULL)
+      {
+         log_ssl_errors(LOG_LEVEL_ERROR, "EC key generation error");
+         ret = -1;
+         goto exit;
+      }
+   }
+   else
+   {
+      key = EVP_RSA_gen(RSA_KEYSIZE);
+      if (key == NULL)
+      {
+         log_ssl_errors(LOG_LEVEL_ERROR, "EVP_RSA_gen() failed");
+         ret = -1;
+         goto exit;
+      }
    }
 #endif
 
@@ -1526,13 +1572,23 @@ exit:
     * Freeing used variables
     */
 #if (OPENSSL_VERSION_NUMBER < 0x30000000L)
-   if (exp)
+   if (csp->config->elliptic_curve_keys)
    {
-      BN_free(exp);
+      if (ec_key)
+      {
+         EC_KEY_free(ec_key);
+      }
    }
-   if (rsa)
+   else
    {
-      RSA_free(rsa);
+      if (exp)
+      {
+         BN_free(exp);
+      }
+      if (rsa)
+      {
+         RSA_free(rsa);
+      }
    }
 #endif
    if (key)

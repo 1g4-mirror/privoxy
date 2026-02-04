@@ -7,7 +7,7 @@
  *                using mbedTLS.
  *
  * Copyright   :  Written by and Copyright (c) 2017-2020 Vaclav Svec. FIT CVUT.
- *                Copyright (C) 2018-2024 by Fabian Keil <fk@fabiankeil.de>
+ *                Copyright (C) 2018-2026 by Fabian Keil <fk@fabiankeil.de>
  *
  *                This program is free software; you can redistribute it
  *                and/or modify it under the terms of the GNU General
@@ -75,7 +75,7 @@
  */
 typedef struct {
    mbedtls_pk_type_t type;   /* type of key to generate  */
-   int  rsa_keysize;         /* length of key in bits    */
+   int  keysize;             /* length of key in bits    */
    char *key_file_path;      /* filename of the key file */
 } key_options;
 
@@ -1002,8 +1002,16 @@ static int generate_key(struct client_state *csp, unsigned char **key_buf)
    /*
     * Preparing path for key file and other properties for generating key
     */
-   key_opt.type        = MBEDTLS_PK_RSA;
-   key_opt.rsa_keysize = RSA_KEYSIZE;
+   if (csp->config->elliptic_curve_keys)
+   {
+      key_opt.type    = MBEDTLS_PK_ECKEY;
+      key_opt.keysize = 32;
+   }
+   else
+   {
+      key_opt.type    = MBEDTLS_PK_RSA;
+      key_opt.keysize = RSA_KEYSIZE;
+   }
 
    key_opt.key_file_path = make_certs_path(csp->config->certificate_directory,
       (char *)csp->http->hash_of_host_hex, KEY_FILE_TYPE);
@@ -1044,16 +1052,30 @@ static int generate_key(struct client_state *csp, unsigned char **key_buf)
       goto exit;
    }
 
-   ret = mbedtls_rsa_gen_key(mbedtls_pk_rsa(key), mbedtls_ctr_drbg_random,
-      &ctr_drbg, (unsigned)key_opt.rsa_keysize, RSA_KEY_PUBLIC_EXPONENT);
-   if (ret != 0)
+   if (csp->config->elliptic_curve_keys)
    {
-      mbedtls_strerror(ret, err_buf, sizeof(err_buf));
-      log_error(LOG_LEVEL_ERROR, "Key generating failed: %s", err_buf);
-      ret = -1;
-      goto exit;
+      ret = mbedtls_ecp_gen_key(MBEDTLS_ECP_DP_SECP256R1,
+         mbedtls_pk_ec(key), mbedtls_ctr_drbg_random, &ctr_drbg);
+      if (ret != 0)
+      {
+         mbedtls_strerror(ret, err_buf, sizeof(err_buf));
+         log_error(LOG_LEVEL_ERROR, "ECC Key generation failed: %s", err_buf);
+         ret = -1;
+         goto exit;
+      }
    }
-
+   else
+   {
+      ret = mbedtls_rsa_gen_key(mbedtls_pk_rsa(key), mbedtls_ctr_drbg_random,
+         &ctr_drbg, (unsigned)key_opt.keysize, RSA_KEY_PUBLIC_EXPONENT);
+      if (ret != 0)
+      {
+         mbedtls_strerror(ret, err_buf, sizeof(err_buf));
+         log_error(LOG_LEVEL_ERROR, "Key generating failed: %s", err_buf);
+         ret = -1;
+         goto exit;
+      }
+   }
    /*
     * Exporting private key into file
     */
