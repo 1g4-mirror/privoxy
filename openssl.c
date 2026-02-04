@@ -74,14 +74,6 @@ static void log_ssl_errors(int debuglevel, const char* fmt, ...) __attribute__((
 
 static int ssl_inited = 0;
 
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-#define X509_set1_notBefore X509_set_notBefore
-#define X509_set1_notAfter X509_set_notAfter
-#define X509_get0_serialNumber X509_get_serialNumber
-#define X509_get0_notBefore X509_get_notBefore
-#define X509_get0_notAfter X509_get_notAfter
-#endif
-
 /*********************************************************************
  *
  * Function    :  openssl_init
@@ -100,11 +92,7 @@ static void openssl_init(void)
       privoxy_mutex_lock(&ssl_init_mutex);
       if (ssl_inited == 0)
       {
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-         SSL_library_init();
-#else
          OPENSSL_init_ssl(0, NULL);
-#endif
          SSL_load_error_strings();
          OpenSSL_add_ssl_algorithms();
          ssl_inited = 1;
@@ -284,9 +272,7 @@ static int ssl_store_cert(struct client_state *csp, X509 *crt)
    char *encoded_text;
    long l;
    const ASN1_INTEGER *bs;
-#if OPENSSL_VERSION_NUMBER > 0x10100000L
    const X509_ALGOR *tsig_alg;
-#endif
    int loc;
 
    if (!bio)
@@ -480,7 +466,6 @@ static int ssl_store_cert(struct client_state *csp, X509 *crt)
       goto exit;
    }
 
-#if OPENSSL_VERSION_NUMBER > 0x10100000L
    if (BIO_puts(bio, "\nsigned using      : ") <= 0)
    {
       log_ssl_errors(LOG_LEVEL_ERROR, "BIO_puts() for signed using failed");
@@ -494,7 +479,6 @@ static int ssl_store_cert(struct client_state *csp, X509 *crt)
       ret = -1;
       goto exit;
    }
-#endif
    pkey = X509_get_pubkey(crt);
    if (!pkey)
    {
@@ -1096,35 +1080,13 @@ extern int create_server_ssl_connection(struct client_state *csp)
    /*
     * Set the hostname to check against the received server certificate
     */
-#if OPENSSL_VERSION_NUMBER > 0x10100000L
    if (!SSL_set1_host(ssl, csp->http->host))
    {
       log_ssl_errors(LOG_LEVEL_ERROR, "SSL_set1_host failed");
       ret = -1;
       goto exit;
    }
-#else
-   if (host_is_ip_address(csp->http->host))
-   {
-      if (X509_VERIFY_PARAM_set1_ip_asc(ssl->param,  csp->http->host) != 1)
-      {
-         log_ssl_errors(LOG_LEVEL_ERROR,
-            "X509_VERIFY_PARAM_set1_ip_asc() failed");
-         ret = -1;
-         goto exit;
-      }
-   }
-   else
-   {
-      if (X509_VERIFY_PARAM_set1_host(ssl->param,  csp->http->host, 0) != 1)
-      {
-         log_ssl_errors(LOG_LEVEL_ERROR,
-            "X509_VERIFY_PARAM_set1_host() failed");
-         ret = -1;
-         goto exit;
-      }
-   }
-#endif
+
    /* SNI extension */
    if (!host_is_ip_address(csp->http->host) &&
        !SSL_set_tlsext_host_name(ssl, csp->http->host))
@@ -2270,11 +2232,9 @@ extern void ssl_release(void)
 {
    if (ssl_inited == 1)
    {
-#if OPENSSL_VERSION_NUMBER >= 0x1000200fL
 #ifndef LIBRESSL_VERSION_NUMBER
 #ifndef OPENSSL_NO_COMP
       SSL_COMP_free_compression_methods();
-#endif
 #endif
 #endif
       CONF_modules_free();
