@@ -3,7 +3,7 @@
 
  Purpose     :  Used with other docs and files only.
 
- Copyright (C) 2001-2023 Privoxy Developers https://www.privoxy.org/
+ Copyright (C) 2001-2026 Privoxy Developers https://www.privoxy.org/
  See LICENSE.
 
  ========================================================================
@@ -4267,6 +4267,71 @@ compression-level 0
  </varlistentry>
 </variablelist>
 <![%config-file;[<literallayout>@@#certificate-directory /usr/local/var/privoxy/certs</literallayout>]]>
+</sect3>
+
+<!--  ~  End section  ~  -->
+
+<!--   ~~~~~       New section      ~~~~~     -->
+
+<sect3 renderas="sect4" id="elliptic-curve-keys"><title>elliptic-curve-keys</title>
+<variablelist>
+ <varlistentry>
+  <term>Specifies:</term>
+  <listitem>
+   <para>
+    Whether or not &my-app; uses Elliptic-curve cryptography.
+   </para>
+  </listitem>
+ </varlistentry>
+ <varlistentry>
+  <term>Type of value:</term>
+  <listitem>
+   <para>
+    1 or 0
+   </para>
+  </listitem>
+ </varlistentry>
+ <varlistentry>
+  <term>Default value:</term>
+  <listitem>
+   <para>
+    1
+   </para>
+  </listitem>
+ </varlistentry>
+ <varlistentry>
+  <term>Effect if unset:</term>
+  <listitem>
+   <para>
+    Website certificates with public elliptic curve keys are being used.
+   </para>
+  </listitem>
+ </varlistentry>
+ <varlistentry>
+  <term>Notes:</term>
+  <listitem>
+   <para>
+    This directive specifies whether or not &my-app; should use Elliptic-curve cryptography
+    when generating website keys that are being used  when https inspection is enabled with the
+    <literal><ulink url="actions-file.html#HTTPS-INSPECTION">https-inspection</ulink></literal>
+    action.
+   </para>
+   <para>
+    When set to 0, &my-app; generates website certificates that use RSA keys.
+    This is expected to be slower but may be required for compatibility with very old clients.
+   </para>
+  </listitem>
+ </varlistentry>
+ <varlistentry>
+  <term>Example:</term>
+  <listitem>
+   <para>
+    elliptic-curve-keys 0
+   </para>
+  </listitem>
+ </varlistentry>
+</variablelist>
+<![%config-file;[<literallayout>@@elliptic-curve-keys 1</literallayout>]]>
 </sect3>
 
 <!--  ~  End section  ~  -->
