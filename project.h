@@ -8,7 +8,7 @@
  *                project.  Does not define any variables or functions
  *                (though it does declare some macros).
  *
- * Copyright   :  Written by and Copyright (C) 2001-2021 the
+ * Copyright   :  Written by and Copyright (C) 2001-2026 the
  *                Privoxy team. https://www.privoxy.org/
  *
  *                Based on the Internet Junkbuster originally written
@@ -1338,7 +1338,8 @@ enum filter_type
  * This struct represents one filter (one block) from
  * the re_filterfile. If there is more than one filter
  * in the file, the file will be represented by a
- * chained list of re_filterfile specs.
+ * chained list of re_filterfile specs of the same filter
+ * type.
  */
 struct re_filterfile_spec
 {
@@ -1346,10 +1347,14 @@ struct re_filterfile_spec
    char *description;               /**< Description from FILTER: statement in re_filterfile. */
    struct list patterns[1];         /**< The patterns from the re_filterfile. */
    pcrs_job *joblist;               /**< The resulting compiled pcrs_jobs. */
-   enum filter_type type;           /**< Filter type (content, client-header, server-header). */
    int dynamic;                     /**< Set to one if the pattern might contain variables
                                          and has to be recompiled for every request. */
    struct re_filterfile_spec *next; /**< The pointer for chaining. */
+};
+
+struct re_filters
+{
+   struct re_filterfile_spec *filters[MAX_FILTER_TYPES];
 };
 
 

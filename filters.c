@@ -4,7 +4,7 @@
  *
  * Purpose     :  Declares functions to parse/crunch headers and pages.
  *
- * Copyright   :  Written by and Copyright (C) 2001-2024 the
+ * Copyright   :  Written by and Copyright (C) 2001-2026 the
  *                Privoxy team. https://www.privoxy.org/
  *
  *                Based on the Internet Junkbuster originally written
@@ -1560,13 +1560,8 @@ struct re_filterfile_spec *get_filter(const struct client_state *csp,
         continue;
      }
 
-     for (b = fl->f; b != NULL; b = b->next)
+     for (b = ((struct re_filters *)(fl->f))->filters[requested_type]; b != NULL; b = b->next)
      {
-        if (b->type != requested_type)
-        {
-           /* The callers isn't interested in this filter type. */
-           continue;
-        }
         if (strcmp(b->name, requested_name) == 0)
         {
            /* The requested filter has been found. Abort search. */

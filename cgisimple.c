@@ -5,7 +5,7 @@
  * Purpose     :  Simple CGIs to get information about Privoxy's
  *                status.
  *
- * Copyright   :  Written by and Copyright (C) 2001-2022 the
+ * Copyright   :  Written by and Copyright (C) 2001-2026 the
  *                Privoxy team. https://www.privoxy.org/
  *
  *                Based on the Internet Junkbuster originally written
@@ -1202,24 +1202,20 @@ static char *get_filter_statistics_table(const struct client_state *csp)
          */
         continue;
      }
-
-     for (b = fl->f; b != NULL; b = b->next)
+     for (b = ((struct re_filters *)(fl->f))->filters[FT_CONTENT_FILTER]; b != NULL; b = b->next)
      {
-        if (b->type == FT_CONTENT_FILTER)
-        {
-           unsigned long long executions;
-           unsigned long long response_bodies_modified;
-           unsigned long long hits;
+        unsigned long long executions;
+        unsigned long long response_bodies_modified;
+        unsigned long long hits;
 
-           get_filter_statistics(b->name, &executions, &response_bodies_modified, &hits);
-           snprintf(buf, sizeof(buf),
-              "<tr><td>%s</td><td style=\"text-align: right\">%llu</td>"
-              "<td style=\"text-align: right\">%llu</td>"
-              "<td style=\"text-align: right\">%llu</td><tr>\n",
-              b->name, executions, response_bodies_modified, hits);
+        get_filter_statistics(b->name, &executions, &response_bodies_modified, &hits);
+        snprintf(buf, sizeof(buf),
+           "<tr><td>%s</td><td style=\"text-align: right\">%llu</td>"
+           "<td style=\"text-align: right\">%llu</td>"
+           "<td style=\"text-align: right\">%llu</td><tr>\n",
+           b->name, executions, response_bodies_modified, hits);
 
-           if (!err) err = string_append(&statistics, buf);
-        }
+        if (!err) err = string_append(&statistics, buf);
      }
    }
 

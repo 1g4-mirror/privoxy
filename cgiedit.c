@@ -12,7 +12,7 @@
  *
  *                Stick to the short names in this file for consistency.
  *
- * Copyright   :  Written by and Copyright (C) 2001-2023 the
+ * Copyright   :  Written by and Copyright (C) 2001-2026 the
  *                Privoxy team. https://www.privoxy.org/
  *
  *                Based on the Internet Junkbuster originally written
@@ -2864,74 +2864,76 @@ jb_err cgi_edit_actions_for_url(struct client_state *csp,
       {
          if ((csp->rlist[i] != NULL) && (csp->rlist[i]->f != NULL))
          {
-            filter_group = csp->rlist[i]->f;
-            for (; (!err) && (filter_group != NULL); filter_group = filter_group->next)
+            int filter_type;
+            for (filter_type = 0; filter_type < MAX_FILTER_TYPES; filter_type++)
             {
-               char current_mode = 'x';
-               char number[20];
-               struct list_entry *filter_name;
-               struct map *line_exports;
-               const enum filter_type type = filter_group->type;
-               const int multi_action_index = action_type_info[type].multi_action_index;
-
-               assert(type < MAX_FILTER_TYPES);
-               assert(multi_action_index < ACTION_MULTI_COUNT);
-
-               filter_name = cur_line->data.action->multi_add[multi_action_index]->first;
-               while ((filter_name != NULL)
-                   && (0 != strcmp(filter_group->name, filter_name->str)))
+               filter_group = ((struct re_filters *)(csp->rlist[i]->f))->filters[filter_type];
+               for (; (!err) && (filter_group != NULL); filter_group = filter_group->next)
                {
-                    filter_name = filter_name->next;
-               }
+                  char current_mode = 'x';
+                  char number[20];
+                  struct list_entry *filter_name;
+                  struct map *line_exports;
+                  const int multi_action_index = action_type_info[filter_type].multi_action_index;
 
-               if (filter_name != NULL)
-               {
-                  current_mode = 'y';
-               }
-               else
-               {
-                  filter_name = cur_line->data.action->multi_remove[multi_action_index]->first;
+                  assert(multi_action_index < ACTION_MULTI_COUNT);
+
+                  filter_name = cur_line->data.action->multi_add[multi_action_index]->first;
                   while ((filter_name != NULL)
                       && (0 != strcmp(filter_group->name, filter_name->str)))
                   {
                        filter_name = filter_name->next;
                   }
+
                   if (filter_name != NULL)
                   {
-                     current_mode = 'n';
+                     current_mode = 'y';
                   }
-               }
-
-               /* Generate a unique serial number */
-               snprintf(number, sizeof(number), "%x", filter_identifier++);
-               number[sizeof(number) - 1] = '\0';
-
-               line_exports = new_map();
-               if (line_exports == NULL)
-               {
-                  err = JB_ERR_MEMORY;
-               }
-               else
-               {
-                  char *filter_line;
-
-                  if (!err) err = map(line_exports, "index", 1, number, 1);
-                  if (!err) err = map(line_exports, "name",  1, filter_group->name, 1);
-                  if (!err) err = map(line_exports, "description",  1, filter_group->description, 1);
-                  if (!err) err = map_radio(line_exports, "this-filter", "ynx", current_mode);
-                  if (!err) err = map(line_exports, "filter-type", 1, action_type_info[type].type, 1);
-                  if (!err) err = map(line_exports, "abbr-action-type", 1, action_type_info[type].abbr_type, 1);
-                  if (!err) err = map(line_exports, "anchor", 1, action_type_info[type].anchor, 1);
-
-                  if (!err)
+                  else
                   {
-                     filter_line = strdup(filter_template);
-                     if (filter_line == NULL) err = JB_ERR_MEMORY;
+                     filter_name = cur_line->data.action->multi_remove[multi_action_index]->first;
+                     while ((filter_name != NULL)
+                         && (0 != strcmp(filter_group->name, filter_name->str)))
+                     {
+                          filter_name = filter_name->next;
+                     }
+                     if (filter_name != NULL)
+                     {
+                        current_mode = 'n';
+                     }
                   }
-                  if (!err) err = template_fill(&filter_line, line_exports);
-                  if (!err) err = string_join(&prepared_templates[type], filter_line);
 
-                  free_map(line_exports);
+                  /* Generate a unique serial number */
+                  snprintf(number, sizeof(number), "%x", filter_identifier++);
+                  number[sizeof(number) - 1] = '\0';
+
+                  line_exports = new_map();
+                  if (line_exports == NULL)
+                  {
+                     err = JB_ERR_MEMORY;
+                  }
+                  else
+                  {
+                     char *filter_line;
+
+                     if (!err) err = map(line_exports, "index", 1, number, 1);
+                     if (!err) err = map(line_exports, "name",  1, filter_group->name, 1);
+                     if (!err) err = map(line_exports, "description",  1, filter_group->description, 1);
+                     if (!err) err = map_radio(line_exports, "this-filter", "ynx", current_mode);
+                     if (!err) err = map(line_exports, "filter-type", 1, action_type_info[filter_type].type, 1);
+                     if (!err) err = map(line_exports, "abbr-action-type", 1, action_type_info[filter_type].abbr_type, 1);
+                     if (!err) err = map(line_exports, "anchor", 1, action_type_info[filter_type].anchor, 1);
+
+                     if (!err)
+                     {
+                        filter_line = strdup(filter_template);
+                        if (filter_line == NULL) err = JB_ERR_MEMORY;
+                     }
+                     if (!err) err = template_fill(&filter_line, line_exports);
+                     if (!err) err = string_join(&prepared_templates[filter_type], filter_line);
+
+                     free_map(line_exports);
+                  }
                }
             }
          }
@@ -2994,6 +2996,7 @@ static int get_number_of_filters(const struct client_state *csp)
    struct re_filterfile_spec *b;
    struct file_list *fl;
    int number_of_filters = 0;
+   int filter_type;
 
    for (i = 0; i < MAX_AF_FILES; i++)
    {
@@ -3009,10 +3012,12 @@ static int get_number_of_filters(const struct client_state *csp)
          */
         continue;
      }
-
-     for (b = fl->f; b != NULL; b = b->next)
+     for (filter_type = 0; filter_type < MAX_FILTER_TYPES; filter_type++)
      {
-        number_of_filters++;
+        for (b = ((struct re_filters *)fl->f)->filters[filter_type]; b != NULL; b = b->next)
+        {
+           number_of_filters++;
+        }
      }
    }
 
