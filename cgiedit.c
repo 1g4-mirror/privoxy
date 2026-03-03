@@ -238,7 +238,7 @@ static const struct action_type_info action_type_info[] =
       ACTION_MULTI_SERVER_HEADER_TAGGER,
       "server-header-tagger-params", "server-header-tagger",
       "server-header-tagger-all", "server_header_tagger_all",
-      "E", "SERVER-HEADER-TAGGER"
+      "M", "SERVER-HEADER-TAGGER"
    },
    {
       ACTION_MULTI_SUPPRESS_TAG,
@@ -3362,12 +3362,17 @@ jb_err cgi_edit_actions_submit(struct client_state *csp,
          case 'L':
             multi_action_index = ACTION_MULTI_CLIENT_HEADER_TAGGER;
             break;
-         case 'E':
+         case 'M':
             multi_action_index = ACTION_MULTI_SERVER_HEADER_TAGGER;
             break;
          case 'P':
             multi_action_index = ACTION_MULTI_CLIENT_BODY_FILTER;
             break;
+#ifdef FEATURE_EXTERNAL_FILTERS
+         case 'E':
+            multi_action_index = ACTION_MULTI_EXTERNAL_FILTER;
+            break;
+#endif
          default:
             log_error(LOG_LEVEL_ERROR,
                "Unknown filter type: %c for filter %s. Filter ignored.", type, name);
