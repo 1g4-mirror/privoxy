@@ -2982,7 +2982,7 @@ jb_err cgi_edit_actions_for_url(struct client_state *csp,
  *
  * Function    :  get_number_of_filters
  *
- * Description :  Counts the number of filter available.
+ * Description :  Counts the number of filters available.
  *
  * Parameters  :
  *          1  :  csp = Current client state (buffers, headers, etc...)
