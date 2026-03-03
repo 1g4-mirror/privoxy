@@ -3325,10 +3325,7 @@ jb_err cgi_edit_actions_submit(struct client_state *csp,
                    * 'N' (inactive) and 'X' (no change).
                    * XXX: bad name.
                    */
-      char type;  /*
-                   * Abbreviated filter type. Valid types are: 'F' (content filter),
-                   * 'S' (server-header filter) and 'C' (client-header filter).
-                   */
+      char filter_type;
       int multi_action_index = 0;
 
       /* Generate the keys */
@@ -3347,8 +3344,8 @@ jb_err cgi_edit_actions_submit(struct client_state *csp,
          continue;
       }
 
-      type = get_char_param(parameters, key_type);
-      switch (type)
+      filter_type = get_char_param(parameters, key_type);
+      switch (filter_type)
       {
          case 'F':
             multi_action_index = ACTION_MULTI_FILTER;
@@ -3375,7 +3372,8 @@ jb_err cgi_edit_actions_submit(struct client_state *csp,
 #endif
          default:
             log_error(LOG_LEVEL_ERROR,
-               "Unknown filter type: %c for filter %s. Filter ignored.", type, name);
+               "Unknown filter type: %c for filter %s. Filter ignored.",
+               filter_type, name);
             continue;
       }
       assert(multi_action_index);
