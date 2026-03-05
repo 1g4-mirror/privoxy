@@ -3685,6 +3685,9 @@ compression-level 0
     it to be set.
     Note that "clients" are  differentiated by IP address,
     if the IP address changes the tag has to be requested again.
+    The <literal>listen-address</literal> used to reach &my-app; is taken into
+    account as well.
+    This allows multiple clients running on the same system to request different settings.
    </para>
    <para>
     Clients can request tags to be set by using the CGI interface <ulink
