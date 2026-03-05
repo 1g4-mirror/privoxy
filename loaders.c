@@ -1257,7 +1257,10 @@ int load_one_re_filterfile(struct client_state *csp, int fileid)
          log_error(LOG_LEVEL_RE_FILTER, "Reading in filter \"%s\" (\"%s\"). Type %d.",
             bl->name, bl->description, new_filter);
 #ifdef FEATURE_EXTENDED_STATISTICS
-         register_filter_for_statistics(bl->name);
+         if (new_filter == FT_CONTENT_FILTER)
+         {
+            register_filter_for_statistics(bl->name);
+         }
 #endif
          freez(buf);
          continue;
