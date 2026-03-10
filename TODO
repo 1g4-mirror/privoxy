@@ -215,10 +215,6 @@ https://www.privoxy.org/donate
     that makes sense. Like #93, this could be useful as a workaround
     for misconfigured setups.
 
-96) Filters should be easier to look up. Currently get_filter() has to
-    go through all filters and skip the filter types the caller isn't
-    interested in.
-
 98) When showing action sections on the CGI pages, properly escape
     line breaks so they can be copy&pasted into action files without
     adjustments.
