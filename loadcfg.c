@@ -263,7 +263,6 @@ static void unload_configfile (void * data)
    {
       freez(config->actions_file_short[i]);
       freez(config->actions_file[i]);
-      freez(config->re_filterfile_short[i]);
       freez(config->re_filterfile[i]);
    }
 
@@ -1161,7 +1160,6 @@ struct configuration_spec * load_config(void)
                   "(You can increase this limit by changing MAX_AF_FILES in project.h and recompiling).",
                   MAX_AF_FILES);
             }
-            config->re_filterfile_short[i] = strdup_or_die(arg);
             config->re_filterfile[i] = make_path(config->confdir, arg);
 
             break;

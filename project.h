@@ -1507,9 +1507,6 @@ struct configuration_spec
    /** The file names of the pcre filter files. */
    const char *re_filterfile[MAX_AF_FILES];
 
-   /** The short names of the pcre filter files. */
-   const char *re_filterfile_short[MAX_AF_FILES];
-
    /**< List of ordered client header names. */
    struct list ordered_client_headers[1];
 
