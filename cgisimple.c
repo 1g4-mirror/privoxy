@@ -1713,8 +1713,7 @@ jb_err cgi_show_url_info(struct client_state *csp,
 
       for (i = 0; i < MAX_AF_FILES; i++)
       {
-         if (NULL == csp->config->actions_file_short[i]
-             || !strcmp(csp->config->actions_file_short[i], "standard.action")) continue;
+         if (NULL == csp->config->actions_file_short[i]) continue;
 
          b = NULL;
          hits = 1;
