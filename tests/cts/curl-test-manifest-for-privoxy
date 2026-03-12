@@ -19,6 +19,7 @@ keyword:SOCKS4: Protocol SOCKS4 is supported by Privoxy but the tests need addit
 keyword:SOCKS5: Protocol SOCKS5 is supported by Privoxy but the tests need additional magic before they can be used.
 keyword:TELNET: Protocol TELNET is not supported by Privoxy.
 keyword:unsupported: Tests with keyword 'unsupported' do not reach the proxy. Or do they?
+test:1: Expected to fail. Multiple values in Connection header that get removed by Privoxy.
 test:1052: Expected to fail. Connection header expected in one response but not in the other. Not yet covered by runtests.pl's proxy mode.
 test:1074: Expected to fail. Privoxy doesn't downgrade the forwarded request and doesn't have to as long as the client is treated like a HTTP/1.0 client. Needs double-checking.
 test:1118: Expected to fail. Looks like a curl bug although Privoxy's behaviour seems subobtimal as well.
