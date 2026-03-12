@@ -7,7 +7,7 @@
 # Generates an exclude file that can be passed to runtests.pl to skip certain
 # tests that aren't expected to work when run through Privoxy.
 #
-# Copyright (c) 2012-2025 Fabian Keil <fk@fabiankeil.de>
+# Copyright (c) 2012-2026 Fabian Keil <fk@fabiankeil.de>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -30,7 +30,9 @@ sub main() {
 
     for my $testnum (1..3500) {
         my $why;
-        if ($testnum eq 2) {
+        if ($testnum eq 1) {
+            $why = "Expected to fail. Multiple values in Connection header that get removed by Privoxy.";
+        } elsif ($testnum eq 2) {
             $why = "Expected to fail. Missing space after status code that gets added by Privoxy.";
         } elsif ($testnum eq 8) {
             $why = "Expected to fail. Tab in cookie that Privoxy converts to a space which the test does not expect.";
