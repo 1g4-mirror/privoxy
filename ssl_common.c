@@ -2,9 +2,9 @@
  *
  * File        :  $Source: /cvsroot/ijbswa/current/ssl_common.c,v $
  *
- * Purpose     :  File with TLS/SSL extension. Contains methods for
- *                creating, using and closing TLS/SSL connections that do
- *                not depend on particular TLS/SSL library.
+ * Purpose     :  File with TLS extension. Contains methods for
+ *                creating, using and closing TLS connections that do
+ *                not depend on particular TLS library.
  *
  * Copyright   :  Written by and Copyright (c) 2017 Vaclav Svec. FIT CVUT.
  *                Copyright (C) 2018-2024 by Fabian Keil <fk@fabiankeil.de>
@@ -54,7 +54,7 @@
  * Parameters  :
  *          1  :  csp = Current client state (buffers, headers, etc...)
  *
- * Returns     :  If client should use TLS/SSL connection, 1 is returned.
+ * Returns     :  If client should use TLS connection, 1 is returned.
  *                Otherwise 0 is returned.
  *
  *********************************************************************/
@@ -74,7 +74,7 @@ extern int client_use_ssl(const struct client_state *csp)
  * Parameters  :
  *          1  :  csp = Current client state (buffers, headers, etc...)
  *
- * Returns     :  If server should use TLS/SSL connection, 1 is returned.
+ * Returns     :  If server should use TLS connection, 1 is returned.
  *                Otherwise 0 is returned.
  *
  *********************************************************************/

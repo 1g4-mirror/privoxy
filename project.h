@@ -298,7 +298,7 @@ struct map
 
 #ifdef FEATURE_HTTPS_INSPECTION_MBEDTLS
 /*
- * Struct of attributes necessary for TLS/SSL connection
+ * Struct of attributes necessary for TLS connection
  */
 typedef struct {
    mbedtls_ssl_context      ssl;
@@ -317,7 +317,7 @@ typedef struct {
 
 #ifdef FEATURE_HTTPS_INSPECTION_OPENSSL
 /*
- * Struct of attributes necessary for TLS/SSL connection
+ * Struct of attributes necessary for TLS connection
  */
 typedef struct {
    SSL_CTX *ctx;
@@ -327,7 +327,7 @@ typedef struct {
 
 #ifdef FEATURE_HTTPS_INSPECTION_WOLFSSL
 /*
- * Struct of attributes necessary for TLS/SSL connection
+ * Struct of attributes necessary for TLS connection
  */
 typedef struct {
    WOLFSSL_CTX *ctx;

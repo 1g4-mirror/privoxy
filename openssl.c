@@ -2,8 +2,8 @@
  *
  * File        :  $Source: /cvsroot/ijbswa/current/openssl.c,v $
  *
- * Purpose     :  File with TLS/SSL extension. Contains methods for
- *                creating, using and closing TLS/SSL connections
+ * Purpose     :  File with TLS extension. Contains methods for
+ *                creating, using and closing TLS connections
  *                using OpenSSL (or LibreSSL).
  *
  * Copyright   :  Written by and Copyright (c) 2020 Maxim Antonov <mantonov@gmail.com>
@@ -180,7 +180,7 @@ extern int ssl_send_data(struct ssl_attr *ssl_attr, const unsigned char *buf, si
          if (!BIO_should_retry(bio))
          {
             log_ssl_errors(LOG_LEVEL_ERROR,
-               "Sending data on socket %d over TLS/SSL failed", fd);
+               "Sending data on socket %d over TLS failed", fd);
             return -1;
          }
       }
@@ -233,7 +233,7 @@ extern int ssl_recv_data(struct ssl_attr *ssl_attr, unsigned char *buf, size_t m
    if (ret < 0)
    {
       log_ssl_errors(LOG_LEVEL_ERROR,
-         "Receiving data on socket %d over TLS/SSL failed", fd);
+         "Receiving data on socket %d over TLS failed", fd);
 
       return -1;
    }
@@ -714,7 +714,7 @@ static int host_to_hash(struct client_state *csp)
  *
  * Function    :  create_client_ssl_connection
  *
- * Description :  Creates TLS/SSL secured connection with client
+ * Description :  Creates TLS secured connection with client
  *
  * Parameters  :
  *          1  :  csp = Current client state (buffers, headers, etc...)
@@ -733,7 +733,7 @@ extern int create_client_ssl_connection(struct client_state *csp)
    SSL *ssl;
 
    /*
-    * Initializing OpenSSL structures for TLS/SSL connection
+    * Initializing OpenSSL structures for TLS connection
     */
    openssl_init();
 
@@ -843,12 +843,12 @@ extern int create_client_ssl_connection(struct client_state *csp)
     *  Handshake with client
     */
    log_error(LOG_LEVEL_CONNECT,
-      "Performing the TLS/SSL handshake with client. Hash of host: %s",
+      "Performing the TLS handshake with client. Hash of host: %s",
       csp->http->hash_of_host_hex);
    if (BIO_do_handshake(ssl_attr->openssl_attr.bio) != 1)
    {
        log_ssl_errors(LOG_LEVEL_ERROR,
-          "The TLS/SSL handshake with the client failed");
+          "The TLS handshake with the client failed");
        ret = -1;
        goto exit;
    }
@@ -879,7 +879,7 @@ exit:
  *
  * Function    :  close_client_ssl_connection
  *
- * Description :  Closes TLS/SSL connection with client. This function
+ * Description :  Closes TLS connection with client. This function
  *                checks if this connection is already created.
  *
  * Parameters  :
@@ -953,7 +953,7 @@ static void free_client_ssl_structures(struct client_state *csp)
  *
  * Function    :  close_server_ssl_connection
  *
- * Description :  Closes TLS/SSL connection with server. This function
+ * Description :  Closes TLS connection with server. This function
  *                checks if this connection is already opened.
  *
  * Parameters  :
@@ -999,7 +999,7 @@ extern void close_server_ssl_connection(struct client_state *csp)
  *
  * Function    :  create_server_ssl_connection
  *
- * Description :  Creates TLS/SSL secured connection with server.
+ * Description :  Creates TLS secured connection with server.
  *
  * Parameters  :
  *          1  :  csp = Current client state (buffers, headers, etc...)
@@ -1101,12 +1101,12 @@ extern int create_server_ssl_connection(struct client_state *csp)
     * Handshake with server
     */
    log_error(LOG_LEVEL_CONNECT,
-      "Performing the TLS/SSL handshake with the server");
+      "Performing the TLS handshake with the server");
 
    if (BIO_do_handshake(ssl_attrs->bio) != 1)
    {
       log_ssl_errors(LOG_LEVEL_ERROR,
-         "The TLS/SSL handshake with the server failed");
+         "The TLS handshake with the server failed");
       ret = -1;
       goto exit;
    }
@@ -1230,11 +1230,11 @@ static void log_ssl_errors(int debuglevel, const char* fmt, ...)
    va_end(args);
    /*
     * In case if called by mistake and there were
-    * no TLS/SSL errors let's report it to the log.
+    * no TLS errors let's report it to the log.
     */
    if (!reported)
    {
-      log_error(debuglevel, "%s: no TLS/SSL errors detected", prefix);
+      log_error(debuglevel, "%s: no TLS errors detected", prefix);
    }
 }
 

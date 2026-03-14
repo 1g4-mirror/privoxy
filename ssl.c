@@ -2,8 +2,8 @@
  *
  * File        :  $Source: /cvsroot/ijbswa/current/ssl.c,v $
  *
- * Purpose     :  File with TLS/SSL extension. Contains methods for
- *                creating, using and closing TLS/SSL connections
+ * Purpose     :  File with TLS extension. Contains methods for
+ *                creating, using and closing TLS connections
  *                using mbedTLS.
  *
  * Copyright   :  Written by and Copyright (c) 2017-2020 Vaclav Svec. FIT CVUT.
@@ -163,7 +163,7 @@ extern int ssl_send_data(struct ssl_attr *ssl_attr, const unsigned char *buf, si
 
          mbedtls_strerror(ret, err_buf, sizeof(err_buf));
          log_error(LOG_LEVEL_ERROR,
-            "Sending %d bytes on socket %d over TLS/SSL failed with ret %d: %s",
+            "Sending %d bytes on socket %d over TLS failed with ret %d: %s",
             send_len, ssl_attr->mbedtls_attr.socket_fd.fd, ret, err_buf);
          return -1;
       }
@@ -219,7 +219,7 @@ extern int ssl_recv_data(struct ssl_attr *ssl_attr, unsigned char *buf, size_t m
       }
       mbedtls_strerror(ret, err_buf, sizeof(err_buf));
       log_error(LOG_LEVEL_ERROR,
-         "Receiving data on socket %d over TLS/SSL failed: %s",
+         "Receiving data on socket %d over TLS failed: %s",
          ssl_attr->mbedtls_attr.socket_fd.fd, err_buf);
 
       return -1;
@@ -236,7 +236,7 @@ extern int ssl_recv_data(struct ssl_attr *ssl_attr, unsigned char *buf, size_t m
  *
  * Function    :  create_client_ssl_connection
  *
- * Description :  Creates TLS/SSL secured connection with client
+ * Description :  Creates TLS secured connection with client
  *
  * Parameters  :
  *          1  :  csp = Current client state (buffers, headers, etc...)
@@ -256,7 +256,7 @@ extern int create_client_ssl_connection(struct client_state *csp)
    char err_buf[ERROR_BUF_SIZE];
 
    /*
-    * Initializing mbedtls structures for TLS/SSL connection
+    * Initializing mbedtls structures for TLS connection
     */
    mbedtls_net_init(&(ssl_attr->mbedtls_attr.socket_fd));
    mbedtls_ssl_init(&(ssl_attr->mbedtls_attr.ssl));
@@ -437,7 +437,7 @@ extern int create_client_ssl_connection(struct client_state *csp)
     *  Handshake with client
     */
    log_error(LOG_LEVEL_CONNECT,
-      "Performing the TLS/SSL handshake with client. Hash of host: %s",
+      "Performing the TLS handshake with client. Hash of host: %s",
       csp->http->hash_of_host_hex);
    while ((ret = mbedtls_ssl_handshake(&(ssl_attr->mbedtls_attr.ssl))) != 0)
    {
@@ -478,7 +478,7 @@ exit:
  *
  * Function    :  close_client_ssl_connection
  *
- * Description :  Closes TLS/SSL connection with client. This function
+ * Description :  Closes TLS connection with client. This function
  *                checks if this connection is already created.
  *
  * Parameters  :
@@ -549,7 +549,7 @@ static void free_client_ssl_structures(struct client_state *csp)
  *
  * Function    :  create_server_ssl_connection
  *
- * Description :  Creates TLS/SSL secured connection with server.
+ * Description :  Creates TLS secured connection with server.
  *
  * Parameters  :
  *          1  :  csp = Current client state (buffers, headers, etc...)
@@ -573,7 +573,7 @@ extern int create_server_ssl_connection(struct client_state *csp)
    trusted_cas_file = csp->config->trusted_cas_file;
 
    /*
-    * Initializing mbedtls structures for TLS/SSL connection
+    * Initializing mbedtls structures for TLS connection
     */
    mbedtls_net_init(&(ssl_attr->mbedtls_attr.socket_fd));
    mbedtls_ssl_init(&(ssl_attr->mbedtls_attr.ssl));
@@ -612,7 +612,7 @@ extern int create_server_ssl_connection(struct client_state *csp)
    }
 
    /*
-    * Set TLS/SSL options
+    * Set TLS options
     */
    ret = mbedtls_ssl_config_defaults(&(ssl_attr->mbedtls_attr.conf),
       MBEDTLS_SSL_IS_CLIENT,
@@ -695,7 +695,7 @@ extern int create_server_ssl_connection(struct client_state *csp)
     * Handshake with server
     */
    log_error(LOG_LEVEL_CONNECT,
-      "Performing the TLS/SSL handshake with the server.");
+      "Performing the TLS handshake with the server.");
 
    while ((ret = mbedtls_ssl_handshake(&(ssl_attr->mbedtls_attr.ssl))) != 0)
    {
@@ -759,7 +759,7 @@ exit:
  *
  * Function    :  close_server_ssl_connection
  *
- * Description :  Closes TLS/SSL connection with server. This function
+ * Description :  Closes TLS connection with server. This function
  *                checks if this connection is already opened.
  *
  * Parameters  :

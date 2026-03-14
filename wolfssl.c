@@ -2,8 +2,8 @@
  *
  * File        :  $Source: /cvsroot/ijbswa/current/wolfssl.c,v $
  *
- * Purpose     :  File with TLS/SSL extension. Contains methods for
- *                creating, using and closing TLS/SSL connections
+ * Purpose     :  File with TLS extension. Contains methods for
+ *                creating, using and closing TLS connections
  *                using wolfSSL.
  *
  * Copyright   :  Copyright (C) 2018-2026 by Fabian Keil <fk@fabiankeil.de>
@@ -877,7 +877,7 @@ extern int create_client_ssl_connection(struct client_state *csp)
     *  Handshake with client
     */
    log_error(LOG_LEVEL_CONNECT,
-      "Performing the TLS/SSL handshake with client. Hash of host: %s",
+      "Performing the TLS handshake with client. Hash of host: %s",
       csp->http->hash_of_host_hex);
 
    ret = wolfSSL_accept(ssl);
@@ -1163,7 +1163,7 @@ extern int create_server_ssl_connection(struct client_state *csp)
 #endif
 
    log_error(LOG_LEVEL_CONNECT,
-      "Performing the TLS/SSL handshake with the server");
+      "Performing the TLS handshake with the server");
 
    /* wolfSSL_Debugging_ON(); */
    connect_ret = wolfSSL_connect(ssl);

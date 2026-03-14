@@ -2994,7 +2994,7 @@ browsing has slowed to a crawl. What gives? </title>
  once the client closed its connection to &my-app;.
  Technically &my-app; could keep the connection to the server open,
  but the server would not accept requests that do not belong to the
- previous TLS/SSL session (and the client may even have terminated
+ previous TLS session (and the client may even have terminated
  the session).
 </para>
 <para>

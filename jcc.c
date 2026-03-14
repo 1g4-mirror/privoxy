@@ -877,7 +877,7 @@ static void send_crunch_response(struct client_state *csp, struct http_response 
          {
             /* There is nothing we can do about it. */
             log_error(LOG_LEVEL_CONNECT, "Couldn't deliver the error message "
-               "for https://%s%s through client socket %d using TLS/SSL",
+               "for https://%s%s through client socket %d using TLS",
                http->hostport, http->url, csp->cfd);
          }
       }
@@ -3400,7 +3400,7 @@ static void handle_established_connection(struct client_state *csp)
                }
                continue;
             }
-            log_error(LOG_LEVEL_CONNECT, "Breaking with TLS/SSL.");
+            log_error(LOG_LEVEL_CONNECT, "Breaking with TLS.");
             break;
          }
          else
@@ -4356,9 +4356,9 @@ static void chat(struct client_state *csp)
     *             have been altered by now.
     *
     * SSL proxy = Open a socket to the host:port of the server
-    *             and create TLS/SSL connection with server and
+    *             and create TLS connection with server and
     *             with client. Then behave like mediator between
-    *             client and server over TLS/SSL.
+    *             client and server over TLS.
     *
     * SSL proxy = Pass the request unchanged if forwarding a CONNECT
     *    with     request to a parent proxy. Note that we'll be sending
@@ -4367,7 +4367,7 @@ static void chat(struct client_state *csp)
     *             since that would result in a double message (ours and the
     *             parent's). After sending the request to the parent, we
     *             must parse answer and send it to client. If connection
-    *             with server is established, we do TLS/SSL proxy. Otherwise
+    *             with server is established, we do TLS proxy. Otherwise
     *             we send parent response to client and close connections.
     *
     * here's the matrix:
@@ -4431,7 +4431,7 @@ static void chat(struct client_state *csp)
 
    /*
     * We have a request. Check if one of the crunchers wants it
-    * unless the client wants to use TLS/SSL in which case we
+    * unless the client wants to use TLS in which case we
     * haven't setup the TLS context yet and will send the crunch
     * response later.
     */
@@ -4665,7 +4665,7 @@ static void chat(struct client_state *csp)
 
 #ifdef FEATURE_HTTPS_INSPECTION
       /*
-       * Creating TLS/SSL connections with destination server or parent
+       * Creating TLS connections with destination server or parent
        * proxy. If forwarding is enabled, we must send client request to
        * parent proxy and receive, parse and resend parent proxy answer.
        */
@@ -4742,7 +4742,7 @@ static void chat(struct client_state *csp)
          } /* -END- if (fwd->forward_host != NULL) */
 
          /*
-          * We can now create the TLS/SSL connection with the destination server.
+          * We can now create the TLS connection with the destination server.
           */
          int ret = create_server_ssl_connection(csp);
          if (ret != 0)
@@ -4762,7 +4762,7 @@ static void chat(struct client_state *csp)
              || csp->server_cert_verification_result == SSL_CERT_VALID)
             {
                /*
-                * The TLS/SSL connection wasn't created but an invalid
+                * The TLS connection wasn't created but an invalid
                 * certificate wasn't detected. Report it as connection
                 * failure.
                 */
