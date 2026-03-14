@@ -23,7 +23,7 @@
 #         hash key as input.
 #       - Add --compress and --decompress options.
 #
-# Copyright (c) 2007-2025 Fabian Keil <fk@fabiankeil.de>
+# Copyright (c) 2007-2026 Fabian Keil <fk@fabiankeil.de>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -1873,8 +1873,11 @@ sub handle_loglevel_connect($) {
         $c =~ s@(?<=Flushed )(\d+)@$h{'Number'}$1$h{'Standard'}@;
         $c =~ s@(?<=expecting )(\d+)@$h{'Number'}$1$h{'Standard'}@;
 
-    } elsif ($c =~ m/^Performing the TLS\/SSL handshake with client. Hash of host:/) {
+    } elsif ($c =~ m/^Performing the TLS(?:\/SSL)? handshake with client. Hash of host:/) {
 
+        # >= 4.2.0:
+        # Performing the TLS handshake with client. Hash of host: bab5296b25e256c7b06b92b17b56bcae
+        # < 4.2.0:
         # Performing the TLS/SSL handshake with client. Hash of host: bab5296b25e256c7b06b92b17b56bcae
         $c = highlight_matched_host($c, '(?<=Hash of host: ).+');
 
