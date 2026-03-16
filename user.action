@@ -83,7 +83,6 @@ allow-ads   = -block -filter{banners-by-size} -filter{banners-by-link}
 #
 { allow-all-cookies }
 #.sourceforge.net
-#sunsolve.sun.com
 #slashdot.org
 #.yahoo.com
 #.msdn.microsoft.com
