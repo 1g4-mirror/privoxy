@@ -368,23 +368,27 @@
 #
 # +limit-connect{portlist}
 #
-#    By default, i.e. if no limit-connect action applies, Privoxy
-#    allows HTTP CONNECT requests to all ports. Use limit-connect
-#    if fine-grained control is desired for some or all destinations.
-#    The CONNECT methods exists in HTTP to allow access to secure websites
-#    ("https://" URLs) through proxies. It works very simply: the proxy
-#    connects to the server on the specified port, and then short-circuits
-#    its connections to the client and to the remote server. This means
-#    CONNECT-enabled proxies can be used as TCP relays very easily. Privoxy
-#    relays HTTPS traffic without seeing the decoded content. Websites can
-#    leverage this limitation to circumvent Privoxy's filters. By specifying
-#    an invalid port range you can disable HTTPS entirely.
+#    By default, i.e. if no limit-connect action applies, Privoxy allows
+#    HTTP CONNECT requests to all ports. Use limit-connect if fine-grained
+#    control is desired for some or all destinations.
+#    The CONNECT methods exists in HTTP to allow access to secure
+#    websites ("https://" URLs) through proxies. It works very simply:
+#    the proxy connects to the server on the specified port, and then
+#    short-circuits its connections to the client and to the remote
+#    server. This means CONNECT-enabled proxies can be used as TCP
+#    relays very easily.
+#    If the CONNECT method is being used and the https-inspection
+#    action is not enabled, Privoxy relays HTTPS or other traffic
+#    without seeing the decoded content. Websites can leverage this
+#    limitation to circumvent Privoxy's filters. By specifying an
+#    invalid port range you can disallow the CONNECT method and prevent
+#    this.
 #
 #    +limit-connect{443}                   # Only port 443 is OK.
 #    +limit-connect{80,443}                # Ports 80 and 443 are OK.
 #    +limit-connect{-3, 7, 20-100, 500-}   # Ports less than 3, 7, 20 to 100 and above 500 are OK.
 #    +limit-connect{-}                     # All ports are OK
-#    +limit-connect{,}                     # No HTTPS/SSL traffic is allowed
+#    +limit-connect{,}                     # All CONNECT requests are rejected.
 #
 # +limit-cookie-lifetime{lifetime in minutes}
 #
