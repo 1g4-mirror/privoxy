@@ -160,7 +160,6 @@ www.example.com/nasty-ads/sponsor.gif
 # safe to have their default policies set here though. So let's set a
 # default policy to have a 'blank' image as opposed to the checkerboard
 # pattern for ALL sites. '/' of course matches all URLs.
-# patterns:
 #
 { +set-image-blocker{blank} }
 #/
