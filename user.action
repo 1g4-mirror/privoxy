@@ -202,8 +202,8 @@ www.example.com/nasty-ads/sponsor.gif
 # {+filter{bundeswehr.de}}
 # .bundeswehr.de/
 
-######### Examples for SSL actions #########
-# Following section enables TLS/SSL filtering for all sites defined by pattern and requested by HTTPS.
+######### Examples for HTTPS-related actions #########
+# Following section enables TLS filtering for all sites defined by pattern and requested by HTTPS.
 # {+https-inspection}
 # privoxy.org
 
