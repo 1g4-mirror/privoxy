@@ -4230,9 +4230,8 @@ compression-level 0
   <term>Notes:</term>
   <listitem>
    <para>
-    This directive specifies the directory where generated
-    TLS/SSL keys and certificates are saved when https inspection
-    is enabled with the
+    This directive specifies the directory where generated keys and
+    certificates are saved when https inspection is enabled with the
     <literal><ulink url="actions-file.html#HTTPS-INSPECTION">https-inspection</ulink></literal>
     action.
    </para>
@@ -4503,7 +4502,7 @@ cipher-list ALL:!EXPORT:!EXPORT40:!EXPORT56:!aNULL:!LOW:!RC4:@STRENGTH
   <listitem>
    <para>
     This directive specifies the trusted CAs file that is used when validating
-    certificates for intercepted TLS/SSL requests.
+    certificates for intercepted HTTPS requests.
    </para>
    <para>
     An example file can be downloaded from
