@@ -148,8 +148,7 @@ www.example.com/nasty-ads/sponsor.gif
 { fragile }
 #.forbes.com
 
-# Here are some sites we wish to support, and we will allow their ads
-# through.
+# Here are some sites some may wish to support. Allow their ads through.
 #
 { allow-ads }
 #.sourceforge.net
