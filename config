@@ -2296,7 +2296,9 @@ socket-timeout 300
 #      The tag is set for all requests that come from clients that
 #      requested it to be set. Note that "clients" are differentiated
 #      by IP address, if the IP address changes the tag has to be
-#      requested again.
+#      requested again. The listen-address used to reach Privoxy is
+#      taken into account as well. This allows multiple clients
+#      running on the same system to request different settings.
 #
 #      Clients can request tags to be set by using the CGI interface
 #      http://config.privoxy.org/client-tags. The specific tag
@@ -2623,9 +2625,9 @@ socket-timeout 300
 #
 #  Notes:
 #
-#      This directive specifies the directory where generated TLS/SSL
-#      keys and certificates are saved when https inspection is
-#      enabled with the https-inspection action.
+#      This directive specifies the directory where generated keys
+#      and certificates are saved when https inspection is enabled
+#      with the https-inspection action.
 #
 #      The keys and certificates currently have to be deleted
 #      manually when changing the ca-cert-file and the ca-cert-key.
@@ -2806,7 +2808,7 @@ elliptic-curve-keys 1
 #  Notes:
 #
 #      This directive specifies the trusted CAs file that is used
-#      when validating certificates for intercepted TLS/SSL requests.
+#      when validating certificates for intercepted HTTPS requests.
 #
 #      An example file can be downloaded from https://curl.se/ca/cacert.pem.
 #      If you want to create the file yourself, please
