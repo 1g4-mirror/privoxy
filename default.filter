@@ -721,6 +721,15 @@ s@<div class="sterling" id="banner-sterling"@$0 style="display:none;"@
 
 #################################################################################
 #
+# taz.de: Hides the 'paywahl' banner on taz.de by default without relying on cookies.
+#
+#################################################################################
+FILTER: taz.de Hides the 'paywahl' banner on taz.de by default without relying on cookies.
+
+s@if \( marOtaz_de.getCookie\('tzi_paywall_payed'\) === \'yesHide'\) return;@if (true) return;@
+
+#################################################################################
+#
 # x-httpd-php-to-html: Changes the Content-Type header from
 #                      x-httpd-php to html. "Content-Type: x-httpd-php"
 #                      is set by clueless PHP users and causes many
