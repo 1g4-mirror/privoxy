@@ -231,7 +231,6 @@ typedef enum privoxy_err jb_err;
 
 /**
  * Default TCP/IP address to listen on, as a string.
- * Set to "127.0.0.1:8118".
  */
 #define HADDR_DEFAULT   "127.0.0.1:8118"
 
