@@ -37,7 +37,7 @@ sub parse_file() {
             my $description = $3;
             my $type = lc($type_uc);
             my $sgml_description = sgml_escape($description);
-            my $white_space = ' ' x (($type eq 'filter' ? 20 : 27) - length($name));
+            my $white_space = ' ' x (($type eq 'filter' ? 22 : 29) - length($name));
 
             $comment_lines{$type} .= "#     $name:" . $white_space . "$description\n";
             $action_lines{$type}  .= "+$type" . "{$name} \\\n";
