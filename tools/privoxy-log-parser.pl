@@ -1293,10 +1293,14 @@ sub handle_loglevel_tagging($) {
 
     } elsif ($c =~ /^Evaluating/) {
 
+        # >= 4.2.0:
+        # Evaluating tag 'forward-directly' for client 127.0.0.1 using 127.0.1.1:8120. End of life 1774948202.
+        # < 4.2.0:
         # Evaluating tag 'change-tor-socks-port' for client 127.0.0.1. End of life 1613162302.
 
         $c =~ s@(?<=tag \')([^\']*)@$h{'tag'}$1$h{'Standard'}@;
-        $c = highlight_matched_host($c, '(?<=client )[^\s]+(?=\.)');
+        $c = highlight_matched_host($c, '(?<=client )[^\s]+(?=[. ])');
+        $c =~ s@(?<=using )(.*)(?=\. )@$h{'listen-address'}$1$h{'Standard'}@;
         $c =~ s@(?<=life )(\d+)@$h{'Number'}$1$h{'Standard'}@;
 
     } elsif ($c =~ /^Client tag/) {
