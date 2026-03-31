@@ -229,6 +229,10 @@ static void unload_configfile (void * data)
    while (cur_acl != NULL)
    {
       struct access_control_list * next_acl = cur_acl->next;
+#ifdef ACL_DEBUG
+      free(cur_acl->src_string);
+      free(cur_acl->dst_string);
+#endif
       free(cur_acl);
       cur_acl = next_acl;
    }
@@ -1013,6 +1017,11 @@ struct configuration_spec * load_config(void)
                cur_acl->wildcard_dst = 1;
             }
 
+#ifdef ACL_DEBUG
+            cur_acl->src_string = strdup_or_die(vec[0]);
+            cur_acl->dst_string = strdup_or_die((vec_count == 2) ? vec[1] : "none specified");
+#endif
+
             /*
              * Add it to the list.  Note we reverse the list to get the
              * behaviour the user expects.  With both the ACL and
@@ -1566,6 +1575,11 @@ struct configuration_spec * load_config(void)
             {
                cur_acl->wildcard_dst = 1;
             }
+
+#ifdef ACL_DEBUG
+            cur_acl->src_string = strdup_or_die(vec[0]);
+            cur_acl->dst_string = strdup_or_die((vec_count == 2) ? vec[1] : "none specified");
+#endif
 
             /*
              * Add it to the list.  Note we reverse the list to get the

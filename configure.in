@@ -956,6 +956,12 @@ AC_ARG_ENABLE(acl-support,
 fi],
 AC_DEFINE(FEATURE_ACL))
 
+AC_ARG_ENABLE(acl-debugging,
+[  --enable-acl-debugging                   Enable code that makes debugging ACLs more convenient],
+[if test $enableval = yes; then
+  AC_DEFINE(ACL_DEBUG,1,[Define to make debugging ACLs more convenient.])
+fi])
+
 AC_ARG_ENABLE(trust-files,
 [  --disable-trust-files           Prevents the use of trust files.],
 [if test $enableval = yes; then

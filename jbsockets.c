@@ -257,6 +257,9 @@ static jb_socket rfc2553_connect_to(const char *host, int portnum, struct client
 
 #ifdef FEATURE_ACL
       memcpy(&dst->addr, rp->ai_addr, rp->ai_addrlen);
+#ifdef ACL_DEBUG
+      dst->addr_length = rp->ai_addrlen;
+#endif
 
       if (block_acl(csp, dst))
       {

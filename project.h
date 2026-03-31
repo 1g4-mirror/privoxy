@@ -1370,6 +1370,9 @@ struct access_control_addr
 #ifdef HAVE_RFC2553
    struct sockaddr_storage addr; /* <The TCP address in network order. */
    struct sockaddr_storage mask; /* <The TCP mask in network order. */
+#ifdef ACL_DEBUG
+   socklen_t addr_length;
+#endif
 #else
    unsigned long addr;  /**< The IP address as an integer. */
    unsigned long mask;  /**< The network mask as an integer. */
@@ -1386,6 +1389,10 @@ struct access_control_list
 {
    struct access_control_addr src[1];  /**< Client IP address */
    struct access_control_addr dst[1];  /**< Website or parent proxy IP address */
+#ifdef ACL_DEBUG
+   char *src_string;
+   char *dst_string;
+#endif
    short wildcard_dst;                 /** < dst address is wildcard */
 
    short action;                       /**< ACL_PERMIT or ACL_DENY */

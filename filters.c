@@ -74,6 +74,13 @@
 #include "win32.h"
 #endif
 
+#ifdef ACL_DEBUG
+#ifndef RFC_2553
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#endif
+#endif
+
 typedef char *(*filter_function_ptr)(struct client_state *csp);
 static filter_function_ptr get_filter_function(const struct client_state *csp);
 static jb_err prepare_for_filtering(struct client_state *csp);
@@ -249,6 +256,14 @@ static int match_sockaddr(const struct sockaddr_storage *network,
 int block_acl(const struct client_state *csp, const struct access_control_addr *dst)
 {
    struct access_control_list *acl = csp->config->acl;
+#ifdef ACL_DEBUG
+#ifdef HAVE_RFC2553
+   int retval;
+   char dst_string[NI_MAXHOST];
+#else
+   char *dst_string;
+#endif
+#endif
 
    /* if not using an access control list, then permit the connection */
    if (acl == NULL)
@@ -256,9 +271,45 @@ int block_acl(const struct client_state *csp, const struct access_control_addr *
       return(0);
    }
 
+#ifdef ACL_DEBUG
+   if (dst == NULL)
+   {
+#ifdef HAVE_RFC2553
+      strlcpy(dst_string, "not yet known", sizeof(dst_string));
+#else
+      dst_string = "not yet known";
+#endif
+   }
+   else
+   {
+#ifdef HAVE_RFC2553
+      retval = getnameinfo((const struct sockaddr *)&dst->addr, dst->addr_length,
+         dst_string, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+      if (retval)
+      {
+         log_error(LOG_LEVEL_ERROR,
+            "Failed to get the host name from the ACL destination: %s",
+            gai_strerror(retval));
+         strlcpy(dst_string, "getnaminfo() failed!", sizeof(dst_string));
+      }
+#else
+      struct in_addr dst_addr;
+      dst_addr.s_addr = htonl(dst->addr);
+      dst_string = inet_ntoa(dst_addr);
+#endif
+   }
+#endif
+
    /* search the list */
    while (acl != NULL)
    {
+#ifdef ACL_DEBUG
+      log_error(LOG_LEVEL_CONNECT,
+         "Checking client address %s against %s rule for source %s and destination %s. "
+         "Destination: %s.",
+         csp->ip_addr_str, (acl->action == ACL_PERMIT) ? "permit" : "deny",
+         acl->src_string, acl->dst_string, dst_string);
+#endif
       if (
 #ifdef HAVE_RFC2553
             match_sockaddr(&acl->src->addr, &acl->src->mask, &csp->tcp_addr)
