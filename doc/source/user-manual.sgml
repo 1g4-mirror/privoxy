@@ -4366,124 +4366,132 @@ another.example.com/testing
   <listitem>
    <para>
     <anchor id="filter-js-annoyances">
+    <screen>+filter{js-annoyances}         # Get rid of particularly annoying JavaScript abuse.</screen>
    </para>
-    <screen>+filter{js-annoyances}       # Get rid of particularly annoying JavaScript abuse.</screen>
    <para>
     <anchor id="filter-js-events">
+    <screen>+filter{js-events}             # Kill JavaScript event bindings and timers (Radically destructive! Only for extra nasty sites).</screen>
    </para>
-    <screen>+filter{js-events}           # Kill JavaScript event bindings and timers (Radically destructive! Only for extra nasty sites).</screen>
    <para>
     <anchor id="filter-html-annoyances">
+    <screen>+filter{html-annoyances}       # Get rid of particularly annoying HTML abuse.</screen>
    </para>
-    <screen>+filter{html-annoyances}     # Get rid of particularly annoying HTML abuse.</screen>
    <para>
     <anchor id="filter-content-cookies">
+    <screen>+filter{content-cookies}       # Kill cookies that come in the HTML or JS content.</screen>
    </para>
-    <screen>+filter{content-cookies}     # Kill cookies that come in the HTML or JS content.</screen>
    <para>
     <anchor id="filter-refresh-tags">
+    <screen>+filter{refresh-tags}          # Kill automatic refresh tags if refresh time is larger than 9 seconds.</screen>
    </para>
-    <screen>+filter{refresh-tags}        # Kill automatic refresh tags if refresh time is larger than 9 seconds.</screen>
    <para>
     <anchor id="filter-unsolicited-popups">
+    <screen>+filter{unsolicited-popups}    # Disable only unsolicited pop-up windows.</screen>
    </para>
-    <screen>+filter{unsolicited-popups}  # Disable only unsolicited pop-up windows.</screen>
    <para>
     <anchor id="filter-all-popups">
+    <screen>+filter{all-popups}            # Kill all popups in JavaScript and HTML.</screen>
    </para>
-    <screen>+filter{all-popups}          # Kill all popups in JavaScript and HTML.</screen>
    <para>
     <anchor id="filter-img-reorder">
+    <screen>+filter{img-reorder}           # Reorder attributes in &lt;img&gt; tags to make the banners-by-* filters more effective.</screen>
    </para>
-    <screen>+filter{img-reorder}         # Reorder attributes in &lt;img&gt; tags to make the banners-by-* filters more effective.</screen>
    <para>
     <anchor id="filter-banners-by-size">
+    <screen>+filter{banners-by-size}       # Kill banners by size.</screen>
    </para>
-    <screen>+filter{banners-by-size}     # Kill banners by size.</screen>
    <para>
     <anchor id="filter-banners-by-link">
+    <screen>+filter{banners-by-link}       # Kill banners by their links to known clicktrackers.</screen>
    </para>
-    <screen>+filter{banners-by-link}     # Kill banners by their links to known clicktrackers.</screen>
    <para>
     <anchor id="filter-webbugs">
+    <screen>+filter{webbugs}               # Squish WebBugs (1x1 invisible GIFs used for user tracking).</screen>
    </para>
-    <screen>+filter{webbugs}             # Squish WebBugs (1x1 invisible GIFs used for user tracking).</screen>
    <para>
     <anchor id="filter-tiny-textforms">
+    <screen>+filter{tiny-textforms}        # Extend those tiny textareas up to 40x80 and kill the hard wrap.</screen>
    </para>
-    <screen>+filter{tiny-textforms}      # Extend those tiny textareas up to 40x80 and kill the hard wrap.</screen>
    <para>
     <anchor id="filter-jumping-windows">
+    <screen>+filter{jumping-windows}       # Prevent windows from resizing and moving themselves.</screen>
    </para>
-    <screen>+filter{jumping-windows}     # Prevent windows from resizing and moving themselves.</screen>
    <para>
     <anchor id="filter-frameset-borders">
+    <screen>+filter{frameset-borders}      # Give frames a border and make them resizable.</screen>
    </para>
-    <screen>+filter{frameset-borders}    # Give frames a border and make them resizable.</screen>
    <para>
     <anchor id="filter-iframes">
+    <screen>+filter{iframes}               # Removes all detected iframes. Should only be enabled for individual sites.</screen>
    </para>
-    <screen>+filter{iframes}             # Removes all detected iframes. Should only be enabled for individual sites.</screen>
    <para>
     <anchor id="filter-demoronizer">
+    <screen>+filter{demoronizer}           # Fix MS's non-standard use of standard charsets.</screen>
    </para>
-    <screen>+filter{demoronizer}         # Fix MS's non-standard use of standard charsets.</screen>
    <para>
     <anchor id="filter-shockwave-flash">
+    <screen>+filter{shockwave-flash}       # Kill embedded Shockwave Flash objects.</screen>
    </para>
-    <screen>+filter{shockwave-flash}     # Kill embedded Shockwave Flash objects.</screen>
    <para>
     <anchor id="filter-quicktime-kioskmode">
+    <screen>+filter{quicktime-kioskmode}   # Make Quicktime movies saveable.</screen>
    </para>
-    <screen>+filter{quicktime-kioskmode} # Make Quicktime movies saveable.</screen>
    <para>
     <anchor id="filter-fun">
+    <screen>+filter{fun}                   # Text replacements for subversive browsing fun!</screen>
    </para>
-    <screen>+filter{fun}                 # Text replacements for subversive browsing fun!</screen>
    <para>
     <anchor id="filter-crude-parental">
+    <screen>+filter{crude-parental}        # Crude parental filtering. Note that this filter doesn't work reliably.</screen>
    </para>
-    <screen>+filter{crude-parental}      # Crude parental filtering. Note that this filter doesn't work reliably.</screen>
    <para>
     <anchor id="filter-site-specifics">
+    <screen>+filter{site-specifics}        # Cure for site-specific problems. Don't apply generally!</screen>
    </para>
-    <screen>+filter{site-specifics}      # Cure for site-specific problems. Don't apply generally!</screen>
    <para>
     <anchor id="filter-no-ping">
+    <screen>+filter{no-ping}               # Removes non-standard ping attributes in &lt;a&gt; and &lt;area&gt; tags.</screen>
    </para>
-    <screen>+filter{no-ping}             # Removes non-standard ping attributes in &lt;a&gt; and &lt;area&gt; tags.</screen>
    <para>
-    <anchor id="filter-bundeswehr.de">
+    <anchor id="filter-allow-autocompletion">
+    <screen>+filter{allow-autocompletion}  # Changes autocomplete="off" on form and input fields to "on" to allow autocompletion.</screen>
    </para>
-    <screen>+filter{bundeswehr.de}      # Hide the cookie and privacy info banner on bundeswehr.de.</screen>
    <para>
     <anchor id="filter-github">
+    <screen>+filter{github}                # Removes the annoying "Sign-Up" banner and the Cookie disclaimer.</screen>
    </para>
-    <screen>+filter{github}              # Removes the annoying "Sign-Up" banner and the Cookie disclaimer.</screen>
-   <para>
-    <anchor id="filter-google">
-   </para>
-    <screen>+filter{google}              # CSS-based block for Google text ads. Also removes a width limitation and the toolbar advertisement.</screen>
    <para>
     <anchor id="filter-imdb">
+    <screen>+filter{imdb}                  # Removes some ads on IMDb.</screen>
    </para>
-    <screen>+filter{imdb}                # Removes some ads on IMDb.</screen>
+   <para>
+    <anchor id="filter-google">
+    <screen>+filter{google}                # CSS-based block for Google text ads. Also removes a width limitation and the toolbar advertisement.</screen>
+   </para>
    <para>
     <anchor id="filter-yahoo">
+    <screen>+filter{yahoo}                 # CSS-based block for Yahoo text ads. Also removes a width limitation.</screen>
    </para>
-    <screen>+filter{yahoo}               # CSS-based block for Yahoo text ads. Also removes a width limitation.</screen>
    <para>
     <anchor id="filter-msn">
+    <screen>+filter{msn}                   # CSS-based block for MSN text ads. Also removes tracking URLs and a width limitation.</screen>
    </para>
-    <screen>+filter{msn}                 # CSS-based block for MSN text ads. Also removes tracking URLs and a width limitation.</screen>
    <para>
     <anchor id="filter-blogspot">
+    <screen>+filter{blogspot}              # Cleans up some Blogspot blogs. Read the fine print before using this.</screen>
    </para>
-    <screen>+filter{blogspot}            # Cleans up some Blogspot blogs. Read the fine print before using this.</screen>
+   <para>
+    <anchor id="filter-bundeswehr.de">
+    <screen>+filter{bundeswehr.de}         # Hide the cookie and privacy info banner on bundeswehr.de</screen>
+   </para>
    <para>
     <anchor id="filter-sourceforge">
+    <screen>+filter{sourceforge}           # Reduces the amount of ads for proprietary software on SourceForge.</screen>
    </para>
-    <screen>+filter{sourceforge}         # Reduces the amount of ads for proprietary software on SourceForge.</screen>
+   <para>
+    <anchor id="filter-taz.de">
+    <screen>+filter{taz.de}                # Hides the 'paywahl' banner on taz.de by default without relying on cookies.</screen>
+   </para>
   </listitem>
  </varlistentry>
 </variablelist>
