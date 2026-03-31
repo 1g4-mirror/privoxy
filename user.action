@@ -199,6 +199,10 @@ www.example.com/nasty-ads/sponsor.gif
 # {+filter{bundeswehr.de}}
 # .bundeswehr.de/
 
+# Hides the 'paywahl' banner on taz.de by default without relying on cookies.
+# {+filter{taz.de}}
+# .taz.de/
+
 ######### Examples for HTTPS-related actions #########
 # Following section enables TLS filtering for all sites defined by pattern and requested by HTTPS.
 # {+https-inspection}
