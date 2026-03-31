@@ -387,6 +387,7 @@ int acl_addr(const char *aspec, struct access_control_addr *aca)
 
    if ((*acl_spec == '[') && (NULL != (p = strchr(acl_spec, ']'))))
    {
+#ifdef HAVE_RFC2553
       *p = '\0';
       memmove(acl_spec, acl_spec + 1, (size_t)(p - acl_spec));
 
@@ -394,6 +395,14 @@ int acl_addr(const char *aspec, struct access_control_addr *aca)
       {
          p = NULL;
       }
+#else
+      log_error(LOG_LEVEL_ERROR,
+         "Ignoring ACL with IPv6 address due to lack of RFC2553 support: %s",
+         acl_spec);
+      freez(acl_spec);
+
+      return(-1);
+#endif
    }
    else
    {
