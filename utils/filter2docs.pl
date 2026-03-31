@@ -31,7 +31,7 @@ sub sgml_escape($) {
 
 sub parse_file() {
     while (<INPUT>) {
-        if (/^((?:(?:SERVER|CLIENT)-HEADER-)?(?:FILTER|TAGGER)): ([-\w]+) (.*)$/) {
+        if (/^((?:(?:SERVER|CLIENT)-HEADER-)?(?:FILTER|TAGGER)): ([-\w.]+) (.*)$/) {
             my $type_uc = $1;
             my $name = $2;
             my $description = $3;
