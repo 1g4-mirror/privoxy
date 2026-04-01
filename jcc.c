@@ -2246,6 +2246,11 @@ static int send_http_request(struct client_state *csp)
    {
       log_error(LOG_LEVEL_CONNECT, "Failed sending request headers to: %s: %E",
          csp->http->hostport);
+      /*
+       * Give up on the client connection. If there's a request body
+       * we may not have dealt with all the request data yet.
+       */
+      csp->flags &= ~CSP_FLAG_CLIENT_CONNECTION_KEEP_ALIVE;
       return 1;
    }
 
