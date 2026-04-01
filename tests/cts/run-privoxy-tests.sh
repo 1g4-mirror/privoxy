@@ -27,9 +27,11 @@ UPSTREAM_TEST_SCENARIO=upstream-tests
 # elegant method to verify that Privoxy is running or failed to start.
 SECONDS_TO_WAIT_FOR_PRIVOXY_TO_START=1
 
+USE_VALGRIND=false
+
 start_privoxy() {
     local test_dir test_scenario
-    local privoxy_config privoxy_binary pid_file log_file
+    local privoxy_config privoxy_binary pid_file log_file valgrind_command valgrind_log_file
     test_dir="${1}"
     test_scenario="${2}"
 
@@ -38,9 +40,16 @@ start_privoxy() {
     pid_file="${test_dir}/${test_scenario}/../privoxy.pid"
     log_file="${test_dir}/logs/${test_scenario}.log"
 
-    (
+    if $USE_VALGRIND; then
+        valgrind_log_file="${test_dir}/logs/${test_scenario}-valgrind.log"
+        valgrind_command="valgrind --tool=memcheck --leak-check=full --log-file=$valgrind_log_file
+           --trace-children=yes --track-origins=yes"
+        SECONDS_TO_WAIT_FOR_PRIVOXY_TO_START=3
+    fi
+
+     (
         cd "${privoxy_config_dir}" || exit 1
-        "${privoxy_binary}" --no-daemon \
+        $valgrind_command "${privoxy_binary}" --no-daemon \
                             --pidfile "${pid_file}" \
                             privoxy.conf > "${log_file}" 2>&1 || exit 1 &
     )
@@ -138,6 +147,11 @@ main() {
             "-t")
                 shift
                 test_scenarios="$1"
+                shift
+                ;;
+            "-v")
+                echo "Running Privoxy through valgrind."
+                USE_VALGRIND=true
                 shift
                 ;;
             "--")
