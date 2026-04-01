@@ -29,7 +29,7 @@ SECONDS_TO_WAIT_FOR_PRIVOXY_TO_START=1
 
 start_privoxy() {
     local test_dir test_scenario
-    local privoxy_config privoxy_binary pid_file
+    local privoxy_config privoxy_binary pid_file log_file
     test_dir="${1}"
     test_scenario="${2}"
 
