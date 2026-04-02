@@ -218,6 +218,9 @@ sub main() {
         $verbose = 1 if ($arg eq "-v");
     }
 
+    # Export TESTDIR so the prechecks can access it.
+    $ENV{TESTDIR} = $TESTDIR;
+
     return 1;
 }
 
