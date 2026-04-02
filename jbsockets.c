@@ -250,7 +250,7 @@ static jb_socket rfc2553_connect_to(const char *host, int portnum, struct client
       return(JB_INVALID_SOCKET);
    }
 
-   csp->http->host_ip_addr_str = malloc_or_die(NI_MAXHOST);
+   csp->http->host_ip_addr_str = zalloc_or_die(NI_MAXHOST);
 
    for (rp = result; rp != NULL; rp = rp->ai_next)
    {
