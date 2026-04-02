@@ -640,7 +640,9 @@ static jb_err compile_pattern(const char *pattern, enum regex_anchoring anchorin
    char *rebuf;
    size_t rebuf_size;
    PCRE2_SIZE error_offset;
+#ifndef DISABLE_PCRE_JIT_COMPILATION
    int ret;
+#endif
 
    assert(pattern);
 
