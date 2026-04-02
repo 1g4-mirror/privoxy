@@ -2342,6 +2342,8 @@ report.error-report.com/
 .bahn.de/
 # URL = https://gstreamer.freedesktop.org/security/sa-2026-0003.html?__goaway_challenge=resource-load&__goaway_id=c17b407714c97e4931b45e8b61315ea7&__goaway_referer=https%3A%2F%2Fgstreamer.freedesktop.org%2F
 /.*&__goaway_referer=http
+# URL = https://archive.is/submit/?url=https%3A%2F%2Fwww.zeit.de%2Fwissen%2F2026-04%2Fnsdap-mitgliederkartei-karteikarten-familienmitglieder-suche
+archive.is/
 
 {+redirect{s@.*url=@http://@} -block}
 # Sticky Actions = +redirect -block
