@@ -615,7 +615,9 @@ pcrs_job *pcrs_compile(const char *pattern, const char *substitute, const char *
    pcrs_job *newjob;
    unsigned int flags;
    int capturecount;
+#ifndef DISABLE_PCRE_JIT_COMPILATION
    int ret;
+#endif
 
    *errptr = 0;
 
