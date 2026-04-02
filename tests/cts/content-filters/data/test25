@@ -37,6 +37,14 @@ X-Control: swsclose%CR
 # pcrs command 5:
 
 <div class="sterling" id="banner-sterling" blafasel
+
+# pcrs command 6:
+
+<div id="monb-sticky-obj" blafasel
+
+# pcrs command 7:
+
+<div id="retool-coding-bar" blafasel
 </data>
 </reply>
 
@@ -47,7 +55,7 @@ Date: Thu, 22 Jul 2010 11:22:33 GMT%CR
 Connection: close%CR
 Content-Type: text/html%CR
 X-Control: swsclose%CR
-Content-Length: 488%CR
+Content-Length: 632%CR
 %CR
 # Here are some strings the sourceforge filter should filter:
 
@@ -70,6 +78,14 @@ Content-Length: 488%CR
 # pcrs command 5:
 
 <div class="sterling" id="banner-sterling" style="display:none;" blafasel
+
+# pcrs command 6:
+
+<div id="monb-sticky-obj" style="display:none;" blafasel
+
+# pcrs command 7:
+
+<div style="display:none !important;" blafasel
 </data>
 </proxy-reply>
 
