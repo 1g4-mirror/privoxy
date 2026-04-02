@@ -728,7 +728,7 @@ s@<div id="retool-coding-bar"@<div style="display:none !important;"@
 #################################################################################
 FILTER: taz.de Hides the 'paywahl' banner on taz.de by default without relying on cookies.
 
-s@if \( marOtaz_de.getCookie\('tzi_paywall_payed'\) === \'yesHide'\) return;@if (true) return;@
+s@if \( marOtaz_de.getCookie\('tzi_paywall_payed'\) === 'yesHide'\) return;@if (true) return;@
 
 #################################################################################
 #
