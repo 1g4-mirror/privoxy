@@ -88,5 +88,8 @@
 {+filter{sourceforge}}
 /sourceforge/
 
+{+filter{taz.de}}
+/taz\.de/
+
 {+filter{bundeswehr.de}}
 /bundeswehr.de/
