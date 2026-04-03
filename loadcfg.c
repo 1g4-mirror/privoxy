@@ -573,13 +573,14 @@ static void parse_client_header_order(struct list *ordered_header_list, const ch
  *          1  :  arg:         The arguments of the directive we're parsing.
  *          2  :  proxy_args:  The proxy arguments to fill in.
  *          3  :  action_type: The type of action we're parsing.
+ *          4  :  line_number: Line number in the configuration file.
  *
  * Returns     :  NULL in case of errors, or a
  *                pointer to an ACL that can be enlisted.
  *
  *********************************************************************/
 static struct access_control_list *parse_acl_rule(const char *arg, char **proxy_args,
-   const short action_type)
+   const short action_type, const unsigned long line_number)
 {
    char tmp[BUFFER_SIZE];
    struct access_control_list *acl;
@@ -594,7 +595,8 @@ static struct access_control_list *parse_acl_rule(const char *arg, char **proxy_
    if ((vec_count != 1) && (vec_count != 2))
    {
       log_error(LOG_LEVEL_ERROR, "Wrong number of parameters for "
-         "%s directive in configuration file.", action_type_string);
+         "%s directive in configuration file line %u.", action_type_string,
+         line_number);
       string_append(proxy_args,
          "<br>\nWARNING: Wrong number of parameters for ");
       string_append(proxy_args, action_type_string);
@@ -610,8 +612,8 @@ static struct access_control_list *parse_acl_rule(const char *arg, char **proxy_
    if (acl_addr(vec[0], acl->src) < 0)
    {
       log_error(LOG_LEVEL_ERROR, "Invalid source address, port or netmask "
-         "for %s directive in configuration file: \"%s\"",
-         action_type_string, vec[0]);
+         "for %s directive in configuration file line %u: \"%s\"",
+         action_type_string, line_number, vec[0]);
       string_append(proxy_args,
          "<br>\nWARNING: Invalid source address, port or netmask for ");
       string_append(proxy_args, action_type_string);
@@ -1059,7 +1061,7 @@ struct configuration_spec * load_config(void)
  * *************************************************************************/
 #ifdef FEATURE_ACL
          case hash_deny_access:
-            cur_acl = parse_acl_rule(arg, &config->proxy_args, ACL_DENY);
+            cur_acl = parse_acl_rule(arg, &config->proxy_args, ACL_DENY, linenum);
             if (cur_acl == NULL)
             {
                break;
@@ -1564,7 +1566,7 @@ struct configuration_spec * load_config(void)
  * *************************************************************************/
 #ifdef FEATURE_ACL
          case hash_permit_access:
-            cur_acl = parse_acl_rule(arg, &config->proxy_args, ACL_PERMIT);
+            cur_acl = parse_acl_rule(arg, &config->proxy_args, ACL_PERMIT, linenum);
             if (cur_acl == NULL)
             {
                break;
