@@ -561,6 +561,101 @@ static void parse_client_header_order(struct list *ordered_header_list, const ch
 }
 
 
+#ifdef FEATURE_ACL
+/*********************************************************************
+ *
+ * Function    :  parse_acl_rule
+ *
+ * Description :  Parse the value of the deny-access and permit-access
+ *                directives
+ *
+ * Parameters  :
+ *          1  :  arg:         The arguments of the directive we're parsing.
+ *          2  :  proxy_args:  The proxy arguments to fill in.
+ *          3  :  action_type: The type of action we're parsing.
+ *
+ * Returns     :  NULL in case of errors, or a
+ *                pointer to an ACL that can be enlisted.
+ *
+ *********************************************************************/
+static struct access_control_list *parse_acl_rule(const char *arg, char **proxy_args,
+   const short action_type)
+{
+   char tmp[BUFFER_SIZE];
+   struct access_control_list *acl;
+   char *vec[3];
+   int vec_count;
+   const char *action_type_string = (action_type == ACL_DENY) ?
+      "deny-access" : "permit-access";
+
+   strlcpy(tmp, arg, sizeof(tmp));
+   vec_count = ssplit(tmp, " \t", vec, SZ(vec));
+
+   if ((vec_count != 1) && (vec_count != 2))
+   {
+      log_error(LOG_LEVEL_ERROR, "Wrong number of parameters for "
+         "%s directive in configuration file.", action_type_string);
+      string_append(proxy_args,
+         "<br>\nWARNING: Wrong number of parameters for ");
+      string_append(proxy_args, action_type_string);
+      string_append(proxy_args, " directive in configuration file.<br><br>\n");
+
+      return NULL;
+   }
+
+   /* allocate a new node */
+   acl = zalloc_or_die(sizeof(*acl));
+   acl->action = action_type;
+
+   if (acl_addr(vec[0], acl->src) < 0)
+   {
+      log_error(LOG_LEVEL_ERROR, "Invalid source address, port or netmask "
+         "for %s directive in configuration file: \"%s\"",
+         action_type_string, vec[0]);
+      string_append(proxy_args,
+         "<br>\nWARNING: Invalid source address, port or netmask for ");
+      string_append(proxy_args, action_type_string);
+      string_append(proxy_args, " directive in configuration file: \"");
+      string_append(proxy_args, vec[0]);
+      string_append(proxy_args, "\"<br><br>\n");
+      freez(acl);
+
+      return NULL;
+   }
+   if (vec_count == 2)
+   {
+      if (acl_addr(vec[1], acl->dst) < 0)
+      {
+        log_error(LOG_LEVEL_ERROR,
+           "Invalid destination address, port or netmask for %s directive "
+           "in configuration file: \"%s\"", action_type_string, vec[1]);
+        string_append(proxy_args,
+           "<br>\nWARNING: Invalid destination address, port or netmask for ");
+        string_append(proxy_args, action_type_string);
+        string_append(proxy_args, " directive in configuration file: \"");
+        string_append(proxy_args, vec[1]);
+        string_append(proxy_args, "\"<br><br>\n");
+        freez(acl);
+
+        return NULL;
+      }
+   }
+   else
+   {
+      acl->wildcard_dst = 1;
+   }
+
+#ifdef ACL_DEBUG
+   acl->src_string = strdup_or_die(vec[0]);
+   acl->dst_string = strdup_or_die((vec_count == 2) ? vec[1] : "none specified");
+#endif
+
+   return acl;
+
+}
+#endif
+
+
 /*********************************************************************
  *
  * Function    :  load_config
@@ -964,64 +1059,11 @@ struct configuration_spec * load_config(void)
  * *************************************************************************/
 #ifdef FEATURE_ACL
          case hash_deny_access:
-            strlcpy(tmp, arg, sizeof(tmp));
-            vec_count = ssplit(tmp, " \t", vec, SZ(vec));
-
-            if ((vec_count != 1) && (vec_count != 2))
+            cur_acl = parse_acl_rule(arg, &config->proxy_args, ACL_DENY);
+            if (cur_acl == NULL)
             {
-               log_error(LOG_LEVEL_ERROR, "Wrong number of parameters for "
-                     "deny-access directive in configuration file.");
-               string_append(&config->proxy_args,
-                  "<br>\nWARNING: Wrong number of parameters for "
-                  "deny-access directive in configuration file.<br><br>\n");
                break;
             }
-
-            /* allocate a new node */
-            cur_acl = zalloc_or_die(sizeof(*cur_acl));
-            cur_acl->action = ACL_DENY;
-
-            if (acl_addr(vec[0], cur_acl->src) < 0)
-            {
-               log_error(LOG_LEVEL_ERROR, "Invalid source address, port or netmask "
-                  "for deny-access directive in configuration file: \"%s\"", vec[0]);
-               string_append(&config->proxy_args,
-                  "<br>\nWARNING: Invalid source address, port or netmask "
-                  "for deny-access directive in configuration file: \"");
-               string_append(&config->proxy_args,
-                  vec[0]);
-               string_append(&config->proxy_args,
-                  "\"<br><br>\n");
-               freez(cur_acl);
-               break;
-            }
-            if (vec_count == 2)
-            {
-               if (acl_addr(vec[1], cur_acl->dst) < 0)
-               {
-                  log_error(LOG_LEVEL_ERROR, "Invalid destination address, port or netmask "
-                     "for deny-access directive in configuration file: \"%s\"", vec[1]);
-                  string_append(&config->proxy_args,
-                     "<br>\nWARNING: Invalid destination address, port or netmask "
-                     "for deny-access directive in configuration file: \"");
-                  string_append(&config->proxy_args,
-                     vec[1]);
-                  string_append(&config->proxy_args,
-                     "\"<br><br>\n");
-                  freez(cur_acl);
-                  break;
-               }
-            }
-            else
-            {
-               cur_acl->wildcard_dst = 1;
-            }
-
-#ifdef ACL_DEBUG
-            cur_acl->src_string = strdup_or_die(vec[0]);
-            cur_acl->dst_string = strdup_or_die((vec_count == 2) ? vec[1] : "none specified");
-#endif
-
             /*
              * Add it to the list.  Note we reverse the list to get the
              * behaviour the user expects.  With both the ACL and
@@ -1522,64 +1564,11 @@ struct configuration_spec * load_config(void)
  * *************************************************************************/
 #ifdef FEATURE_ACL
          case hash_permit_access:
-            strlcpy(tmp, arg, sizeof(tmp));
-            vec_count = ssplit(tmp, " \t", vec, SZ(vec));
-
-            if ((vec_count != 1) && (vec_count != 2))
+            cur_acl = parse_acl_rule(arg, &config->proxy_args, ACL_PERMIT);
+            if (cur_acl == NULL)
             {
-               log_error(LOG_LEVEL_ERROR, "Wrong number of parameters for "
-                     "permit-access directive in configuration file.");
-               string_append(&config->proxy_args,
-                  "<br>\nWARNING: Wrong number of parameters for "
-                  "permit-access directive in configuration file.<br><br>\n");
-
                break;
             }
-
-            /* allocate a new node */
-            cur_acl = zalloc_or_die(sizeof(*cur_acl));
-            cur_acl->action = ACL_PERMIT;
-
-            if (acl_addr(vec[0], cur_acl->src) < 0)
-            {
-               log_error(LOG_LEVEL_ERROR, "Invalid source address, port or netmask "
-                  "for permit-access directive in configuration file: \"%s\"", vec[0]);
-               string_append(&config->proxy_args,
-                  "<br>\nWARNING: Invalid source address, port or netmask for "
-                  "permit-access directive in configuration file: \"");
-               string_append(&config->proxy_args,
-                  vec[0]);
-               string_append(&config->proxy_args,
-                  "\"<br><br>\n");
-               freez(cur_acl);
-               break;
-            }
-            if (vec_count == 2)
-            {
-               if (acl_addr(vec[1], cur_acl->dst) < 0)
-               {
-                  log_error(LOG_LEVEL_ERROR, "Invalid destination address, port or netmask "
-                     "for permit-access directive in configuration file: \"%s\"", vec[1]);
-                  string_append(&config->proxy_args,
-                     "<br>\nWARNING: Invalid destination address, port or netmask for "
-                     "permit-access directive in configuration file: \"");
-                  string_append(&config->proxy_args,
-                     vec[1]);
-                  string_append(&config->proxy_args,
-                     "\"<br><br>\n");
-                  freez(cur_acl);
-                  break;
-               }
-            }
-            else
-            {
-               cur_acl->wildcard_dst = 1;
-            }
-
-#ifdef ACL_DEBUG
-            cur_acl->src_string = strdup_or_die(vec[0]);
-            cur_acl->dst_string = strdup_or_die((vec_count == 2) ? vec[1] : "none specified");
-#endif
 
             /*
              * Add it to the list.  Note we reverse the list to get the
