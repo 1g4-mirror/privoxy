@@ -61,7 +61,9 @@ start_privoxy() {
         if [ -f "${log_file}" ]; then
             tail -n 1 "${log_file}"
         fi
-        exit 1
+        # Kill the whole process group including Privoxy
+        # if it started after the PID file was checked.
+        kill -- -$$
     fi
 }
 
