@@ -649,7 +649,7 @@ static struct access_control_list *parse_acl_rule(const char *arg, char **proxy_
 
 #ifdef ACL_DEBUG
    acl->src_string = strdup_or_die(vec[0]);
-   acl->dst_string = strdup_or_die((vec_count == 2) ? vec[1] : "none specified");
+   acl->dst_string = strdup_or_die((vec_count == 2) ? vec[1] : "unspecified");
 #endif
 
    return acl;
