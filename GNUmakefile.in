@@ -548,13 +548,13 @@ dok-man:
 man: dok-release
 	mkdir -p doc/source/temp && cd doc/source/temp && $(RM) * ;\
 	$(NSGMLS) ../privoxy-man-page.sgml  | sgmlspl ../../../utils/docbook2man/docbook2man-spec.pl &&\
-	perl -pi.bak -e 's/ <URL:.*>//; s/\[ /\[/g' man/$(PRIVOXY_MAN_PAGE) ;\
-	perl -pi.bak -e "s/\[ /\[/g;s/á/\\\\['a]/g;s/é/\\\\['e]/g" man/$(PRIVOXY_MAN_PAGE); \
-	perl -pi.bak -e "s/ö/\\\\[:o]/g" man/$(PRIVOXY_MAN_PAGE); \
-	perl -pi.bak -e 's/([ {])-([a-z])/$$1\\-$$2/g' man/$(PRIVOXY_MAN_PAGE); \
-	perl -pi.bak -e 's/ --([a-z])/ \\-\\-$$1/g' man/$(PRIVOXY_MAN_PAGE); \
-	perl -pi.bak -e 's/\\fB--/\\fB\\-\\-/g' man/$(PRIVOXY_MAN_PAGE); \
-	$(DB) ../privoxy-man-page.sgml && $(MV) -f man/$(PRIVOXY_MAN_PAGE) ../../../$(PRIVOXY_MAN_PAGE)
+	perl -pi.bak -e 's/ <URL:.*>//; s/\[ /\[/g' $(PRIVOXY_MAN_PAGE) ;\
+	perl -pi.bak -e "s/\[ /\[/g;s/á/\\\\['a]/g;s/é/\\\\['e]/g" $(PRIVOXY_MAN_PAGE); \
+	perl -pi.bak -e "s/ö/\\\\[:o]/g" $(PRIVOXY_MAN_PAGE); \
+	perl -pi.bak -e 's/([ {])-([a-z])/$$1\\-$$2/g' $(PRIVOXY_MAN_PAGE); \
+	perl -pi.bak -e 's/ --([a-z])/ \\-\\-$$1/g' $(PRIVOXY_MAN_PAGE); \
+	perl -pi.bak -e 's/\\fB--/\\fB\\-\\-/g' $(PRIVOXY_MAN_PAGE); \
+	$(DB) ../privoxy-man-page.sgml && $(MV) -f $(PRIVOXY_MAN_PAGE) ../../../man/$(PRIVOXY_MAN_PAGE)
 
 # For those with man2html ala RH7s.
 man2html:
