@@ -37,6 +37,7 @@
 <!entity seealso SYSTEM "seealso.sgml">
 <!entity copyright SYSTEM "copyright.sgml">
 <!entity license SYSTEM "license.sgml">
+<!entity license-explanation SYSTEM "license-explanation.sgml">
 <!entity authors SYSTEM "p-authors.sgml">
 <!entity p-version "4.2.0">
 <!entity p-status "UNRELEASED">
