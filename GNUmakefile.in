@@ -603,12 +603,11 @@ dok-index:
      doc/webserver/privoxy-index.html && $(RM) doc/webserver/*.bak
 
 dok-privoxy-tools:
-	cd tools && for privoxy_tool in *.pl; do \
+	cd tools && for privoxy_tool in $(PRIVOXY_TOOLS); do \
 		echo Generating man page for $${privoxy_tool}; \
-		man_page=$${privoxy_tool%%.pl}.1; \
-		$(POD2MAN_CMD) $${privoxy_tool} > ../man/$${man_page}; \
-		html_man_page=../doc/webserver/man-page/$${man_page##*/}; \
-		html_man_page=$${html_man_page%%.pl}.html; \
+		man_page=$${privoxy_tool}.1; \
+		$(POD2MAN_CMD) $${privoxy_tool}.pl > ../man/$${man_page}; \
+		html_man_page=../doc/webserver/man-page/$${man_page##*/}.html; \
 		$(G2H_CMD) ../man/$${man_page} | $(GREP) -v CreationDate > $${html_man_page}; \
 	done
 
