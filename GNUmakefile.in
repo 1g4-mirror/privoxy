@@ -60,7 +60,7 @@ CONF_BASE    = @sysconfdir@
 SBIN_DEST    = @sbindir@
 MAN_DIR      = @mandir@
 MAN_DEST     = $(MAN_DIR)/man8
-MAN_PAGE     = privoxy.8
+PRIVOXY_MAN_PAGE = privoxy.8
 SHARE_DEST   = @datadir@
 DOC_DEST     = $(SHARE_DEST)/doc/privoxy
 VAR_DEST     = @localstatedir@
@@ -204,7 +204,7 @@ CONFIG_FILES = $(CONFIGS) \
 DOC_FILES = AUTHORS LICENSE LICENSE.GPLv3 README ChangeLog INSTALL \
 		`find doc/webserver/ -name "*.html" | grep -v "\(webserver\|team\)\/index\.html" | sort` \
 		`find doc/webserver/ -name "*.css" | sort` \
-                $(MAN_PAGE)
+                $(PRIVOXY_MAN_PAGE)
 
 #############################################################################
 # Filenames and libraries
@@ -528,7 +528,7 @@ dok-man:
 	echo MAN2HTML is $(MAN2HTML)
 	@if [ $(MAN2HTML) != "false" ]; then \
 		$(ECHO) "<html><head><title>Privoxy Man page</title><link rel=\"stylesheet\" type=\"text/css\" href=\"../p_web.css\"></head><body><H2>NAME</H2>" > doc/webserver/man-page/privoxy-man-page.html; \
-		man ./$(MAN_PAGE) | $(MAN2HTML) -bare >> doc/webserver/man-page/privoxy-man-page.html; \
+		man ./$(PRIVOXY_MAN_PAGE) | $(MAN2HTML) -bare >> doc/webserver/man-page/privoxy-man-page.html; \
 		$(ECHO) "</body></html>" >> doc/webserver/man-page/privoxy-man-page.html; \
 	else \
 		$(MAKE) groff2html; \
@@ -540,19 +540,19 @@ dok-man:
 man: dok-release
 	mkdir -p doc/source/temp && cd doc/source/temp && $(RM) * ;\
 	$(NSGMLS) ../privoxy-man-page.sgml  | sgmlspl ../../../utils/docbook2man/docbook2man-spec.pl &&\
-	perl -pi.bak -e 's/ <URL:.*>//; s/\[ /\[/g' $(MAN_PAGE) ;\
-	perl -pi.bak -e "s/\[ /\[/g;s/á/\\\\['a]/g;s/é/\\\\['e]/g" $(MAN_PAGE); \
-	perl -pi.bak -e "s/ö/\\\\[:o]/g" $(MAN_PAGE); \
-	perl -pi.bak -e 's/([ {])-([a-z])/$$1\\-$$2/g' $(MAN_PAGE); \
-	perl -pi.bak -e 's/ --([a-z])/ \\-\\-$$1/g' $(MAN_PAGE); \
-	perl -pi.bak -e 's/\\fB--/\\fB\\-\\-/g' $(MAN_PAGE); \
-	$(DB) ../privoxy-man-page.sgml && $(MV) -f $(MAN_PAGE) ../../../$(MAN_PAGE)
+	perl -pi.bak -e 's/ <URL:.*>//; s/\[ /\[/g' $(PRIVOXY_MAN_PAGE) ;\
+	perl -pi.bak -e "s/\[ /\[/g;s/á/\\\\['a]/g;s/é/\\\\['e]/g" $(PRIVOXY_MAN_PAGE); \
+	perl -pi.bak -e "s/ö/\\\\[:o]/g" $(PRIVOXY_MAN_PAGE); \
+	perl -pi.bak -e 's/([ {])-([a-z])/$$1\\-$$2/g' $(PRIVOXY_MAN_PAGE); \
+	perl -pi.bak -e 's/ --([a-z])/ \\-\\-$$1/g' $(PRIVOXY_MAN_PAGE); \
+	perl -pi.bak -e 's/\\fB--/\\fB\\-\\-/g' $(PRIVOXY_MAN_PAGE); \
+	$(DB) ../privoxy-man-page.sgml && $(MV) -f $(PRIVOXY_MAN_PAGE) ../../../$(PRIVOXY_MAN_PAGE)
 
 # For those with man2html ala RH7s.
 man2html:
 	mkdir -p doc/webserver/man-page
 	@if [ $(MAN2HTML) != "false" ]; then \
-		$(MAN2HTML) $(MAN_PAGE) |grep -v "^Content-type" > tmp.html; \
+		$(MAN2HTML) $(PRIVOXY_MAN_PAGE) |grep -v "^Content-type" > tmp.html; \
 		$(PERL) -pi.bak -e 's/<A .*Contents<\/A>//; s/<A .*man2html<\/A>/man2html/' tmp.html; \
 		$(PERL) -pi.bak -e 's/(<\/HEAD>)/<LINK REL=\"STYLESHEET\" TYPE=\"text\/css\" HREF=\"..\/p_doc.css\"><\/HEAD>/' tmp.html; \
 		$(PERL) -pi.bak -e 's/(<A.*),(">)/$$1$$2/g' tmp.html; \
@@ -565,7 +565,7 @@ man2html:
 
 # Otherwise we get plain groff conversion.
 groff2html:
-	$(G2H_CMD) ./$(MAN_PAGE) | $(SED) -e 's@</head>@<link REL="STYLESHEET" TYPE="text/css" HREF="../p_doc.css"></head>@' > doc/webserver/man-page/privoxy-man-page.html
+	$(G2H_CMD) ./$(PRIVOXY_MAN_PAGE) | $(SED) -e 's@</head>@<link REL="STYLESHEET" TYPE="text/css" HREF="../p_doc.css"></head>@' > doc/webserver/man-page/privoxy-man-page.html
 
 
 # readme page and INSTALL file
@@ -892,8 +892,8 @@ install: CONF_DEST LOG_DEST PID_DEST check_doc GROUP_T
 		$(INSTALL) $(INSTALL_T) $(DOK_WEB)/p_doc.css $(DESTDIR)$$DOC/user-manual;\
 	fi
 	@# Not all platforms support gzipped man pages.
-	@$(ECHO) Installing man page to $(DESTDIR)$(MAN_DEST)/$(MAN_PAGE)
-	-$(INSTALL) $(INSTALL_T) $(MAN_PAGE)  $(DESTDIR)$(MAN_DEST)/$(MAN_PAGE)
+	@$(ECHO) Installing man page to $(DESTDIR)$(MAN_DEST)/$(PRIVOXY_MAN_PAGE)
+	-$(INSTALL) $(INSTALL_T) $(PRIVOXY_MAN_PAGE)  $(DESTDIR)$(MAN_DEST)/$(PRIVOXY_MAN_PAGE)
 
 	@# Change the config file default directories according to the configured ones
 	@$(ECHO) Rewriting config for this installation
@@ -1044,7 +1044,7 @@ uninstall: CONF_DEST LOG_DEST PID_DEST check_doc
 
 	@# man page and docs
 	@$(ECHO) Removing $(PROGRAM) docs
-	-$(RM) $(DESTDIR)$(MAN_DEST)/$(MAN_PAGE)*
+	-$(RM) $(DESTDIR)$(MAN_DEST)/$(PRIVOXY_MAN_PAGE)*
 	-$(RM) -r $(DESTDIR)$(DOC_DEST) || $(RM) -r $(DESTDIR)$(prefix)/doc/privoxy
 
 	@# Log and pidfile
