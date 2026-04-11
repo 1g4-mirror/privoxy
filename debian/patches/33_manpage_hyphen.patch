@@ -1,17 +1,18 @@
 From: Roland Rosenfeld <roland@debian.org>
 Date: Thu, 24 Jan 2013 17:40:51 +0100
+Last-Update: 2026-04-11
 Subject: Replace all -- in man page by \-\- to make lintian happy.
 Forwarded: not-needed
 
 --- a/GNUmakefile.in
 +++ b/GNUmakefile.in
-@@ -544,8 +544,7 @@ man: dok-release
- 	perl -pi.bak -e "s/\[ /\[/g;s/á/\\\\['a]/g;s/é/\\\\['e]/g" $(MAN_PAGE); \
- 	perl -pi.bak -e "s/ö/\\\\[:o]/g" $(MAN_PAGE); \
- 	perl -pi.bak -e 's/([ {])-([a-z])/$$1\\-$$2/g' $(MAN_PAGE); \
--	perl -pi.bak -e 's/ --([a-z])/ \\-\\-$$1/g' $(MAN_PAGE); \
--	perl -pi.bak -e 's/\\fB--/\\fB\\-\\-/g' $(MAN_PAGE); \
-+	perl -pi.bak -e 's/--/\\-\\-/g' $(MAN_PAGE); \
- 	$(DB) ../privoxy-man-page.sgml && $(MV) -f $(MAN_PAGE) ../../../$(MAN_PAGE)
+@@ -552,8 +552,7 @@ man: dok-release
+ 	perl -pi.bak -e "s/\[ /\[/g;s/á/\\\\['a]/g;s/é/\\\\['e]/g" $(PRIVOXY_MAN_PAGE); \
+ 	perl -pi.bak -e "s/ö/\\\\[:o]/g" $(PRIVOXY_MAN_PAGE); \
+ 	perl -pi.bak -e 's/([ {])-([a-z])/$$1\\-$$2/g' $(PRIVOXY_MAN_PAGE); \
+-	perl -pi.bak -e 's/ --([a-z])/ \\-\\-$$1/g' $(PRIVOXY_MAN_PAGE); \
+-	perl -pi.bak -e 's/\\fB--/\\fB\\-\\-/g' $(PRIVOXY_MAN_PAGE); \
++	perl -pi.bak -e 's/--/\\-\\-/g' $(PRIVOXY_MAN_PAGE); \
+ 	$(DB) ../privoxy-man-page.sgml && $(MV) -f $(PRIVOXY_MAN_PAGE) ../../../man/$(PRIVOXY_MAN_PAGE)
  
  # For those with man2html ala RH7s.
