@@ -57,9 +57,11 @@ datarootdir  = @datarootdir@
 prefix       = @prefix@
 exec_prefix  = @exec_prefix@
 CONF_BASE    = @sysconfdir@
+BIN_DEST     = @bindir@
 SBIN_DEST    = @sbindir@
 MAN_DIR      = @mandir@
 MAN_DEST     = $(MAN_DIR)/man8
+PRIVOXY_TOOL_MAN_DEST = $(MAN_DIR)/man1
 PRIVOXY_MAN_PAGE = privoxy.8
 SHARE_DEST   = @datadir@
 DOC_DEST     = $(SHARE_DEST)/doc/privoxy
@@ -206,6 +208,11 @@ DOC_FILES = AUTHORS LICENSE LICENSE.GPLv3 README ChangeLog INSTALL \
 		`find doc/webserver/ -name "*.html" | grep -v "\(webserver\|team\)\/index\.html" | sort` \
 		`find doc/webserver/ -name "*.css" | sort` \
                 man/$(PRIVOXY_MAN_PAGE)
+
+# We ignore url-pattern-translator here which has no man
+# page and is of limitted use now that Privoxy supports PCRE
+# in host patterns.
+PRIVOXY_TOOLS = privoxy-log-parser privoxy-regression-test uagen
 
 #############################################################################
 # Filenames and libraries
@@ -863,7 +870,8 @@ install: CONF_DEST LOG_DEST PID_DEST check_doc GROUP_T
 
 	@$(ECHO) "Creating directories, and preparing $(PROGRAM_V) installation"
 	$(CHMOD) $(DIR_MODE) $(MKDIR)
-	@$(MKDIR) $(DESTDIR)$(SBIN_DEST) $(DESTDIR)$(prefix) $(DESTDIR)$(CONF_DEST) \
+	@$(MKDIR) $(DESTDIR)$(BIN_DEST) $(DESTDIR)$(SBIN_DEST) \
+		$(DESTDIR)$(prefix) $(DESTDIR)$(CONF_DEST) \
 		$(DESTDIR)$(CONF_DEST)/templates $(DESTDIR)$(SHARE_DEST) \
 		$(DESTDIR)$(LOG_DEST) $(DESTDIR)$(PID_DEST)
 	@# Install the executable binary, strip if invoked as install-strip
@@ -880,7 +888,7 @@ install: CONF_DEST LOG_DEST PID_DEST check_doc GROUP_T
 		DOC=$(prefix)/doc/privoxy ;\
 	fi;\
 	$(MKDIR) $(DESTDIR)$$DOC $(DESTDIR)$$DOC/user-manual $(DESTDIR)$$DOC/faq $(DESTDIR)$$DOC/developer-manual \
-	     $(DESTDIR)$$DOC/man-page $(DESTDIR)$(MAN_DEST) ;\
+	     $(DESTDIR)$$DOC/man-page $(DESTDIR)$(MAN_DEST) $(DESTDIR)$(PRIVOXY_TOOL_MAN_DEST);\
 	if [ -d "$(DOK_WEB)" ]; then \
 		$(ECHO) Installing FAQ, Manual, and other docs to $(DESTDIR)$$DOC;\
           for i in user-manual developer-manual faq; do \
@@ -902,8 +910,16 @@ install: CONF_DEST LOG_DEST PID_DEST check_doc GROUP_T
 		$(INSTALL) $(INSTALL_T) $(DOK_WEB)/p_doc.css $(DESTDIR)$$DOC/user-manual;\
 	fi
 	@# Not all platforms support gzipped man pages.
-	@$(ECHO) Installing man page to $(DESTDIR)$(MAN_DEST)/$(PRIVOXY_MAN_PAGE)
+	@$(ECHO) Installing Privoxy man page to $(DESTDIR)$(MAN_DEST)/$(PRIVOXY_MAN_PAGE)
 	-$(INSTALL) $(INSTALL_T) man/$(PRIVOXY_MAN_PAGE)  $(DESTDIR)$(MAN_DEST)/$(PRIVOXY_MAN_PAGE)
+	@$(ECHO) Installing Privoxy tools to $(DESTDIR)$(BIN_DEST)
+	@for f in $(PRIVOXY_TOOLS); do \
+		$(INSTALL) tools/$${f}.pl  $(DESTDIR)$(BIN_DEST)/$${f}; \
+	done
+	@$(ECHO) Installing Privoxy tool man pages to $(DESTDIR)$(PRIVOXY_TOOL_MAN_DEST)
+	@for f in $(PRIVOXY_TOOLS); do \
+		$(INSTALL) $(INSTALL_T) man/$${f}.1  $(DESTDIR)$(PRIVOXY_TOOL_MAN_DEST); \
+	done
 
 	@# Change the config file default directories according to the configured ones
 	@$(ECHO) Rewriting config for this installation
@@ -1035,6 +1051,11 @@ uninstall: CONF_DEST LOG_DEST PID_DEST check_doc
 	@$(ECHO) Removing $(PROGRAM) binary
 	$(RM) $(DESTDIR)$(SBIN_DEST)/$(PROGRAM) $(SBIN_DEST)/$(PROGRAM)~
 
+	@$(ECHO) Removing Privoxy tools from $(DESTDIR)$(BIN_DEST)
+	@for f in $(PRIVOXY_TOOLS); do \
+		$(RM) $(DESTDIR)$(BIN_DEST)/$${f}; \
+	done
+
 	@# config files and dir, and maybe old install backups
 	-@if [ -d $(DESTDIR)$(CONF_DEST) ]; then \
 		$(ECHO) Saving $(PROGRAM) config files to $(DESTDIR)/tmp/$(PROGRAM)-save ;\
@@ -1056,6 +1077,9 @@ uninstall: CONF_DEST LOG_DEST PID_DEST check_doc
 	@$(ECHO) Removing $(PROGRAM) docs
 	-$(RM) $(DESTDIR)$(MAN_DEST)/$(PRIVOXY_MAN_PAGE)*
 	-$(RM) -r $(DESTDIR)$(DOC_DEST) || $(RM) -r $(DESTDIR)$(prefix)/doc/privoxy
+	-@for f in $(PRIVOXY_TOOLS); do \
+		$(RM) $(DESTDIR)/$(PRIVOXY_TOOL_MAN_DEST)/$${f}.1; \
+	done
 
 	@# Log and pidfile
 	@$(ECHO) Removing $(PROGRAM) logs
