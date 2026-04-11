@@ -42,6 +42,8 @@ X-Control: swsclose%CR
 
 <div id="monb-sticky-obj" blafasel
 
+<div id="mon-sticky-div" blafasel
+
 <div id="mon-sticky-el" blafasel
 
 # pcrs command 7:
@@ -59,7 +61,7 @@ Date: Thu, 22 Jul 2010 11:22:33 GMT%CR
 Connection: close%CR
 Content-Type: text/html%CR
 X-Control: swsclose%CR
-Content-Length: 736%CR
+Content-Length: 793%CR
 %CR
 # Here are some strings the sourceforge filter should filter:
 
@@ -86,6 +88,8 @@ Content-Length: 736%CR
 # pcrs command 6:
 
 <div id="monb-sticky-obj" style="display:none;" blafasel
+
+<div id="mon-sticky-div" style="display:none;" blafasel
 
 <div id="mon-sticky-el" style="display:none;" blafasel
 
