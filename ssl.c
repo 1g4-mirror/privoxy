@@ -33,7 +33,9 @@
 #include <unistd.h>
 
 #include <mbedtls/version.h>
+#if MBEDTLS_VERSION_MAJOR < 4
 #include "mbedtls/sha256.h"
+#endif
 #include "mbedtls/pem.h"
 #include "mbedtls/base64.h"
 #include "mbedtls/error.h"
@@ -74,14 +76,20 @@
  * Properties of key for generating
  */
 typedef struct {
+#if MBEDTLS_VERSION_MAJOR < 4
    mbedtls_pk_type_t type;   /* type of key to generate  */
+#else
+   mbedtls_pk_sigalg_t type; /* type of key to generate  */
+#endif
    int  keysize;             /* length of key in bits    */
    char *key_file_path;      /* filename of the key file */
 } key_options;
 
+#if MBEDTLS_VERSION_MAJOR < 4
 /* Variables for one common RNG for all SSL use */
 static mbedtls_ctr_drbg_context ctr_drbg;
 static mbedtls_entropy_context  entropy;
+#endif
 static int rng_seeded;
 
 static int generate_host_certificate(struct client_state *csp);
@@ -203,7 +211,19 @@ extern int ssl_recv_data(struct ssl_attr *ssl_attr, unsigned char *buf, size_t m
    do
    {
       ret = mbedtls_ssl_read(ssl, buf, max_length);
+#ifdef MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET
+      if (ret == MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET)
+      {
+         log_error(LOG_LEVEL_CONNECT,
+            "mbedtls_ssl_read() reported new session ticket for "
+            "the connection on socket %d.",
+            ssl_attr->mbedtls_attr.socket_fd.fd);
+      }
+#endif
    } while (ret == MBEDTLS_ERR_SSL_WANT_READ
+#ifdef MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET
+      || ret == MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET
+#endif
       || ret == MBEDTLS_ERR_SSL_WANT_WRITE);
 
    if (ret < 0)
@@ -294,6 +314,16 @@ extern int create_client_ssl_connection(struct client_state *csp)
    }
 
    /*
+    * Seed the RNG
+    */
+   ret = seed_rng(csp);
+   if (ret != 0)
+   {
+      ret = -1;
+      goto exit;
+   }
+
+   /*
     * Generating certificate for requested host. Mutex to prevent
     * certificate and key inconsistence must be locked.
     */
@@ -305,16 +335,6 @@ extern int create_client_ssl_connection(struct client_state *csp)
    {
       log_error(LOG_LEVEL_ERROR,
          "generate_host_certificate failed: %d", ret);
-      ret = -1;
-      goto exit;
-   }
-
-   /*
-    * Seed the RNG
-    */
-   ret = seed_rng(csp);
-   if (ret != 0)
-   {
       ret = -1;
       goto exit;
    }
@@ -345,7 +365,11 @@ extern int create_client_ssl_connection(struct client_state *csp)
    }
 
    ret = mbedtls_pk_parse_keyfile(&(ssl_attr->mbedtls_attr.prim_key),
-      key_file, NULL, mbedtls_ctr_drbg_random, &ctr_drbg);
+      key_file, NULL
+#if MBEDTLS_VERSION_MAJOR < 4
+                    , mbedtls_ctr_drbg_random, &ctr_drbg
+#endif
+                                                        );
    if (ret != 0)
    {
       mbedtls_strerror(ret, err_buf, sizeof(err_buf));
@@ -371,8 +395,10 @@ extern int create_client_ssl_connection(struct client_state *csp)
       goto exit;
    }
 
+#if MBEDTLS_VERSION_MAJOR < 4
    mbedtls_ssl_conf_rng(&(ssl_attr->mbedtls_attr.conf),
       mbedtls_ctr_drbg_random, &ctr_drbg);
+#endif
 
 #if defined(MBEDTLS_SSL_CACHE_C)
    mbedtls_ssl_conf_session_cache(&(ssl_attr->mbedtls_attr.conf),
@@ -644,8 +670,10 @@ extern int create_server_ssl_connection(struct client_state *csp)
    mbedtls_ssl_conf_verify(&(ssl_attr->mbedtls_attr.conf),
       ssl_verify_callback, (void *)csp);
 
+#if MBEDTLS_VERSION_MAJOR < 4
    mbedtls_ssl_conf_rng(&(ssl_attr->mbedtls_attr.conf),
       mbedtls_ctr_drbg_random, &ctr_drbg);
+#endif
 
    if (csp->config->cipher_list != NULL)
    {
@@ -744,6 +772,15 @@ extern int create_server_ssl_connection(struct client_state *csp)
    csp->server_cert_verification_result =
       mbedtls_ssl_get_verify_result(&(ssl_attr->mbedtls_attr.ssl));
 
+#if MBEDTLS_VERSION_MAJOR > 3
+   if ((csp->server_cert_verification_result == MBEDTLS_X509_BADCERT_SKIP_VERIFY) &&
+      csp->dont_verify_certificate)
+   {
+      log_error(LOG_LEVEL_CONNECT, "Ignoring MBEDTLS_X509_BADCERT_SKIP_VERIFY");
+      csp->server_cert_verification_result = 0;
+   }
+#endif
+
 exit:
    /* Freeing structures if connection wasn't created successfully */
    if (ret < 0)
@@ -838,8 +875,12 @@ static void free_server_ssl_structures(struct client_state *csp)
  *                on error
  *
  *********************************************************************/
+#if MBEDTLS_VERSION_MAJOR < 4
 static int write_certificate(mbedtls_x509write_cert *crt, const char *output_file,
    int(*f_rng)(void *, unsigned char *, size_t), void *p_rng)
+#else
+static int write_certificate(mbedtls_x509write_cert *crt, const char *output_file)
+#endif
 {
    FILE *f = NULL;
    size_t len = 0;
@@ -854,7 +895,11 @@ static int write_certificate(mbedtls_x509write_cert *crt, const char *output_fil
     * returns specific error and no buffer overflow can happen.
     */
    if ((ret = mbedtls_x509write_crt_pem(crt, cert_buf,
-      sizeof(cert_buf) - 1, f_rng, p_rng)) != 0)
+      sizeof(cert_buf) - 1
+#if MBEDTLS_VERSION_MAJOR < 4
+                          , f_rng, p_rng
+#endif
+                                        )) != 0)
    {
       mbedtls_strerror(ret, err_buf, sizeof(err_buf));
       log_error(LOG_LEVEL_ERROR,
@@ -987,10 +1032,27 @@ exit:
  *********************************************************************/
 static int generate_key(struct client_state *csp, unsigned char **key_buf)
 {
+#if MBEDTLS_VERSION_MAJOR > 3
+   mbedtls_svc_key_id_t key_id = MBEDTLS_SVC_KEY_ID_INIT;
+#endif
    mbedtls_pk_context key;
    key_options key_opt;
    int ret = 0;
+#if MBEDTLS_VERSION_MAJOR < 4
    char err_buf[ERROR_BUF_SIZE];
+#else
+   psa_key_attributes_t attributes;
+   psa_status_t psa_status;
+
+   attributes = psa_key_attributes_init();
+
+   psa_set_key_usage_flags(&attributes,
+      PSA_KEY_USAGE_COPY|PSA_KEY_USAGE_SIGN_MESSAGE|PSA_KEY_USAGE_EXPORT);
+#if 0
+   psa_set_key_id(&attributes, key_id);
+#endif
+   psa_set_key_lifetime(&attributes, PSA_KEY_LIFETIME_VOLATILE);
+#endif
 
    key_opt.key_file_path = NULL;
 
@@ -1004,13 +1066,24 @@ static int generate_key(struct client_state *csp, unsigned char **key_buf)
     */
    if (csp->config->elliptic_curve_keys)
    {
+#if MBEDTLS_VERSION_MAJOR > 3
+      psa_set_key_type(&attributes,
+         PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_SECP_R1));
+      psa_set_key_bits(&attributes, 256);
+#else
       key_opt.type    = MBEDTLS_PK_ECKEY;
       key_opt.keysize = 32;
+#endif
    }
    else
    {
+#if MBEDTLS_VERSION_MAJOR > 3
+      psa_set_key_type(&attributes, PSA_KEY_TYPE_RSA_KEY_PAIR);
+      psa_set_key_bits(&attributes, RSA_KEYSIZE);
+#else
       key_opt.type    = MBEDTLS_PK_RSA;
       key_opt.keysize = RSA_KEYSIZE;
+#endif
    }
 
    key_opt.key_file_path = make_certs_path(csp->config->certificate_directory,
@@ -1040,6 +1113,15 @@ static int generate_key(struct client_state *csp, unsigned char **key_buf)
       goto exit;
    }
 
+#if MBEDTLS_VERSION_MAJOR > 3
+   psa_status = psa_generate_key(&attributes, &key_id);
+   if (psa_status != PSA_SUCCESS)
+   {
+      log_error(LOG_LEVEL_ERROR, "psa_generate_key() failed: %d",psa_status);
+      ret = -1;
+      goto exit;
+   }
+#else
    /*
     * Setting attributes of private key and generating it
     */
@@ -1076,6 +1158,17 @@ static int generate_key(struct client_state *csp, unsigned char **key_buf)
          goto exit;
       }
    }
+#endif
+
+#if MBEDTLS_VERSION_MAJOR > 3
+   if (0 != mbedtls_pk_copy_from_psa(key_id, &key))
+   {
+      log_error(LOG_LEVEL_ERROR, "mbedtls_pk_copy_from_psa() failed failed.");
+      ret = -1;
+      goto exit;
+   }
+#endif
+
    /*
     * Exporting private key into file
     */
@@ -1471,15 +1564,21 @@ static int generate_host_certificate(struct client_state *csp)
       /* Key was created in this function and is stored in buffer */
       ret = mbedtls_pk_parse_key(&loaded_subject_key, key_buf,
          (size_t)(subject_key_len + 1), (unsigned const char *)
-         cert_opt.subject_pwd, strlen(cert_opt.subject_pwd),
-         mbedtls_ctr_drbg_random, &ctr_drbg);
+         cert_opt.subject_pwd, strlen(cert_opt.subject_pwd)
+#if MBEDTLS_VERSION_MAJOR < 4
+         , mbedtls_ctr_drbg_random, &ctr_drbg
+#endif
+                                              );
    }
    else
    {
       /* Key wasn't created in this function, because it already existed */
       ret = mbedtls_pk_parse_keyfile(&loaded_subject_key,
-         cert_opt.subject_key, cert_opt.subject_pwd,
-         mbedtls_ctr_drbg_random, &ctr_drbg);
+         cert_opt.subject_key, cert_opt.subject_pwd
+#if MBEDTLS_VERSION_MAJOR < 4
+         , mbedtls_ctr_drbg_random, &ctr_drbg
+#endif
+                                             );
    }
 
    if (ret != 0)
@@ -1492,7 +1591,11 @@ static int generate_host_certificate(struct client_state *csp)
    }
 
    ret = mbedtls_pk_parse_keyfile(&loaded_issuer_key, cert_opt.issuer_key,
-      cert_opt.issuer_pwd, mbedtls_ctr_drbg_random, &ctr_drbg);
+      cert_opt.issuer_pwd
+#if MBEDTLS_VERSION_MAJOR < 4
+                          , mbedtls_ctr_drbg_random, &ctr_drbg
+#endif
+                                                               );
    if (ret != 0)
    {
       mbedtls_strerror(ret, err_buf, sizeof(err_buf));
@@ -1528,7 +1631,16 @@ static int generate_host_certificate(struct client_state *csp)
       goto exit;
    }
 
+#if MBEDTLS_VERSION_MAJOR < 4
    mbedtls_ctr_drbg_random(&ctr_drbg, serial_buf, sizeof(serial_buf));
+#else
+   if (PSA_SUCCESS != psa_generate_random(serial_buf, sizeof(serial_buf)))
+   {
+      log_error(LOG_LEVEL_ERROR, "psa_generate_random() failed.");
+      ret = -1;
+      goto exit;
+   }
+#endif
    ret = mbedtls_x509write_crt_set_serial_raw(&cert,
       (unsigned char *)&serial_buf, sizeof(serial_buf));
    if (ret != 0)
@@ -1600,8 +1712,11 @@ static int generate_host_certificate(struct client_state *csp)
    /*
     * Writing certificate into file
     */
-   ret = write_certificate(&cert, cert_opt.output_file,
-      mbedtls_ctr_drbg_random, &ctr_drbg);
+   ret = write_certificate(&cert, cert_opt.output_file
+#if MBEDTLS_VERSION_MAJOR < 4
+      , mbedtls_ctr_drbg_random, &ctr_drbg
+#endif
+                           );
    if (ret < 0)
    {
       log_error(LOG_LEVEL_ERROR, "Writing certificate into file failed.");
@@ -1743,8 +1858,20 @@ static int ssl_verify_callback(void *csp_void, mbedtls_x509_crt *crt,
  *********************************************************************/
 static int host_to_hash(struct client_state *csp)
 {
+#if MBEDTLS_VERSION_MAJOR > 3
+   size_t output_size = 0;
+
+   if (PSA_SUCCESS != psa_hash_compute(PSA_ALG_SHA_256,
+         (unsigned char *)csp->http->host, strlen(csp->http->host),
+         csp->http->hash_of_host, sizeof(csp->http->hash_of_host),
+         &output_size))
+    {
+       return -1;
+    }
+#else
    mbedtls_sha256((unsigned char *)csp->http->host,
       strlen(csp->http->host), csp->http->hash_of_host, 0);
+#endif
 
    return create_hexadecimal_hash_of_host(csp);
 
@@ -1765,8 +1892,10 @@ static int host_to_hash(struct client_state *csp)
  *********************************************************************/
 static int seed_rng(struct client_state *csp)
 {
+#if MBEDTLS_VERSION_MAJOR < 4
    int ret = 0;
    char err_buf[ERROR_BUF_SIZE];
+#endif
 
    if (rng_seeded == 0)
    {
@@ -1780,6 +1909,7 @@ static int seed_rng(struct client_state *csp)
             privoxy_mutex_unlock(&ssl_init_mutex);
             return -1;
          }
+#if MBEDTLS_VERSION_MAJOR < 4
          mbedtls_ctr_drbg_init(&ctr_drbg);
          mbedtls_entropy_init(&entropy);
          ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func,
@@ -1792,6 +1922,7 @@ static int seed_rng(struct client_state *csp)
             privoxy_mutex_unlock(&ssl_init_mutex);
             return -1;
          }
+#endif
          rng_seeded = 1;
       }
       privoxy_mutex_unlock(&ssl_init_mutex);
@@ -1867,11 +1998,13 @@ extern void ssl_crt_verify_info(char *buf, size_t size, struct client_state *csp
  *********************************************************************/
 extern void ssl_release(void)
 {
+#if MBEDTLS_VERSION_MAJOR < 4
    if (rng_seeded == 1)
    {
       mbedtls_ctr_drbg_free(&ctr_drbg);
       mbedtls_entropy_free(&entropy);
    }
+#endif
 }
 #endif /* def FEATURE_GRACEFUL_TERMINATION */
 

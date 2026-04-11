@@ -55,8 +55,10 @@
 
 #ifdef FEATURE_HTTPS_INSPECTION_MBEDTLS
 #include "mbedtls/net_sockets.h"
+#if MBEDTLS_VERSION_MAJOR < 4
 #include "mbedtls/entropy.h"
 #include "mbedtls/ctr_drbg.h"
+#endif
 
 #if defined(MBEDTLS_SSL_CACHE_C)
 #include "mbedtls/ssl_cache.h"
