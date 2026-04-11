@@ -718,7 +718,7 @@ s@<section id="nels"@$0 style="display:none;"@
 s@<aside class="m-wide-widget m-wide-projects-widget "@$0 style="display:none;"@
 s@<div id="newsletter-floating"@$0 style="display:none;"@
 s@<div class="sterling" id="banner-sterling"@$0 style="display:none;"@
-s@<div id="(?:monb-sticky-obj|mon-sticky-el)"@$0 style="display:none;"@g
+s@<div id="(?:monb-sticky-obj|mon-sticky-[^"]*)"@$0 style="display:none;"@Ug
 s@<div id="[^"]*-coding-bar"@<div style="display:none !important;"@g
 
 #################################################################################
