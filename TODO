@@ -525,6 +525,10 @@ https://www.privoxy.org/donate
 
 205) Document how commit messages should look like.
 
+206) Figure out how to provide Windows binaries again. They should probably
+     be cross-built.
+     Interested donors: 0.
+
 ##########################################################################
 
 Hosting wish list (relevant for #53)
