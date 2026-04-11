@@ -11,4 +11,3 @@ ExecStart=/etc/cron.daily/privoxy systemd-timer
 Nice=19
 IOSchedulingClass=best-effort
 IOSchedulingPriority=7
-

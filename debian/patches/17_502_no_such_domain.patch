@@ -7,7 +7,7 @@ Forwarded: not-needed
 
 --- a/templates/no-such-domain
 +++ b/templates/no-such-domain
-@@ -78,7 +78,7 @@
+@@ -79,7 +79,7 @@
  <html>
  
  <head>
@@ -16,7 +16,7 @@ Forwarded: not-needed
    <meta http-equiv="Content-Style-Type" content="text/css">
    <meta http-equiv="Content-Script-Type" content="text/javascript">
    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-@@ -94,7 +94,7 @@
+@@ -95,7 +95,7 @@
    <table summary="" cellpadding="20" cellspacing="10" border="0" width="100%">
      <tr>
        <td class="status">

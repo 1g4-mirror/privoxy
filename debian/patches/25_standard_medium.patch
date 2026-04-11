@@ -1,6 +1,5 @@
 From: Roland Rosenfeld <roland@debian.org>
 Date: Sat, 23 Sep 2006 23:37:03 +0200
-Last-Update: 2025-06-22
 Subject: Change the global default from standard.Cautious to standard.Medium,
  which is similar to the old 3.0.3 behavior and doesn't change too much.
 Forwarded: not-needed

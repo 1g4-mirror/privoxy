@@ -1,0 +1,36 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Yangfl <mmyangfl@gmail.com>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: privoxy\n"
+"Report-Msgid-Bugs-To: privoxy@packages.debian.org\n"
+"POT-Creation-Date: 2016-04-08 17:17+0200\n"
+"PO-Revision-Date: 2026-01-01 06:42+0800\n"
+"Last-Translator: Yangfl <mmyangfl@gmail.com>\n"
+"Language-Team: 汉语 <debian-l10n-chinese@lists.debian.org>\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Poedit 3.8\n"
+
+#. Type: string
+#. Description
+#: ../templates:1001
+msgid "Adresses on with Privoxy listens:"
+msgstr "Privoxy 监听的地址："
+
+#. Type: string
+#. Description
+#: ../templates:1001
+msgid ""
+"Please enter a space separated list of address:port combinations on which "
+"Privoxy will listen for client requests."
+msgstr ""
+"请输入以空格分隔的 地址:端口 组合列表，Privoxy 将在这些地址和端口上监听客"
+"户端请求。"

@@ -1,10 +1,26 @@
-privoxy (4.1.0~gitsnapshot-1) UNRELEASED; urgency=medium
+privoxy (4.2.0~gitsnapshot-1) UNRELEASED; urgency=medium
 
   * Unreleased GIT snapshot.
-  * Update 25_standard_medium to changed upstream.
-  * Enable zstd support.
+  * Update all patches to new version.
 
- -- Roland Rosenfeld <roland@debian.org>  Sun, 22 Jun 2025 15:12:38 +0200
+ -- Roland Rosenfeld <roland@debian.org>  Sat, 11 Apr 2026 12:15:13 +0200
+
+privoxy (4.1.0-1) unstable; urgency=medium
+
+  * New upstream version 4.1.0.
+  * Update 25_standard_medium to changed upstream.
+  * Update debian/watch to version 5.
+  * Remove «Rules-Requires-Root: no», which is the current default.
+  * Update years of packaging copyright.
+  * Remove «Priority: optional», which is the current default.
+  * Update FSF address in copyright to URL.
+  * debian/lrc.config: exclude docs pointing to other licenses.
+  * Add zh_CN and zh_TW translation.  Thanks to Yangfl (Closes: #1124422).
+  * Enable zstd support.
+  * Update debian/copyright (and adjust debian/lrc.config).
+  * Declare compliance with Debian Policy 4.7.3.
+
+ -- Roland Rosenfeld <roland@debian.org>  Mon, 05 Jan 2026 19:51:13 +0100
 
 privoxy (4.0.0-2) unstable; urgency=medium
 
