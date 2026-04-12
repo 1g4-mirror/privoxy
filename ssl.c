@@ -219,8 +219,8 @@ extern int ssl_recv_data(struct ssl_attr *ssl_attr, unsigned char *buf, size_t m
       }
       mbedtls_strerror(ret, err_buf, sizeof(err_buf));
       log_error(LOG_LEVEL_ERROR,
-         "Receiving data on socket %d over TLS failed: %s",
-         ssl_attr->mbedtls_attr.socket_fd.fd, err_buf);
+         "Receiving data on socket %d over TLS failed (%d): %s",
+         ssl_attr->mbedtls_attr.socket_fd.fd, ret, err_buf);
 
       return -1;
    }
