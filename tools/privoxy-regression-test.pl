@@ -206,7 +206,7 @@ sub load_regression_tests_from_file($) {
             $sticky_actions = $value;
             if ($sticky_actions =~ /{[^}]*\s/) {
                 log_and_die("'Sticky Actions' with whitespace inside the " .
-                            "action parameters are currently unsupported.");
+                            "action parameters are currently unsupported: '$_'");
             }
         }
 
@@ -577,7 +577,7 @@ sub load_action_files($) {
                 $sticky_actions = $value;
                 if ($sticky_actions =~ /{[^}]*\s/) {
                     log_and_die("'Sticky Actions' with whitespace inside the " .
-                                "action parameters are currently unsupported.");
+                                "action parameters are currently unsupported: '$_'");
                 }
             }
 
