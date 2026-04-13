@@ -48,6 +48,7 @@ test:1598: Expected to fail. Privoxy does not support chunk-encoded POST request
 test:16, 45, 63: Not supposed to work with Privoxy. Expected forwarding failure. Workaround probably possible.
 test:1665: Expected to fail. Trigger Privoxy's MS IIS 5 hack which the test does not expect.
 test:1671: Known to fail as curl adds a Proxy-Connection header to the JSON output which the test doesn't expect.
+test:1685: Known to fail as Privoxy converts a tab in a Cookie header to space.
 test:17: Not supposed to work with Privoxy. Invalid METHODs get rejected.
 test:187: Expected to fail. Test doesn't deal with Privoxy's error message in case of invalid URLs.
 test:19, 20: Not supposed to work with Privoxy. Tests behaviour with non-existing server and doesn't deal with error messages coming from a proxy.
