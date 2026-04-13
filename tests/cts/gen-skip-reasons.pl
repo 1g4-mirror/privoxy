@@ -167,6 +167,8 @@ sub main() {
             $why = "Expected to fail. Trigger Privoxy's MS IIS 5 hack which the test does not expect.";
         } elsif ($testnum eq 1671) {
             $why = "Known to fail as curl adds a Proxy-Connection header to the JSON output which the test doesn't expect.";
+        } elsif ($testnum eq 1685) {
+            $why = "Known to fail as Privoxy converts a tab in a Cookie header to space.";
         } elsif ($testnum eq 1915) {
             $why = "Known to fail. Uses tool that doesn't expect a proxy.";
         } elsif ($testnum eq 1933) {
