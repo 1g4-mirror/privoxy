@@ -90,14 +90,14 @@ typedef struct {
 static mbedtls_ctr_drbg_context ctr_drbg;
 static mbedtls_entropy_context  entropy;
 #endif
-static int rng_seeded;
+static int mbedtls_initialized;
 
 static int generate_host_certificate(struct client_state *csp);
 static int host_to_hash(struct client_state *csp);
 static int ssl_verify_callback(void *data, mbedtls_x509_crt *crt, int depth, uint32_t *flags);
 static void free_client_ssl_structures(struct client_state *csp);
 static void free_server_ssl_structures(struct client_state *csp);
-static int seed_rng(struct client_state *csp);
+static int initialize_mbedtls(struct client_state *csp);
 static int *get_ciphersuites_from_string(const char *ciphersuites_string);
 
 /*********************************************************************
@@ -313,10 +313,7 @@ extern int create_client_ssl_connection(struct client_state *csp)
       goto exit;
    }
 
-   /*
-    * Seed the RNG
-    */
-   ret = seed_rng(csp);
+   ret = initialize_mbedtls(csp);
    if (ret != 0)
    {
       ret = -1;
@@ -613,10 +610,7 @@ extern int create_server_ssl_connection(struct client_state *csp)
    */
    ssl_attr->mbedtls_attr.socket_fd.fd = csp->server_connection.sfd;
 
-   /*
-    * Seed the RNG
-    */
-   ret = seed_rng(csp);
+   ret = initialize_mbedtls(csp);
    if (ret != 0)
    {
       ret = -1;
@@ -1103,10 +1097,7 @@ static int generate_key(struct client_state *csp, unsigned char **key_buf)
       goto exit;
    }
 
-   /*
-    * Seed the RNG
-    */
-   ret = seed_rng(csp);
+   ret = initialize_mbedtls(csp);
    if (ret != 0)
    {
       ret = -1;
@@ -1523,10 +1514,7 @@ static int generate_host_certificate(struct client_state *csp)
       goto exit;
    }
 
-   /*
-    * Seed the PRNG
-    */
-   ret = seed_rng(csp);
+   ret = initialize_mbedtls(csp);
    if (ret != 0)
    {
       ret = -1;
@@ -1879,28 +1867,29 @@ static int host_to_hash(struct client_state *csp)
 
 /*********************************************************************
  *
- * Function    :  seed_rng
+ * Function    :  initialize_mbedtls
  *
- * Description :  Seeding the RNG for all SSL uses
+ * Description :  Initialize Mbed TLS. When using Mbed TLS 3 this
+ *                function also seeds the RNG for all TLS uses.
  *
  * Parameters  :
  *          1  :  csp = Current client state (buffers, headers, etc...)
  *
- * Returns     : -1 => RNG wasn't seed successfully
- *                0 => RNG is seeded successfully
+ * Returns     : -1 => Something failed.
+ *                0 => Success.
  *
  *********************************************************************/
-static int seed_rng(struct client_state *csp)
+static int initialize_mbedtls(struct client_state *csp)
 {
 #if MBEDTLS_VERSION_MAJOR < 4
    int ret = 0;
    char err_buf[ERROR_BUF_SIZE];
 #endif
 
-   if (rng_seeded == 0)
+   if (mbedtls_initialized == 0)
    {
       privoxy_mutex_lock(&ssl_init_mutex);
-      if (rng_seeded == 0)
+      if (mbedtls_initialized == 0)
       {
          psa_status_t status = psa_crypto_init();
          if (PSA_SUCCESS != status)
@@ -1923,7 +1912,7 @@ static int seed_rng(struct client_state *csp)
             return -1;
          }
 #endif
-         rng_seeded = 1;
+         mbedtls_initialized = 1;
       }
       privoxy_mutex_unlock(&ssl_init_mutex);
    }
@@ -1999,7 +1988,7 @@ extern void ssl_crt_verify_info(char *buf, size_t size, struct client_state *csp
 extern void ssl_release(void)
 {
 #if MBEDTLS_VERSION_MAJOR < 4
-   if (rng_seeded == 1)
+   if (mbedtls_initialized == 1)
    {
       mbedtls_ctr_drbg_free(&ctr_drbg);
       mbedtls_entropy_free(&entropy);
