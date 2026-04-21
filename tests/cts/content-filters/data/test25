@@ -51,6 +51,8 @@ X-Control: swsclose%CR
 <div id="retool-coding-bar" blafasel
 
 <div id="bolt-coding-bar" blafasel
+
+<div id="vibe-main-row" blafasel
 </data>
 </reply>
 
@@ -61,7 +63,7 @@ Date: Thu, 22 Jul 2010 11:22:33 GMT%CR
 Connection: close%CR
 Content-Type: text/html%CR
 X-Control: swsclose%CR
-Content-Length: 793%CR
+Content-Length: 841%CR
 %CR
 # Here are some strings the sourceforge filter should filter:
 
@@ -94,6 +96,8 @@ Content-Length: 793%CR
 <div id="mon-sticky-el" style="display:none;" blafasel
 
 # pcrs command 7:
+
+<div style="display:none !important;" blafasel
 
 <div style="display:none !important;" blafasel
 
