@@ -763,17 +763,11 @@ extern int create_server_ssl_connection(struct client_state *csp)
    free_certificate_chain(csp);
 
    csp->ssl_with_server_is_opened = 1;
-   csp->server_cert_verification_result =
-      mbedtls_ssl_get_verify_result(&(ssl_attr->mbedtls_attr.ssl));
-
-#if MBEDTLS_VERSION_MAJOR > 3
-   if ((csp->server_cert_verification_result == MBEDTLS_X509_BADCERT_SKIP_VERIFY) &&
-      csp->dont_verify_certificate)
+   if (!csp->dont_verify_certificate)
    {
-      log_error(LOG_LEVEL_CONNECT, "Ignoring MBEDTLS_X509_BADCERT_SKIP_VERIFY");
-      csp->server_cert_verification_result = 0;
+      csp->server_cert_verification_result =
+         mbedtls_ssl_get_verify_result(&(ssl_attr->mbedtls_attr.ssl));
    }
-#endif
 
 exit:
    /* Freeing structures if connection wasn't created successfully */
