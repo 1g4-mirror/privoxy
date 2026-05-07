@@ -21,7 +21,7 @@ Request from client address from denied network range
 
 <verify>
 <errorcode>
-52
+56
 </errorcode>
 </verify>
 
