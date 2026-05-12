@@ -85,6 +85,7 @@ test:501: Not relevant for a proxy.
 test:507: Expected to fail. DNS failures cause a Privoxy error message the test doesn't handle.
 test:530, 584: Known to fail. Test server expects pipelined requests and doesn't respond otherwise.
 test:556: Expected to fail. Uses HTTP/1.2 which Privoxy rejects as invalid.
+test:58: Expected to fail when using Privoxy. Doesn't appear to be obviously Privoxy's fault.
 test:581: Expected to fail. Privoxy removes second Content-Type header.
 test:587, 644: Expected to fail. POST request doesn't make it to the server. Needs investigating.
 test:59: Invalid URL gets rejected by Privoxy which the test can't handle.
