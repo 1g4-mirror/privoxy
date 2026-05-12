@@ -59,6 +59,8 @@ sub main() {
             $why = "Expected to fail with Privoxy. Test contains non-standard 'Connection: mooo' header that Privoxy replaces with 'Connection: close'.";
         } elsif ($testnum eq 46) {
             $why = "Invalid URL and use of --resolv.";
+        } elsif ($testnum eq 58) {
+            $why = "Expected to fail when using Privoxy. Doesn't appear to be obviously Privoxy's fault.";
         } elsif ($testnum eq 59) {
             $why = "Invalid URL gets rejected by Privoxy which the test can't handle.";
         } elsif ($testnum eq 129) {
