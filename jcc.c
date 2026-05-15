@@ -1522,7 +1522,7 @@ static enum chunk_status chunked_body_is_complete(struct iob *iob, size_t *lengt
       {
          return CHUNK_STATUS_MISSING_DATA;
       }
-      if (sscanf(p, "%x", &chunksize) != 1)
+      if (JB_ERR_OK != parse_chunk_size(p, *length, &chunksize))
       {
          return CHUNK_STATUS_PARSE_ERROR;
       }

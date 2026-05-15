@@ -2251,7 +2251,7 @@ static int get_bytes_to_next_chunk_start(char *buffer, size_t size, size_t offse
       return -1;
    }
 
-   if (sscanf(chunk_start, "%x", &chunk_size) != 1)
+   if (JB_ERR_OK != parse_chunk_size(chunk_start, size, &chunk_size))
    {
       /* XXX: Write test case to trigger this. */
       log_error(LOG_LEVEL_ERROR, "Failed to parse chunk size. "
@@ -2372,6 +2372,94 @@ int chunked_data_is_complete(char *buffer, size_t size, size_t offset)
 
 /*********************************************************************
  *
+ * Function    :  parse_chunk_size
+ *
+ * Description :  Parses the chunk-size or returns an error if the
+ *                size is considered "unreasonably" large.
+ *
+ * Parameters  :
+ *          1  :  buffer = Pointer to the chunk-encoded content.
+ *          2  :  buffer_size =  Size of the buffer.
+ *          3  :  chunk_size = Storage for the parsed chunk-size.
+ *                             Only valid if the function returns
+ *                             JB_ERR_OK
+ *
+ * Returns     :  JB_ERR_OK for success,
+ *                JB_ERR_PARSE otherwise
+ *
+ *********************************************************************/
+jb_err parse_chunk_size(char *buffer, size_t buffer_size, unsigned int *chunk_size)
+{
+   char *p = buffer;
+   const unsigned int max_hex_digits = 7;
+   unsigned int hex_digits_that_matter = 0;
+   unsigned int leading_zeros = 0;
+   int skipping_leading_zeros = TRUE;
+
+   *chunk_size = 0;
+
+   while (p < buffer + buffer_size && xdtoi(*p) != -1)
+   {
+      if (skipping_leading_zeros)
+      {
+         if (*p == '0')
+         {
+            p++;
+            leading_zeros++;
+
+            continue;
+         }
+         skipping_leading_zeros = FALSE;
+      }
+
+      p++;
+      hex_digits_that_matter++;
+
+      /*
+       * We cap the number of hex digits that matter to make
+       * sure we can represent the chunk-size with an unsigned
+       * integer.
+       */
+      if (hex_digits_that_matter == max_hex_digits)
+      {
+         log_error(LOG_LEVEL_ERROR, "Chunk-size 'unreasonably' large. "
+            "Counted %u hex digits that matter and %u leading zeros.",
+            hex_digits_that_matter, leading_zeros);
+         return JB_ERR_PARSE;
+      }
+   }
+
+   if (leading_zeros != 0)
+   {
+      if (xdtoi(*(buffer + leading_zeros)) == -1)
+      {
+         /*
+          * Looks like the chunk-size consists entirely of zeros
+          * so let's not skip the last one.
+          */
+         leading_zeros--;
+      }
+
+      if (leading_zeros != 0)
+      {
+         log_error(LOG_LEVEL_RE_FILTER,
+            "Parsing the chunk-size after skipping %d leading zeros.",
+            leading_zeros);
+      }
+   }
+
+   if (sscanf(buffer + leading_zeros, "%x", chunk_size) != 1)
+   {
+      return JB_ERR_PARSE;
+   }
+
+   return JB_ERR_OK;
+
+}
+
+
+/*********************************************************************
+ *
  * Function    :  remove_chunked_transfer_coding
  *
  * Description :  In-situ remove the "chunked" transfer coding as defined
@@ -2420,7 +2508,7 @@ static jb_err remove_chunked_transfer_coding(char *buffer, size_t *size)
    }
 #endif
 
-   if (sscanf(buffer, "%x", &chunksize) != 1)
+   if (JB_ERR_OK != parse_chunk_size(buffer, *size, &chunksize))
    {
       log_error(LOG_LEVEL_ERROR, "Invalid first chunksize while stripping \"chunked\" transfer coding");
       return JB_ERR_PARSE;
@@ -2487,7 +2575,8 @@ static jb_err remove_chunked_transfer_coding(char *buffer, size_t *size)
          return JB_ERR_PARSE;
       }
       from_p += 2;
-      if (sscanf(from_p, "%x", &chunksize) != 1)
+      assert(*size > newsize);
+      if (JB_ERR_OK != parse_chunk_size(from_p, *size - newsize, &chunksize))
       {
          log_error(LOG_LEVEL_INFO, "Invalid \"chunked\" transfer encoding detected and ignored.");
          break;

@@ -104,6 +104,7 @@ extern struct http_response *direct_response(struct client_state *csp);
 
 extern int get_bytes_missing_from_chunked_data(char *buffer, size_t size, size_t offset);
 extern int chunked_data_is_complete(char *buffer, size_t size, size_t offset);
+extern jb_err parse_chunk_size(char *buffer, size_t buffer_size, unsigned int *chunk_size);
 
 #ifdef FUZZ
 extern char *gif_deanimate_response(struct client_state *csp);
