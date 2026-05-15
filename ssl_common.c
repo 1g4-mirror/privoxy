@@ -380,8 +380,7 @@ extern void ssl_send_certificate_error(struct client_state *csp)
    /*
     * Joining all blocks in one long message
     */
-   char message[message_len];
-   memset(message, 0, message_len);
+   char *message = zalloc_or_die(message_len);
 
    strlcpy(message, message_begin, message_len);
    strlcat(message, reason       , message_len);
@@ -395,9 +394,7 @@ extern void ssl_send_certificate_error(struct client_state *csp)
                                            /* +1 for terminating null */
          size_t base64_len = 4 * ((strlen(cert->file_buf) + 2) / 3) + 1;
          size_t olen = 0;
-         char base64_buf[base64_len];
-
-         memset(base64_buf, 0, base64_len);
+         char *base64_buf = zalloc_or_die(base64_len);
 
          /* Encoding certificate into base64 code */
          ret = ssl_base64_encode((unsigned char*)base64_buf,
@@ -420,6 +417,7 @@ extern void ssl_send_certificate_error(struct client_state *csp)
             strlcat(message, base64_buf, message_len);
             strlcat(message, "\">Download certificate</a>", message_len);
          }
+         freez(base64_buf);
       }
 
       cert = cert->next;
@@ -442,6 +440,7 @@ extern void ssl_send_certificate_error(struct client_state *csp)
    (void)ssl_send_data(ssl_attr, (const unsigned char *)message, strlen(message));
 
    free_certificate_chain(csp);
+   freez(message);
 
    log_error(LOG_LEVEL_CRUNCH, "Certificate error: %s: https://%s%s",
       reason, csp->http->hostport, csp->http->path);
