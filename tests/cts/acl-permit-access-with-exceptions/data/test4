@@ -7,28 +7,27 @@ HTTP HEAD
 </keywords>
 </info>
 
-<proxy-reply>
+<reply>
 <data>
-HTTP/1.1 503 Connect failed
-Content-Length: 44
-Content-Type: text/html
-Cache-Control: no-cache
-X-Ignore-Header: Date
+HTTP/1.1 200 Okay
+Content-Type: text/plain
 Date: Wed, 01 Apr 2026 07:30:49 GMT
-Last-Modified: Wed, 08 Jun 1955 12:00:00 GMT
-Expires: Sat, 17 Jun 2000 12:00:00 GMT
-Pragma: no-cache
+Connection: close
+X-Control: swsclose
 
-Could not connect to destination 127.0.0.1.
+Enjoy this message, most venerable client.
 </data>
-</proxy-reply>
+</reply>
 
 <client>
+<server>
+http
+</server>
 <name>
-Request from client address from denied network range
+Request from client address from denied network range with explicit permission
 </name>
 <command>
---interface 127.0.1.3 http://127.0.0.1/%TESTNUMBER
+--interface 127.0.1.3 http://127.0.0.1:%HTTPPORT/%TESTNUMBER
 </command>
 <precheck>
 %PERL $TESTDIR/../../bind-to-address.pl 127.0.1.3
