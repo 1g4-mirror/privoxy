@@ -48,6 +48,8 @@ X-Control: swsclose%CR
 
 <div id="mon-sticky-el" blafasel
 
+<div id="mdb_obj" blafasel
+
 # pcrs command 7:
 
 <div id="retool-coding-bar" blafasel
@@ -65,7 +67,7 @@ Date: Thu, 22 Jul 2010 11:22:33 GMT%CR
 Connection: close%CR
 Content-Type: text/html%CR
 X-Control: swsclose%CR
-Content-Length: 899%CR
+Content-Length: 949%CR
 %CR
 # Here are some strings the sourceforge filter should filter:
 
@@ -98,6 +100,8 @@ Content-Length: 899%CR
 <div id="mon-sticky-div" style="display:none;" blafasel
 
 <div id="mon-sticky-el" style="display:none;" blafasel
+
+<div id="mdb_obj" style="display:none;" blafasel
 
 # pcrs command 7:
 
