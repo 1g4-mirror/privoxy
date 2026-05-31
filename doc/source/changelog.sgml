@@ -24,15 +24,52 @@
 -->
 
 <para>
-  <application>Privoxy 4.2.0</application> fixes a few
-  minor bugs and brings a couple of general improvements
-  inclusing support for elliptic-curve keys.
+  <application>Privoxy 4.2.0</application> fixes a couple of bugs
+  including two reported security issues and brings a couple of
+  general improvements including support for elliptic-curve keys.
+</para>
+<para>
+  Unfortunately the reporter of the alleged security issues did not answer
+  questions about the report that was based on an unofficial git mirror which
+  was apparently two years behind. CVEs have been requested but haven't been
+  assigned in time for the release.
+</para>
+<para>
+  The Privoxy project is currently underfunded and the income doesn't even
+  cover the hosting expenses (~161 EUR/month). If you can afford it, please
+  consider making a <ulink url="https://www.privoxy.org/donate">donation</ulink>.
 </para>
 <para>
   Changes in <application>Privoxy 4.2.0</application> stable:
 </para>
 <para>
  <itemizedlist>
+  <listitem>
+   <para>
+    Security fixes:
+    <itemizedlist>
+    <listitem>
+     <para>
+      Parse the chunk-size with a dedicated function and reject "unreasonably"
+      large values to prevent silent truncation by sscanf(), integer overflows
+      and misinterpretation of the content later on. Heap buffer overflows on
+      platforms with 32-bit pointers were alleged as well.
+      Commit 5b3bb22b77. OVE-20260515-0002. Reported by @TristanInSec.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      ssl_send_certificate_error(): Store the generated message on the heap
+      instead of the stack to prevent an alleged segmentation fault if there
+      are enough certificates in the chain to exceed the stack size.
+      While at it, replace another variable-length array that was probably
+      unproblematic with a heap-based buffer as well.
+      Commit 4963aa4f08. OVE-20260515-0001. Reported by @TristanInSec.
+     </para>
+     </listitem>
+    </itemizedlist>
+   </para>
+  </listitem>
   <listitem>
    <para>
     Bug fixes:
@@ -229,6 +266,11 @@
     </listitem>
     <listitem>
      <para>
+      Block requests to ".siteintercept.qualtrics.com/".
+     </para>
+    </listitem>
+    <listitem>
+     <para>
       Unblock "gitlab./search/count\?".
      </para>
     </listitem>
@@ -287,6 +329,18 @@
    <para>
     Documentation improvements:
     <itemizedlist>
+    <listitem>
+     <para>
+      FAQ: Mention that one can also donate through Liberapay and add a link.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Add two paragraphs to the 'Reporting security problems' section.
+      Request that use of "AI" is disclosed and that reporters respond to
+      questions about the report.
+     </para>
+    </listitem>
     <listitem>
      <para>
       The Privoxy tools privoxy-log-parser, privoxy-regression-test and uagen
@@ -448,7 +502,7 @@
     </listitem>
     <listitem>
      <para>
-      tests/cts/README: Recommend to use curl upstream tag curl-8_19_0.
+      tests/cts/README: Recommend to use curl upstream tag curl-8_20_0.
      </para>
     </listitem>
     <listitem>
@@ -458,7 +512,26 @@
     </listitem>
     <listitem>
      <para>
+      gen-skip-reasons.pl: Use '==' instead of 'eq' when checking whether or
+      not a test should be skipped. While the script output is the same, the
+      test number isn't a  string so using '==' seems more appropriate.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
       gen-skip-reasons.pl: Skip test 1 due to multiple Connection header values.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      gen-skip-reasons.pl: Skip test 58 for now which doesn't work anymore after
+      a recent curl upstream change.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      gen-skip-reasons.pl: Skip test 1685 which uses a Cookie header with a tab
+      that Privoxy converts into a space.
      </para>
     </listitem>
     <listitem>
@@ -476,6 +549,11 @@
      <para>
       Privoxy-Regression-Test: Include the offending line in the error message
       when rejecting Sticky Actions with whitespace inside the action parameters.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Add three more tests for the chunked-transfer-encoding scenario.
      </para>
      </listitem>
     </itemizedlist>
