@@ -3,6 +3,19 @@ ChangeLog for Privoxy
 --------------------------------------------------------------------
 *** Version 4.2.0 stable ***
 
+- Security fixes:
+  - Parse the chunk-size with a dedicated function and reject "unreasonably"
+    large values to prevent silent truncation by sscanf(), integer overflows
+    and misinterpretation of the content later on. Heap buffer overflows on
+    platforms with 32-bit pointers were alleged as well.
+    Commit 5b3bb22b77. OVE-20260515-0002. Reported by @TristanInSec.
+  - ssl_send_certificate_error(): Store the generated message on the heap
+    instead of the stack to prevent an alleged segmentation fault if there
+    are enough certificates in the chain to exceed the stack size.
+    While at it, replace another variable-length array that was probably
+    unproblematic with a heap-based buffer as well.
+    Commit 4963aa4f08. OVE-20260515-0001. Reported by @TristanInSec.
+
 - Bug fixes:
   - block_acl(): Ignore ACL matches when we don't have a destination yet
     but the ACL requires one to match. block_acl() will be called
@@ -64,6 +77,7 @@ ChangeLog for Privoxy
   - Disable fast-redirects for "/.*&__goaway_referer=http".
   - Block ".parsely.com/p(logger|x)/" to match URLs that weren't
     covered by ".pixel.parsely.com/".
+  - Block requests to ".siteintercept.qualtrics.com/".
   - Unblock "gitlab./search/count\?".
   - Reword a comment in user.action that claimed that 'we' want
     to support certain sites.
@@ -78,6 +92,10 @@ ChangeLog for Privoxy
   - Add a "taz.de" filter which hides the "paywahl" banner on taz.de by default.
 
 - Documentation improvements:
+  - FAQ: Mention that one can also donate through Liberapay and add a link.
+  - Add two paragraphs to the 'Reporting security problems' section.
+    Request that use of "AI" is disclosed and that reporters respond to
+    questions about the report.
   - The Privoxy tools privoxy-log-parser, privoxy-regression-test and uagen
     have man pages now. Previously they were only documented in perldoc.
   - user-manual: Update the content filter list.
@@ -126,14 +144,22 @@ ChangeLog for Privoxy
     to bind to.
   - run-privoxy-tests.sh: Add valgrind support that can be enabled with "-v".
   - run-privoxy-tests.sh: Turn $log_file into a local variable in start_privoxy().
-  - tests/cts/README: Recommend to use curl upstream tag curl-8_19_0.
+  - tests/cts/README: Recommend to use curl upstream tag curl-8_20_0.
   - Regenerate curl-test-manifest-for-privoxy.
+  - gen-skip-reasons.pl: Use '==' instead of 'eq' when checking whether or
+    not a test should be skipped. While the script output is the same, the
+    test number isn't a  string so using '==' seems more appropriate.
   - gen-skip-reasons.pl: Skip test 1 due to multiple Connection header values.
+  - gen-skip-reasons.pl: Skip test 58 for now which doesn't work anymore after
+    a recent curl upstream change.
+  - gen-skip-reasons.pl: Skip test 1685 which uses a Cookie header with a tab
+    that Privoxy converts into a space.
   - Privoxy-Regression-Test: Bump version to 0.7.6
   - Privoxy-Regression-Test: Allow '!' characters which are used in URLs from
     taz.de for example.
   - Privoxy-Regression-Test: Include the offending line in the error message
     when rejecting Sticky Actions with whitespace inside the action parameters.
+  - Add three more tests for the chunked-transfer-encoding scenario.
 
 *** Version 4.1.0 stable ***
 
