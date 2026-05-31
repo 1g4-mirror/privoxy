@@ -4,6 +4,11 @@
 <keywords>
 HTTP
 HTTP GET
+# Skip this test for now as the curl return code is platform specific
+# since curl commit 335dc0e3c5968827.
+# At the moment the test is expected to work on ElectroBSD and OpenBSD
+# but known to fail on Debian GNU/Linux.
+skip
 </keywords>
 </info>
 
