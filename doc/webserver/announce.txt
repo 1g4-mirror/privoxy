@@ -1,14 +1,10 @@
                Announcing Privoxy 4.2.0 stable
 --------------------------------------------------------------------
 
-Privoxy 4.2.0 fixes a couple of bugs including two reported security
-issues and brings a couple of general improvements including support
-for elliptic-curve keys.
+Privoxy 4.2.0 fixes a couple of bugs and brings general improvements
+such as support for elliptic-curve keys.
 
-Unfortunately the reporter of the alleged security issues did not
-answer questions about the report that was based on an unofficial git
-mirror which was apparently two years behind. CVEs have been requested
-but haven't been assigned in time for the release.
+Two potential security problems have been reported and addressed.
 
 The Privoxy project is currently underfunded and the income doesn't
 even cover the hosting expenses (~161 EUR/month). If you can afford
@@ -17,7 +13,7 @@ it, please consider making a donation (https://www.privoxy.org/donate).
 --------------------------------------------------------------------
 ChangeLog for Privoxy 4.2.0
 --------------------------------------------------------------------
-- Security fixes:
+- Security improvements:
   - Parse the chunk-size with a dedicated function and reject "unreasonably"
     large values to prevent silent truncation by sscanf(), integer overflows
     and misinterpretation of the content later on. Heap buffer overflows on
