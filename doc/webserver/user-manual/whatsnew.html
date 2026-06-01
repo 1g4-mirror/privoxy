@@ -27,18 +27,16 @@
   </div>
   <div class="SECT1">
     <h1 class="SECT1"><a name="WHATSNEW" id="WHATSNEW">3. What's New in this Release</a></h1>
-    <p><span class="APPLICATION">Privoxy 4.2.0</span> fixes a couple of bugs including two reported security issues and
-    brings a couple of general improvements including support for elliptic-curve keys.</p>
-    <p>Unfortunately the reporter of the alleged security issues did not answer questions about the report that was
-    based on an unofficial git mirror which was apparently two years behind. CVEs have been requested but haven't been
-    assigned in time for the release.</p>
+    <p><span class="APPLICATION">Privoxy 4.2.0</span> fixes a couple of bugs and brings general improvements such as
+    support for elliptic-curve keys.</p>
+    <p>Two potential security problems have been reported and addressed.</p>
     <p>The Privoxy project is currently underfunded and the income doesn't even cover the hosting expenses (~161
     EUR/month). If you can afford it, please consider making a <a href="https://www.privoxy.org/donate" target=
     "_top">donation</a>.</p>
     <p>Changes in <span class="APPLICATION">Privoxy 4.2.0</span> stable:</p>
     <ul>
       <li>
-        <p>Security fixes:</p>
+        <p>Security improvements:</p>
         <ul>
           <li>
             <p>Parse the chunk-size with a dedicated function and reject "unreasonably" large values to prevent silent
