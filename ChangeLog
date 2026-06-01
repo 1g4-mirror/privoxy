@@ -3,7 +3,7 @@ ChangeLog for Privoxy
 --------------------------------------------------------------------
 *** Version 4.2.0 stable ***
 
-- Security fixes:
+- Security improvements:
   - Parse the chunk-size with a dedicated function and reject "unreasonably"
     large values to prevent silent truncation by sscanf(), integer overflows
     and misinterpretation of the content later on. Heap buffer overflows on
