@@ -75,8 +75,7 @@
 <sect1 renderas="sect2" id="download" label=""><title>Download</title>
 <para>
  You can <ulink url="/sf-download-mirror/">download Privoxy here</ulink>,
- from <ulink url="https://www.silvester.org.uk/privoxy/">this mirror</ulink>,
- or from <ulink url="https://sourceforge.net/projects/ijbswa/files/">SourceForge</ulink>.
+ or from <ulink url="https://www.silvester.org.uk/privoxy/">this download mirror</ulink>.
 </para>
 <para>
  Note that the Privoxy project currently has no trusted build infrastructure.
