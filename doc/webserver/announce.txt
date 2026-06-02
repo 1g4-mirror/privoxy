@@ -30,7 +30,7 @@ ChangeLog for Privoxy 4.2.0
   - block_acl(): Ignore ACL matches when we don't have a destination yet
     but the ACL requires one to match. block_acl() will be called
     again later on when the destination is known from parsing the request.
-    Fixes SF bug #913 reported by Rainer Sokoll  with confirmation from
+    Fixes SF bug #913 reported by Rainer Sokoll with confirmation from
     Peter Geelhoed.
   - rfc2553_connect_to(): Prevent theoretical memory disclosure through
     the CGI interface if a request is rejected due to ACLs. It's theoretical
