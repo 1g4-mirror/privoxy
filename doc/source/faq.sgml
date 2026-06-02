@@ -498,6 +498,11 @@ warranty? Registration?</title>
 </para>
 
 <para>
+ The Privoxy project is currently underfunded and the income doesn't
+ even cover the hosting expenses (~161 EUR/month for 2025).
+</para>
+
+<para>
  <application>Privoxy</application> is an associated
  project of <ulink url="https://www.spi-inc.org/">Software
  in the Public Interest (SPI)</ulink>, which allows us to receive
