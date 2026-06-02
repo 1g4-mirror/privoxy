@@ -576,6 +576,12 @@ $ make                             # build Privoxy
 
 &changelog;
 
+<para>
+  The Privoxy project is currently underfunded.
+  If you can afford it, please consider
+  <ulink url="https://www.privoxy.org/donate">making a donation</ulink>.
+</para>
+
 <!--   ~~~~~       New section      ~~~~~     -->
 
 <sect2 id="upgradersnote">

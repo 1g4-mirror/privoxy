@@ -31,11 +31,6 @@
   Two potential security problems have been reported and addressed.
 </para>
 <para>
-  The Privoxy project is currently underfunded and the income doesn't even
-  cover the hosting expenses (~161 EUR/month). If you can afford it, please
-  consider making a <ulink url="https://www.privoxy.org/donate">donation</ulink>.
-</para>
-<para>
   Changes in <application>Privoxy 4.2.0</application> stable:
 </para>
 <para>
