@@ -1,6 +1,6 @@
 From: Roland Rosenfeld <roland@debian.org>
 Date: Thu, 24 Jan 2013 17:40:51 +0100
-Last-Update: 2026-04-11
+Last-Update: 2026-06-02
 Subject: Replace all -- in man page by \-\- to make lintian happy.
 Forwarded: not-needed
 

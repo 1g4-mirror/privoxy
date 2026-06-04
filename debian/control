@@ -1,40 +1,45 @@
 Source: privoxy
 Maintainer: Roland Rosenfeld <roland@debian.org>
 Section: web
-Build-Depends: autoconf,
-               debhelper-compat (= 13),
-               dh-apparmor,
-               docbook <!nodoc>,
-               docbook-dsssl <!nodoc>,
-               docbook-utils <!nodoc>,
-               groff <!nodoc>,
-               libbrotli-dev,
-               libpcre2-dev,
-               libssl-dev,
-               libzstd-dev,
-               man2html <!nodoc>,
-               opensp:native <!nodoc>,
-               po-debconf,
-               sgmlspl <!nodoc>,
-               w3m <!nodoc>,
-               zlib1g-dev
-Standards-Version: 4.7.3
+Build-Depends:
+ debhelper-compat (= 13),
+ dh-apparmor,
+ autoconf,
+ docbook <!nodoc>,
+ docbook-dsssl <!nodoc>,
+ docbook-utils <!nodoc>,
+ groff <!nodoc>,
+ libbrotli-dev,
+ libpcre2-dev,
+ libssl-dev,
+ libzstd-dev,
+ man2html <!nodoc>,
+ opensp:native <!nodoc>,
+ po-debconf,
+ sgmlspl <!nodoc>,
+ w3m <!nodoc>,
+ zlib1g-dev,
+Standards-Version: 4.7.4
 Vcs-Browser: https://salsa.debian.org/debian/privoxy
 Vcs-Git: https://salsa.debian.org/debian/privoxy.git
 Homepage: https://www.privoxy.org/
 
 Package: privoxy
 Architecture: any
-Depends: ${misc:Depends},
-         ${perl:Depends},
-         ${shlibs:Depends},
-         adduser,
-         debconf,
-         logrotate,
-         ucf
-Recommends: doc-base
-Suggests: apparmor
-Pre-Depends: ${misc:Pre-Depends}
+Depends:
+ adduser,
+ debconf,
+ logrotate,
+ ucf,
+ ${misc:Depends},
+ ${perl:Depends},
+ ${shlibs:Depends},
+Recommends:
+ doc-base,
+Suggests:
+ apparmor,
+Pre-Depends:
+ ${misc:Pre-Depends},
 Description: Privacy enhancing HTTP Proxy
  Privoxy is a web proxy with advanced filtering capabilities for
  protecting privacy, filtering web page content, managing cookies,

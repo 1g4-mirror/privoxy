@@ -14,7 +14,7 @@ Copyright:
  Parts Copyright (C) 2001 Jonathan Foster http://www.jon-foster.co.uk/
  Parts Copyright (C) 2003 Ian Cummings <ian_a_c@hotmail.com>
  Parts Copyright (C) 2000-2003 by Andreas S. Oesterhelt <andreas@oesterhelt.org>
- Parts Copyright (C) 2006-2021 Fabian Keil <fk@fabiankeil.de>
+ Parts Copyright (C) 2006-2026 Fabian Keil <fk@fabiankeil.de>
  Parts Copyright (c) 2020 Maxim Antonov <mantonov@gmail.com>
  Parts Copyright (C) 2017-2020 Vaclav Svec. FIT CVUT.
 License: GPL-2+
@@ -40,9 +40,9 @@ Files: regression-tests.action tools/uagen.pl
  tools/url-pattern-translator.pl utils/changelog2doc.pl
  utils/create-package-feed.pl tests/cts/gen-skip-reasons.pl
  tests/cts/privoxy-runtests.pm tests/cts/run-privoxy-tests.sh
- tests/cts/runtests-wrapper.sh
+ tests/cts/runtests-wrapper.sh tests/cts/bind-to-address.pl
 Copyright:
- Copyright (c) 2006-2025 Fabian Keil <fk@fabiankeil.de>
+ Copyright (c) 2006-2026 Fabian Keil <fk@fabiankeil.de>
 License: ISC
  Permission to use, copy, modify, and distribute this software for any
  purpose with or without fee is hereby granted, provided that the above
