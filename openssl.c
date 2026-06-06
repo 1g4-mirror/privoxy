@@ -1170,6 +1170,12 @@ extern int create_server_ssl_connection(struct client_state *csp)
          }
       }
    }
+   else
+   {
+      log_error(LOG_LEVEL_ERROR,
+         "Failed to get the TLS certificate chain for %s",
+         csp->http->hostport);
+   }
 
    if (!csp->dont_verify_certificate)
    {
