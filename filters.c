@@ -2439,13 +2439,6 @@ jb_err parse_chunk_size(char *buffer, size_t buffer_size, unsigned int *chunk_si
           */
          leading_zeros--;
       }
-
-      if (leading_zeros != 0)
-      {
-         log_error(LOG_LEVEL_RE_FILTER,
-            "Parsing the chunk-size after skipping %d leading zeros.",
-            leading_zeros);
-      }
    }
 
    if (sscanf(buffer + leading_zeros, "%x", chunk_size) != 1)
