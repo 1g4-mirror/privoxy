@@ -141,6 +141,11 @@ main() {
                 ignore_errors=true
                 shift
                 ;;
+            "-C")
+                shift
+                non_standard_curl_args="-c ${1}"
+                shift
+                ;;
             "-r")
                 echo "Not starting privoxy."
                 start_privoxy=false
@@ -175,9 +180,9 @@ main() {
 
     for test_scenario in ${test_scenarios}; do
         if [ "${test_scenario}" = "${UPSTREAM_TEST_SCENARIO}" ]; then
-            run_upstream_tests ${start_privoxy} "$@"
+            run_upstream_tests ${start_privoxy} ${non_standard_curl_args} "$@"
         else
-            run_privoxy_tests ${start_privoxy} "${test_scenario}" "$@"
+            run_privoxy_tests ${start_privoxy} "${test_scenario}" ${non_standard_curl_args} "$@"
         fi
         if [ $? != 0 ]; then
             scenarios_with_errors="${scenarios_with_errors} ${test_scenario}"
