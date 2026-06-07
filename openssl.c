@@ -74,6 +74,12 @@ static void log_ssl_errors(int debuglevel, const char* fmt, ...) __attribute__((
 
 static int ssl_inited = 0;
 
+#if OPENSSL_VERSION_NUMBER >= 0x40000000L
+#define OPENSSL4_CONST const
+#else
+#define OPENSSL4_CONST
+#endif
+
 /*********************************************************************
  *
  * Function    :  openssl_init
@@ -271,7 +277,9 @@ static int ssl_store_cert(struct client_state *csp, X509 *crt)
    char *bio_mem_data = NULL;
    char *encoded_text;
    long l;
+#if OPENSSL_VERSION_NUMBER < 0x40000000L
    const ASN1_INTEGER *bs;
+#endif
    const X509_ALGOR *tsig_alg;
    int loc;
 
@@ -359,6 +367,16 @@ static int ssl_store_cert(struct client_state *csp, X509 *crt)
       ret = -1;
       goto exit;
    }
+#if OPENSSL_VERSION_NUMBER >= 0x40000000L
+#warning Showing certificate serial numbers on the CGI error page has not been implemented for OpenSSL 4 (yet)
+   if (0 >= BIO_puts(bio,
+         "Printing certificate serial numbers has not been implemented for OpenSSL 4 (yet)\n"))
+   {
+      log_ssl_errors(LOG_LEVEL_ERROR, "BIO_puts() for serial failed");
+      ret = -1;
+      goto exit;
+   }
+#else
    bs = X509_get0_serialNumber(crt);
    if (bs->length <= (int)sizeof(long))
    {
@@ -414,6 +432,7 @@ static int ssl_store_cert(struct client_state *csp, X509 *crt)
          }
       }
    }
+#endif
 
    if (BIO_puts(bio, "issuer name       : ") <= 0)
    {
@@ -513,7 +532,7 @@ static int ssl_store_cert(struct client_state *csp, X509 *crt)
    loc = X509_get_ext_by_NID(crt, NID_basic_constraints, -1);
    if (loc != -1)
    {
-      X509_EXTENSION *ex = X509_get_ext(crt, loc);
+      OPENSSL4_CONST X509_EXTENSION *ex = X509_get_ext(crt, loc);
       if (BIO_puts(bio, "\nbasic constraints : ") <= 0)
       {
          log_ssl_errors(LOG_LEVEL_ERROR,
@@ -536,7 +555,7 @@ static int ssl_store_cert(struct client_state *csp, X509 *crt)
    loc = X509_get_ext_by_NID(crt, NID_subject_alt_name, -1);
    if (loc != -1)
    {
-      X509_EXTENSION *ex = X509_get_ext(crt, loc);
+      OPENSSL4_CONST X509_EXTENSION *ex = X509_get_ext(crt, loc);
       if (BIO_puts(bio, "\nsubject alt name  : ") <= 0)
       {
          log_ssl_errors(LOG_LEVEL_ERROR, "BIO_printf() for alt name failed");
@@ -559,7 +578,7 @@ static int ssl_store_cert(struct client_state *csp, X509 *crt)
    loc = X509_get_ext_by_NID(crt, NID_netscape_cert_type, -1);
    if (loc != -1)
    {
-      X509_EXTENSION *ex = X509_get_ext(crt, loc);
+      OPENSSL4_CONST X509_EXTENSION *ex = X509_get_ext(crt, loc);
       if (BIO_puts(bio, "\ncert. type        : ") <= 0)
       {
          log_ssl_errors(LOG_LEVEL_ERROR, "BIO_printf() for cert type failed");
@@ -582,7 +601,7 @@ static int ssl_store_cert(struct client_state *csp, X509 *crt)
    loc = X509_get_ext_by_NID(crt, NID_key_usage, -1);
    if (loc != -1)
    {
-      X509_EXTENSION *ex = X509_get_ext(crt, loc);
+      OPENSSL4_CONST X509_EXTENSION *ex = X509_get_ext(crt, loc);
       if (BIO_puts(bio, "\nkey usage         : ") <= 0)
       {
          log_ssl_errors(LOG_LEVEL_ERROR, "BIO_printf() for key usage failed");
@@ -604,7 +623,7 @@ static int ssl_store_cert(struct client_state *csp, X509 *crt)
 
    loc = X509_get_ext_by_NID(crt, NID_ext_key_usage, -1);
    if (loc != -1) {
-      X509_EXTENSION *ex = X509_get_ext(crt, loc);
+      OPENSSL4_CONST X509_EXTENSION *ex = X509_get_ext(crt, loc);
       if (BIO_puts(bio, "\next key usage     : ") <= 0)
       {
          log_ssl_errors(LOG_LEVEL_ERROR,
@@ -628,7 +647,7 @@ static int ssl_store_cert(struct client_state *csp, X509 *crt)
    loc = X509_get_ext_by_NID(crt, NID_certificate_policies, -1);
    if (loc != -1)
    {
-      X509_EXTENSION *ex = X509_get_ext(crt, loc);
+      OPENSSL4_CONST X509_EXTENSION *ex = X509_get_ext(crt, loc);
       if (BIO_puts(bio, "\ncertificate policies : ") <= 0)
       {
          log_ssl_errors(LOG_LEVEL_ERROR, "BIO_printf() for certificate policies failed");
@@ -1080,12 +1099,33 @@ extern int create_server_ssl_connection(struct client_state *csp)
    /*
     * Set the hostname to check against the received server certificate
     */
+#if OPENSSL_VERSION_NUMBER >= 0x40000000L
+   if (host_is_ip_address(csp->http->host))
+   {
+      if (!SSL_set1_ipaddr(ssl, csp->http->host))
+      {
+         log_ssl_errors(LOG_LEVEL_ERROR, "SSL_set1_ipaddr failed");
+         ret = -1;
+         goto exit;
+      }
+   }
+   else
+   {
+      if (!SSL_set1_dnsname(ssl, csp->http->host))
+      {
+         log_ssl_errors(LOG_LEVEL_ERROR, "SSL_set1_dnsname failed");
+         ret = -1;
+         goto exit;
+      }
+   }
+#else
    if (!SSL_set1_host(ssl, csp->http->host))
    {
       log_ssl_errors(LOG_LEVEL_ERROR, "SSL_set1_host failed");
       ret = -1;
       goto exit;
    }
+#endif
 
    /* SNI extension */
    if (!host_is_ip_address(csp->http->host) &&
@@ -1655,14 +1695,25 @@ static X509 *ssl_certificate_load(const char *cert_path)
 static int ssl_certificate_is_invalid(const char *cert_file)
 {
    int ret;
-
+#if OPENSSL_VERSION_NUMBER >= 0x40000000L
+   int error;
+#endif
    X509 *cert = NULL;
 
    if (!(cert = ssl_certificate_load(cert_file)))
    {
       return 1;
    }
-
+#if OPENSSL_VERSION_NUMBER >= 0x40000000L
+   ret = X509_check_certificate_times(NULL, cert, &error);
+   if (ret != 1)
+   {
+      log_ssl_errors(LOG_LEVEL_ERROR, "Failed to check certificate %s "
+         "validity with X509_check_certificate_times(). error is %i",
+         cert_file, error);
+      ret = -1;
+   }
+#else
    ret = X509_cmp_current_time(X509_get_notAfter(cert));
    if (ret == 0)
    {
@@ -1670,6 +1721,7 @@ static int ssl_certificate_is_invalid(const char *cert_file)
          "Error checking certificate %s validity", cert_file);
       ret = -1;
    }
+#endif
 
    X509_free(cert);
 
@@ -1775,7 +1827,7 @@ static int generate_host_certificate(struct client_state *csp)
    BIO *pk_bio = NULL;
    EVP_PKEY *loaded_subject_key = NULL;
    EVP_PKEY *loaded_issuer_key = NULL;
-   X509_NAME *issuer_name;
+   OPENSSL4_CONST X509_NAME *issuer_name;
    X509_NAME *subject_name = NULL;
    ASN1_TIME *asn_time = NULL;
    ASN1_INTEGER *serial = NULL;
