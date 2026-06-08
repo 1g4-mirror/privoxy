@@ -4671,12 +4671,14 @@ static void chat(struct client_state *csp)
 #ifdef FEATURE_HTTPS_INSPECTION
       /*
        * Creating TLS connections with destination server or parent
-       * proxy. If forwarding is enabled, we must send client request to
-       * parent proxy and receive, parse and resend parent proxy answer.
+       * proxy. If forwarding is enabled and we are not treating the
+       * forward host as webserver, we must send the client request to the
+       * parent proxy and receive, parse and resend the parent proxy
+       * answer.
        */
       if (http->ssl && !use_ssl_tunnel)
       {
-         if (fwd->forward_host != NULL)
+         if (fwd->forward_host != NULL && fwd->type != FORWARD_WEBSERVER)
          {
             char server_response[BUFFER_SIZE];
             int ret = 0;
