@@ -945,6 +945,9 @@ struct http_response *error_response(struct client_state *csp,
    {
       const struct forward_spec *fwd = forward_url(csp, csp->http);
       char *socks_type = NULL;
+      const char *gateway_string = (fwd->gateway_host != NULL) ?
+         fwd->gateway_host : "a direct connection";
+
       if (fwd == NULL)
       {
          log_error(LOG_LEVEL_FATAL, "gateway spec is NULL. This shouldn't happen!");
@@ -970,7 +973,7 @@ struct http_response *error_response(struct client_state *csp,
          log_error(LOG_LEVEL_ERROR, "Socks failure reason missing.");
          csp->error_message = strdup("Failure reason missing. Check the log file for details.");
       }
-      if (!err) err = map(exports, "gateway", 1, fwd->gateway_host, 1);
+      if (!err) err = map(exports, "gateway", 1, gateway_string, 1);
 
       /*
        * XXX: this is almost the same code as in cgi_show_url_info()
