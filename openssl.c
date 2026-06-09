@@ -1446,9 +1446,9 @@ static int generate_key(struct client_state *csp, char **key_buf)
    int ret = 0;
    char* key_file_path;
 #if (OPENSSL_VERSION_NUMBER < 0x30000000L)
-   BIGNUM *exp;
-   RSA *rsa;
-   EC_KEY *ec_key;
+   BIGNUM *exp = NULL;
+   RSA *rsa = NULL;
+   EC_KEY *ec_key = NULL;
 #endif
    EVP_PKEY *key;
 
