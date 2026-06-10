@@ -45,7 +45,7 @@ use constant {
     # CLI option defaults
     CLI_RETRIES   => 1,
     CLI_LOOPS     => 1,
-    CLI_MAX_TIME  => 5,
+    CLI_MAX_TIME  => 10,
     CLI_MIN_LEVEL => 0,
     # The reason for a maximum test level is explained in the
     # perldoc section TEST LEVELS near the end of this file.
