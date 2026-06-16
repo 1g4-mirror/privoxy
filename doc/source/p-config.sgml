@@ -4333,7 +4333,7 @@ compression-level 0
   </listitem>
  </varlistentry>
 </variablelist>
-<![%config-file;[<literallayout>@@elliptic-curve-keys 1</literallayout>]]>
+<![%config-file;[<literallayout>@@#elliptic-curve-keys 1</literallayout>]]>
 </sect3>
 
 <!--  ~  End section  ~  -->
