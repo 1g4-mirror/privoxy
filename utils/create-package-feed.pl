@@ -101,20 +101,37 @@ sub get_released_files($) {
         while (my $fi2 = readdir($D2)) {
             next if ($fi2 =~ m/^\./);
 
-            # Start listing /OS/Version/FILE
+            # Start listing /OS/Version/FILE or /OS/Version/architecture/FILE
             opendir(my $D3, $scan_dir . $fi1 . '/' . $fi2 . '/')
                 or die "Can't open 3rd directory! /$fi1/$fi2";
             while (my $fi3 = readdir($D3)) {
                 next if ($fi3 =~ m/^\./);
                 $target = $scan_dir . $fi1 . '/' . $fi2 . '/' . $fi3;
                 next if (!-e $target);    # skip if file is not exist
+                if (-d $target) {
+                    opendir(my $D4, $target) or die "Can't open 4th directory $target";
+                    while (my $fi4 = readdir($D4)) {
+                        next if ($fi4 =~ m/^\./);
+                        $target = $scan_dir . $fi1 . '/' . $fi2 . '/' . $fi3 . '/' . $fi4;
+                        next if (! -e $target); # skip if file does not exist
 
-                $target_uri  = $fi1 . '/' . $fi2 . '/' . $fi3;
-                $target_time = (stat $target)[9];
+                        $target_uri  = $fi1 . '/' . $fi2 . '/' . $fi3 . '/' . $fi4;
+                        $target_time = (stat $target)[9];
 
-                $Array[$i] = ([$target_time, $target, $target_uri]);
+                        $Array[$i] = ([$target_time, $target, $target_uri]);
 
-                $i++;
+                        $i++;
+                    }
+                    closedir($D4);
+                } else {
+
+                    $target_uri  = $fi1 . '/' . $fi2 . '/' . $fi3;
+                    $target_time = (stat $target)[9];
+
+                    $Array[$i] = ([$target_time, $target, $target_uri]);
+
+                    $i++;
+                }
             }
             closedir($D3);
         }
