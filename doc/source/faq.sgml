@@ -9,10 +9,10 @@
 <!entity copyright SYSTEM "copyright.sgml">
 <!entity license SYSTEM "license.sgml">
 <!entity license-explanation SYSTEM "license-explanation.sgml">
-<!entity p-version "4.3.0">
-<!entity p-status "UNRELEASED">
-<!entity % p-not-stable "INCLUDE">
-<!entity % p-stable "IGNORE">
+<!entity p-version "4.2.0">
+<!entity p-status "stable">
+<!entity % p-not-stable "IGNORE">
+<!entity % p-stable "INCLUDE">
 <!entity % p-text "IGNORE">        <!-- define we are not a text only doc -->
 <!entity % p-doc "INCLUDE">        <!-- and we are a formal doc           -->
 <!entity % p-supp-userman "INCLUDE"> <!-- Include all from supported.sgml -->
@@ -607,6 +607,55 @@ warranty? Registration?</title>
 <!--   ~~~~~       New section      ~~~~~     -->
 
 <sect1  id="installation"><title>Installation</title>
+
+<sect2 renderas="sect3" id="GPGsigs">
+<title>How can I confirm the Privoxy installer is genuine?</title>
+<para>
+ Each binary installation package is GPG signed by the relevant packager, using
+ detached .asc signature files, as follows:
+ <literal>gpg --armor --output installer.sig --detach-sig installer</literal>
+ 
+ To verify that the installer file has not been modified since it was built,
+ use GPG to check that it cryptographically matches the signature, as follows:
+ <literal>gpg --verify installer.sig installer</literal>
+ 
+ The output of this command will identify the email address of the packager,
+ alongside the fingerprint of their public GPG key. The current packagers are as
+ follows:
+ <table frame='all'><title>Privoxy binary packagers</title>
+ <tgroup cols='4' align='left' colsep='1' rowsep='1'>
+ <thead>
+ <row>
+  <entry>Operating System</entry>
+  <entry>Packager Name</entry>
+  <entry>Packager Email</entry>
+  <entry>Packager Public Key Fingerprint</entry>
+ </row>
+ </thead>
+ <tbody>
+ <row>
+  <entry>FreeBSD</entry>
+  <entry>Fabian Keil</entry>
+  <entry>fk@fabiankeil.de</entry>
+  <entry>4F36C17F3816913654A1E850691822918BA2371C</entry>
+ </row>
+ <row>
+  <entry>Debian Linux</entry>
+  <entry>Roland Rosenfeld</entry>
+  <entry>roland@spinnaker.de</entry>
+  <entry>AC2FBDB104943D8A44A0211D02713BCFCA5410B2</entry>
+ </row>
+ <row>
+  <entry>macOS</entry>
+  <entry>Ian Silvester</entry>
+  <entry>iansilvester@fastmail.fm</entry>
+  <entry>558FCF92D02E6325E6C89E8DD9A17F79A285F0C7</entry>
+ </row>
+ </tbody>
+ </tgroup>
+ </table>
+</para>
+</sect2>
 
 <sect2 renderas="sect3" id="whichbrowsers">
 <title>Which browsers are supported by Privoxy?</title>
