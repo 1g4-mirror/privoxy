@@ -27,7 +27,55 @@
   <div class="SECT1">
     <h1 class="SECT1"><a name="INSTALLATION" id="INSTALLATION">2. Installation</a></h1>
     <div class="SECT2">
-      <h3 class="SECT2"><a name="WHICHBROWSERS" id="WHICHBROWSERS">2.1. Which browsers are supported by
+      <h3 class="SECT2"><a name="GPGSIGS" id="GPGSIGS">2.1. How can I confirm the Privoxy installer is
+      genuine?</a></h3>
+      <p>Each binary installation package is GPG signed by the relevant packager, using detached .asc signature files,
+      as follows: <tt class="LITERAL">gpg --armor --output installer.sig --detach-sig installer</tt> To verify that the
+      installer file has not been modified since it was built, use GPG to check that it cryptographically matches the
+      signature, as follows: <tt class="LITERAL">gpg --verify installer.sig installer</tt> The output of this command
+      will identify the email address of the packager, alongside the fingerprint of their public GPG key. The current
+      packagers are as follows:</p>
+      <div class="TABLE">
+        <a name="AEN294" id="AEN294"></a>
+        <p><b>Table 1. Privoxy binary packagers</b></p>
+        <table border="1" frame="border" rules="all" class="CALSTABLE">
+          <col>
+          <col>
+          <col>
+          <col>
+          <thead>
+            <tr>
+              <th>Operating System</th>
+              <th>Packager Name</th>
+              <th>Packager Email</th>
+              <th>Packager Public Key Fingerprint</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>FreeBSD</td>
+              <td>Fabian Keil</td>
+              <td>fk@fabiankeil.de</td>
+              <td>4F36C17F3816913654A1E850691822918BA2371C</td>
+            </tr>
+            <tr>
+              <td>Debian Linux</td>
+              <td>Roland Rosenfeld</td>
+              <td>roland@spinnaker.de</td>
+              <td>AC2FBDB104943D8A44A0211D02713BCFCA5410B2</td>
+            </tr>
+            <tr>
+              <td>macOS</td>
+              <td>Ian Silvester</td>
+              <td>iansilvester@fastmail.fm</td>
+              <td>558FCF92D02E6325E6C89E8DD9A17F79A285F0C7</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="SECT2">
+      <h3 class="SECT2"><a name="WHICHBROWSERS" id="WHICHBROWSERS">2.2. Which browsers are supported by
       Privoxy?</a></h3>
       <p>Any browser that can be configured to use a proxy, which should be virtually all browsers, including
       <span class="APPLICATION">Firefox</span>, <span class="APPLICATION">Internet Explorer</span>, <span class=
@@ -36,7 +84,7 @@
       talks to the browser in the standardized HTTP protocol, just like a web server does.</p>
     </div>
     <div class="SECT2">
-      <h3 class="SECT2"><a name="WHICHOS" id="WHICHOS">2.2. Which operating systems are supported?</a></h3>
+      <h3 class="SECT2"><a name="WHICHOS" id="WHICHOS">2.3. Which operating systems are supported?</a></h3>
       <p>At present, <span class="APPLICATION">Privoxy</span> is known to run on Windows 95 and later versions (98, ME,
       2000, XP, Vista, Windows 7, Windows 10, Windows 11 etc.), GNU/Linux (RedHat, SuSE, Debian, Fedora, Gentoo,
       Slackware and others), Mac OS X (10.4 and upwards on PPC and Intel processors), Haiku, DragonFly, ElectroBSD,
@@ -46,8 +94,8 @@
       issues. <span class="emphasis"><i class="EMPHASIS">It is preferable to build the latest code to target earlier OS
       releases than use an earlier Privoxy release</i></span>:</p>
       <div class="TABLE">
-        <a name="AEN303" id="AEN303"></a>
-        <p><b>Table 1. Operating system support for binaries provided by Privoxy team members</b></p>
+        <a name="AEN333" id="AEN333"></a>
+        <p><b>Table 2. Operating system support for binaries provided by Privoxy team members</b></p>
         <table border="1" frame="border" rules="all" class="CALSTABLE">
           <col>
           <col>
@@ -80,17 +128,17 @@
             </tr>
             <tr>
               <td>macOS</td>
-              <td>3.0.33</td>
+              <td>4.2.0</td>
               <td>El Capitan (10.11.6)</td>
               <td>Snow Leopard (10.6.1)</td>
               <td>Intel 64 bit</td>
             </tr>
             <tr>
               <td>&nbsp;</td>
-              <td>3.0.26</td>
-              <td>El Capitan (10.11.6), Tiger (10.4.1) PPC</td>
-              <td>Tiger (10.4.1)</td>
-              <td>Intel 32 &#38; 64 bit, PowerPC</td>
+              <td>4.2.0</td>
+              <td>Tahoe (26.5.1)</td>
+              <td>Big Sur (11.0.0)</td>
+              <td>Apple Silicon</td>
             </tr>
           </tbody>
         </table>
@@ -103,7 +151,7 @@
       compiling for older versions of supported operating systems.</p>
     </div>
     <div class="SECT2">
-      <h3 class="SECT2"><a name="EMAIL-CLIENT" id="EMAIL-CLIENT">2.3. Can I use Privoxy with my email client?</a></h3>
+      <h3 class="SECT2"><a name="EMAIL-CLIENT" id="EMAIL-CLIENT">2.4. Can I use Privoxy with my email client?</a></h3>
       <p>As long as there is some way to set a HTTP proxy for the client, then yes, any application can be used,
       whether it is strictly speaking a <span class="QUOTE">"browser"</span> or not. Though this may not be the best
       approach for dealing with some of the common abuses of HTML in email. See <a href=
@@ -114,7 +162,7 @@
       to plain text for these reasons.</p>
     </div>
     <div class="SECT2">
-      <h3 class="SECT2"><a name="FIRSTSTEP" id="FIRSTSTEP">2.4. I just installed Privoxy. Is there anything special I
+      <h3 class="SECT2"><a name="FIRSTSTEP" id="FIRSTSTEP">2.5. I just installed Privoxy. Is there anything special I
       have to do now?</a></h3>
       <p>All browsers should be told to use <span class="APPLICATION">Privoxy</span> as a proxy by specifying the
       correct proxy address and port number in the appropriate configuration area for the browser. It's possible to
@@ -126,7 +174,7 @@
       "_top">cookies</a>.</p>
     </div>
     <div class="SECT2">
-      <h3 class="SECT2"><a name="LOCALHOST" id="LOCALHOST">2.5. What is the proxy address of Privoxy?</a></h3>
+      <h3 class="SECT2"><a name="LOCALHOST" id="LOCALHOST">2.6. What is the proxy address of Privoxy?</a></h3>
       <p>If you set up the <span class="APPLICATION">Privoxy</span> to run on the computer you browse from (rather than
       your ISP's server or some networked computer on a LAN), the proxy will be on <tt class="LITERAL">127.0.0.1</tt>
       (sometimes referred to as <span class="QUOTE">"localhost"</span>, which is the special name used by every
@@ -146,7 +194,7 @@
       IRC, ICQ, etc.</p>
     </div>
     <div class="SECT2">
-      <h3 class="SECT2"><a name="NOTHING" id="NOTHING">2.6. I just installed Privoxy, and nothing is happening. All the
+      <h3 class="SECT2"><a name="NOTHING" id="NOTHING">2.7. I just installed Privoxy, and nothing is happening. All the
       ads are there. What's wrong?</a></h3>
       <p>Did you configure your browser to use <span class="APPLICATION">Privoxy</span> as a proxy? It does not sound
       like it. See above. You might also try flushing the browser's caches to force a full re-reading of pages. You can
@@ -164,7 +212,7 @@
       Manual</a>.</p>
     </div>
     <div class="SECT2">
-      <h3 class="SECT2"><a name="NOTUSED" id="NOTUSED">2.7. I get a <span class="QUOTE">"Privoxy is not being
+      <h3 class="SECT2"><a name="NOTUSED" id="NOTUSED">2.8. I get a <span class="QUOTE">"Privoxy is not being
       used"</span> dummy page although Privoxy is running and being used.</a></h3>
       <p>First, make sure that Privoxy is <span class="emphasis"><i class="EMPHASIS">really</i></span> running and
       being used by visiting <a href="http://p.p/" target="_top">http://p.p/</a>. You should see the <span class=
