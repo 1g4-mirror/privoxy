@@ -1618,7 +1618,7 @@ struct configuration_spec * load_config(void)
             break;
 
 /* *************************************************************************
- * socket-timeout numer_of_seconds
+ * socket-timeout number_of_seconds
  * *************************************************************************/
          case hash_socket_timeout :
          {
