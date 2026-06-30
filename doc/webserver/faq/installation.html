@@ -30,13 +30,15 @@
       <h3 class="SECT2"><a name="GPGSIGS" id="GPGSIGS">2.1. How can I confirm the Privoxy installer is
       genuine?</a></h3>
       <p>Each binary installation package is GPG signed by the relevant packager, using detached .asc signature files,
-      as follows: <tt class="LITERAL">gpg --armor --output installer.sig --detach-sig installer</tt> To verify that the
-      installer file has not been modified since it was built, use GPG to check that it cryptographically matches the
-      signature, as follows: <tt class="LITERAL">gpg --verify installer.sig installer</tt> The output of this command
-      will identify the email address of the packager, alongside the fingerprint of their public GPG key. The current
-      packagers are as follows:</p>
+      as follows:</p>
+      <p><tt class="LITERAL">gpg --armor --output installer.sig --detach-sig installer</tt></p>
+      <p>To verify that the installer file has not been modified since it was built, use GPG to check that it
+      cryptographically matches the signature, as follows:</p>
+      <p><tt class="LITERAL">gpg --verify installer.sig installer</tt></p>
+      <p>The output of this command will identify the email address of the packager, alongside the fingerprint of their
+      public GPG key. The current packagers are as follows:</p>
       <div class="TABLE">
-        <a name="AEN294" id="AEN294"></a>
+        <a name="AEN298" id="AEN298"></a>
         <p><b>Table 1. Privoxy binary packagers</b></p>
         <table border="1" frame="border" rules="all" class="CALSTABLE">
           <col>
@@ -56,19 +58,25 @@
               <td>FreeBSD</td>
               <td>Fabian Keil</td>
               <td>fk@fabiankeil.de</td>
-              <td>4F36C17F3816913654A1E850691822918BA2371C</td>
+              <td>4F36 C17F 3816 9136 54A1 E850 6918 2291 8BA2 371C</td>
             </tr>
             <tr>
               <td>Debian Linux</td>
               <td>Roland Rosenfeld</td>
               <td>roland@spinnaker.de</td>
-              <td>AC2FBDB104943D8A44A0211D02713BCFCA5410B2</td>
+              <td>AC2F BDB1 0494 3D8A 44A0 211D 0271 3BCF CA54 10B2</td>
             </tr>
             <tr>
               <td>macOS</td>
               <td>Ian Silvester</td>
               <td>iansilvester@fastmail.fm</td>
-              <td>558FCF92D02E6325E6C89E8DD9A17F79A285F0C7</td>
+              <td>558F CF92 D02E 6325 E6C8 9E8D D9A1 7F79 A285 F0C7</td>
+            </tr>
+            <tr>
+              <td>Windows</td>
+              <td>Lee Rian</td>
+              <td>ler762@gmail.com</td>
+              <td>A64E FD41 6B94 82FD 3734 7AC9 F143 81F4 A112 856D</td>
             </tr>
           </tbody>
         </table>
@@ -94,7 +102,7 @@
       issues. <span class="emphasis"><i class="EMPHASIS">It is preferable to build the latest code to target earlier OS
       releases than use an earlier Privoxy release</i></span>:</p>
       <div class="TABLE">
-        <a name="AEN333" id="AEN333"></a>
+        <a name="AEN342" id="AEN342"></a>
         <p><b>Table 2. Operating system support for binaries provided by Privoxy team members</b></p>
         <table border="1" frame="border" rules="all" class="CALSTABLE">
           <col>
@@ -114,7 +122,7 @@
           <tbody>
             <tr>
               <td>Windows</td>
-              <td>3.0.33</td>
+              <td>4.1.0</td>
               <td>Windows 10</td>
               <td>Windows Vista</td>
               <td>Intel 32 and 64 bit</td>
