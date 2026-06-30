@@ -1322,7 +1322,10 @@ sub get_status_code($) {
 
         } else {
 
-            return '123' if cli_option_is_set('fuzzer-feeding');
+            if (cli_option_is_set('fuzzer-feeding') or
+                cli_option_is_set('tolerate-flakiness')) {
+                return '123';
+            }
             chomp;
             log_and_die('Unexpected buffer line: "' . $_ . '"');
         }
@@ -1496,7 +1499,7 @@ sub get_page_with_curl($) {
         }
     } while ($? && --$retries_left);
 
-    unless ($retries_left) {
+    unless ($retries_left or cli_option_is_set('tolerate-flakiness')) {
         log_and_die("Running curl failed " . get_cli_option('retries') .
                     " times in a row. Last error: '" . $failure_reason . "'.");
     }
@@ -1714,6 +1717,7 @@ Options and their default values if they have any:
     [--shuffle-tests]
     [--sleep-time $cli_options{'sleep-time'}]
     [--test-number]
+    [--tolerate-flakiness]
     [--verbose]
     [--version]
     EOF
@@ -1778,6 +1782,7 @@ sub parse_cli_options() {
         'show-skipped-tests' => \$cli_options{'show-skipped-tests'},
         'sleep-time=i'       => \$cli_options{'sleep-time'},
         'test-number=i'      => \$cli_options{'test-number'},
+        'tolerate-flakiness' => \$cli_options{'tolerate-flakiness'},
         'verbose'            => \$cli_options{'verbose'},
         'version'            => sub {print_version && exit(0)}
     ) or exit(1);
@@ -1840,6 +1845,7 @@ sub start_forks($) {
 
 sub check_bad_ssl() {
     my $failures = 0;
+    my $soft_failures = 0;
     my @bad_ssl_urls_to_check = (
         "https://expired.badssl.com/",
         "https://wrong.host.badssl.com/",
@@ -1864,16 +1870,30 @@ sub check_bad_ssl() {
 
         $buffer_ref = get_page_with_curl($url_to_check);
         $status_code = get_status_code($buffer_ref);
-
-        if (!check_status_code_result($status_code, "403")) {
-            $failures++;
+        if ($status_code != 403) {
+            if (cli_option_is_set('tolerate-flakiness') and $status_code != 200) {
+                # Status code 123 is used for curl failures that are logged already.
+                unless ($status_code == 123) {
+                    log_message("Oops. Got status code $status_code instead of 200.")
+                }
+                $soft_failures++;
+            } else {
+                unless ($status_code == 123) {
+                    log_message("Oops. Got status code $status_code instead of 403.");
+                }
+                $failures++;
+            }
         }
 
     }
-    if ($failures == 0) {
+    if ($failures == 0 and $soft_failures == 0) {
         log_message("All requests resulted in status code 403 as expected.");
     } else {
-        log_message("There were $failures requests that did not result in status code 403!");
+        my $total_failures = $failures + $soft_failures;
+        log_message("There were $total_failures requests that did not result in status code 403!");
+        if ($soft_failures) {
+            log_message("Tolerated $soft_failures failure(s) due to the --tolerate-flakiness option.");
+        }
     }
 
     return $failures;
@@ -1886,6 +1906,9 @@ sub main() {
     init_proxy_settings('vanilla-proxy');
     if (cli_option_is_set('check-bad-ssl')) {
         exit check_bad_ssl();
+    }
+    if (cli_option_is_set('tolerate-flakiness')) {
+        log_and_die("Option --tolerate-flakiness requires option --check-bad-ssl.");
     }
     load_regression_tests();
     init_proxy_settings('fuzz-proxy');
@@ -1906,7 +1929,7 @@ B<privoxy-regression-test> [B<--check-bad-ssl>] [B<--curl curl>] [B<--debug bitm
 [B<--local-test-file testfile>] [B<--loops count>] [B<--max-level max-level>]
 [B<--max-time max-time>] [B<--min-level min-level>] B<--privoxy-address proxy-address>
 B<--privoxy-cgi-prefix cgi-prefix> [B<--retries retries>] [B<--test-number test-number>]
-[B<--show-skipped-tests>] [B<--sleep-time> seconds] [B<--verbose>]
+[B<--tolerate-flakiness>] [B<--show-skipped-tests>] [B<--sleep-time> seconds] [B<--verbose>]
 [B<--version>]
 
 =head1 DESCRIPTION
@@ -2134,6 +2157,10 @@ B<--retries retries> Retry B<retries> times.
 
 B<--test-number test-number> Only run the test with the specified
 number.
+
+B<--tolerate-flakiness> Only treat status code 200 as error when
+the B<--check-bad-ssl> option is being used. Timeouts and other errors
+are not considered fatal problems.
 
 B<--show-skipped-tests> Log skipped tests even if verbose mode is off.
 
