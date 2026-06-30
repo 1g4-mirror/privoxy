@@ -3,6 +3,7 @@ tags
 TAGS
 .make.state
 .nse_depinfo
+.DS_Store
 *~
 #*
 .#*
