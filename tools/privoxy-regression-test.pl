@@ -1916,8 +1916,8 @@ B<privoxy-regression-test> - A regression test "framework" for Privoxy.
 B<privoxy-regression-test> [B<--check-bad-ssl>] [B<--curl curl>] [B<--debug bitmask>]
 [B<--forks> forks] [B<--fuzzer-feeding>] [B<--fuzzer-feeding>] [B<--help>] [B<--level level>]
 [B<--local-test-file testfile>] [B<--loops count>] [B<--max-level max-level>]
-[B<--max-time max-time>] [B<--min-level min-level>] B<--privoxy-address proxy-address>
-B<--privoxy-cgi-prefix cgi-prefix> [B<--retries retries>] [B<--test-number test-number>]
+[B<--max-time max-time>] [B<--min-level min-level>] [B<--privoxy-address proxy-address>]
+[B<--privoxy-cgi-prefix cgi-prefix>] [B<--retries retries>] [B<--test-number test-number>]
 [B<--tolerate-flakiness>] [B<--show-skipped-tests>] [B<--sleep-time> seconds] [B<--verbose>]
 [B<--version>]
 
