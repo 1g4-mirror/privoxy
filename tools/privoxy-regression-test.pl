@@ -1493,7 +1493,7 @@ sub get_page_with_curl($) {
 
         if ($?) {
             log_and_die("Executing '$curl_line' failed.") unless @buffer;
-            $failure_reason = array_as_string(\@buffer);
+            $failure_reason = $buffer[0];
             chomp $failure_reason;
             l(LL_SOFT_ERROR, "Fetch failure: '" . $failure_reason . $! ."'");
         }
@@ -1513,17 +1513,6 @@ sub get_page_with_curl($) {
 # Log functions
 #
 ############################################################################
-
-sub array_as_string($) {
-    my $array_ref = shift;
-    my $string = '';
-
-    foreach (@{$array_ref}) {
-        $string .= $_;
-    }
-
-    return $string;
-}
 
 sub show_test($) {
     my $test = shift;
