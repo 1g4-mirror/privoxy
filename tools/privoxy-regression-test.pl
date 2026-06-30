@@ -38,7 +38,7 @@ use strict;
 use Getopt::Long;
 
 use constant {
-    PRT_VERSION => 'Privoxy-Regression-Test 0.7.7',
+    PRT_VERSION => 'Privoxy-Regression-Test 0.7.8',
  
     CURL => 'curl',
 
