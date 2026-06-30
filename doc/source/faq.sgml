@@ -3176,7 +3176,7 @@ C:\Privoxy></screen>
 
  <!--   ~~~~~       New section      ~~~~~     -->
  <sect2 id="privoxy-license"><title>License</title>
- <!-- Include copyright.sgml: -->
+ <!-- Include license.sgml: -->
   &license;
  <!-- end copyright -->
  </sect2>
