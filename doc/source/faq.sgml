@@ -615,14 +615,14 @@ warranty? Registration?</title>
  detached .asc signature files, as follows:
 </para>
 <para>
- <literal>gpg --armor --output installer.sig --detach-sig installer</literal>
+ <literal>gpg --armor --output installer.asc --detach-sig installer</literal>
 </para>
 <para>
  To verify that the installer file has not been modified since it was built,
  use GPG to check that it cryptographically matches the signature, as follows:
 </para>
 <para>
- <literal>gpg --verify installer.sig installer</literal>
+ <literal>gpg --verify installer.asc installer</literal>
 </para>
 <para>
  The output of this command will identify the email address of the packager,
