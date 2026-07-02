@@ -31,10 +31,10 @@
       genuine?</a></h3>
       <p>Each binary installation package is GPG signed by the relevant packager, using detached .asc signature files,
       as follows:</p>
-      <p><tt class="LITERAL">gpg --armor --output installer.sig --detach-sig installer</tt></p>
+      <p><tt class="LITERAL">gpg --armor --output installer.asc --detach-sig installer</tt></p>
       <p>To verify that the installer file has not been modified since it was built, use GPG to check that it
       cryptographically matches the signature, as follows:</p>
-      <p><tt class="LITERAL">gpg --verify installer.sig installer</tt></p>
+      <p><tt class="LITERAL">gpg --verify installer.asc installer</tt></p>
       <p>The output of this command will identify the email address of the packager, alongside the fingerprint of their
       public GPG key. The current packagers are as follows:</p>
       <div class="TABLE">
