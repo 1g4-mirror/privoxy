@@ -72,6 +72,7 @@
 #define PCRS_WARN_BADREF         -304      /* Backreference out of range */
 #define PCRS_WARN_TRUNCATION     -305      /* At least one pcrs variable was too big,
                                             * only the first part was used. */
+#define PCRS_TOO_MANY_SUBMATCHES -306      /* PCRS_MAX_SUBMATCHES reached. */
 
 /* Flags */
 #define PCRS_GLOBAL          0x08000000u      /* Job should be applied globally, as with perl's g option */

@@ -110,6 +110,7 @@ const char *pcrs_strerror(const int error)
          case PCRS_WARN_BADREF:        return "(pcrs:) Backreference out of range";
          case PCRS_WARN_TRUNCATION:
             return "(pcrs:) At least one variable was too big and has been truncated before compilation";
+         case PCRS_TOO_MANY_SUBMATCHES: return "(pcrs:) Submatch limit reached";
 
          default:
             pcre2_get_error_message(error, (PCRE2_UCHAR8*)buf, sizeof(buf));
@@ -835,6 +836,13 @@ int pcrs_execute(pcrs_job *job, const char *subject, size_t subject_length, char
    while ((submatches = pcre2_match(job->pattern, (const unsigned char *)subject,
                            subject_length, (size_t)offset, 0, pcre2_matches, NULL)) > 0)
    {
+      if (submatches >= PCRS_MAX_SUBMATCHES)
+      {
+         free(matches);
+         pcre2_match_data_free(pcre2_matches);
+
+         return(PCRS_TOO_MANY_SUBMATCHES);
+      }
       job->flags |= PCRS_SUCCESS;
       matches[i].submatches = submatches;
 
