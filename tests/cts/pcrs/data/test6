@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+Filter with multiple submatches that are being referenced in the pattern
+</keywords>
+</info>
+
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 22 Jul 2010 11:22:33 GMT
+Connection: close
+Content-Type: text/html
+X-Control: swsclose
+
+Does not matter.
+</data>
+</reply>
+
+<proxy-reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 22 Jul 2010 11:22:33 GMT
+Connection: close
+Content-Type: text/html
+X-Control: swsclose
+
+Does not matter.
+</data>
+</proxy-reply>
+
+
+<client>
+<server>
+http
+</server>
+<name>
++filter{lots-of-parentheses}
+</name>
+<features>
+proxy
+</features>
+<command>
+http://%HOSTIP:%HTTPPORT/lots-of-parentheses/%TESTNUMBER
+</command>
+</client>
+
+<verify>
+<protocol>
+GET /lots-of-parentheses/%TESTNUMBER HTTP/1.1%CR
+Host: %HOSTIP:%HTTPPORT%CR
+User-Agent: curl/%VERSION%CR
+Accept: */*%CR
+Connection: close%CR
+%CR
+</protocol>
+</verify>
+</testcase>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+Dynamic filter with variables
+</keywords>
+</info>
+
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 22 Jul 2010 11:22:33 GMT
+Connection: close
+Content-Type: text/html
+X-Control: swsclose
+
+host variable:
+listen-address variable:
+origin variable:
+path variable:
+url variable:
+</data>
+</reply>
+
+<proxy-reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 22 Jul 2010 11:22:33 GMT
+Connection: close
+Content-Type: text/html
+X-Control: swsclose
+Content-Length: 181
+
+host variable: 127.0.0.1
+listen-address variable: 127.0.0.1:9119
+origin variable: 127.0.0.1
+path variable: /embed-variables/%TESTNUMBER
+url variable: http://%HOSTIP:%HTTPPORT/embed-variables/%TESTNUMBER
+</data>
+</proxy-reply>
+
+
+<client>
+<server>
+http
+</server>
+<name>
++filter{embed-variables}
+</name>
+<features>
+proxy
+</features>
+<command>
+http://%HOSTIP:%HTTPPORT/embed-variables/%TESTNUMBER
+</command>
+</client>
+
+<verify>
+<protocol>
+GET /embed-variables/%TESTNUMBER HTTP/1.1%CR
+Host: %HOSTIP:%HTTPPORT%CR
+User-Agent: curl/%VERSION%CR
+Accept: */*%CR
+Connection: close%CR
+%CR
+</protocol>
+</verify>
+</testcase>

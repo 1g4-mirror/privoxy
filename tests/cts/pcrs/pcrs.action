@@ -1,0 +1,17 @@
+{+filter{submatch-limit-not-reached}}
+/submatch-limit-not-reached/
+
+{+filter{submatch-limit-reached}}
+/submatch-limit-reached/
+
+{+filter{embed-variables}}
+/embed-variables/
+
+{+filter{submatches-used}}
+/submatches-used/
+
+{+filter{submatches-referenced}}
+/submatches-referenced/
+
+{+filter{lots-of-parentheses}}
+/lots-of-parentheses/

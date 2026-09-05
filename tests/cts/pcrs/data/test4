@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+Filter with multiple submatches that are being referenced in the substitution text.
+</keywords>
+</info>
+
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 22 Jul 2010 11:22:33 GMT
+Connection: close
+Content-Type: text/html
+X-Control: swsclose
+
+1 2 3 4 5 6 7 8 9
+</data>
+</reply>
+
+<proxy-reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 22 Jul 2010 11:22:33 GMT
+Connection: close
+Content-Type: text/html
+X-Control: swsclose
+Content-Length: 18
+
+9 8 7 6 5 4 3 2 1
+</data>
+</proxy-reply>
+
+
+<client>
+<server>
+http
+</server>
+<name>
++filter{submatches-used}
+</name>
+<features>
+proxy
+</features>
+<command>
+http://%HOSTIP:%HTTPPORT/submatches-used/%TESTNUMBER
+</command>
+</client>
+
+<verify>
+<protocol>
+GET /submatches-used/%TESTNUMBER HTTP/1.1%CR
+Host: %HOSTIP:%HTTPPORT%CR
+User-Agent: curl/%VERSION%CR
+Accept: */*%CR
+Connection: close%CR
+%CR
+</protocol>
+</verify>
+</testcase>
