@@ -823,6 +823,8 @@ int pcrs_execute(pcrs_job *job, const char *subject, size_t subject_length, char
 
    if (NULL == (matches = (pcrs_match *)malloc((size_t)max_matches * sizeof(pcrs_match))))
    {
+      pcre2_match_data_free(pcre2_matches);
+
       return(PCRS_ERR_NOMEM);
    }
    memset(matches, '\0', (size_t)max_matches * sizeof(pcrs_match));
@@ -876,6 +878,8 @@ int pcrs_execute(pcrs_job *job, const char *subject, size_t subject_length, char
          if (NULL == (dummy = (pcrs_match *)realloc(matches, (size_t)max_matches * sizeof(pcrs_match))))
          {
             free(matches);
+            pcre2_match_data_free(pcre2_matches);
+
             return(PCRS_ERR_NOMEM);
          }
          matches = dummy;
