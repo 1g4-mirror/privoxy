@@ -331,7 +331,7 @@ https://www.privoxy.org/donate
 
 135) Add OpenBSM audit support.
 
-136) Make builds reproducible.
+136) Make binary packages reproducible.
 
 138) Bring back the scripts to provide actions file feedback.
 
