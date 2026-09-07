@@ -44,8 +44,6 @@ https://www.privoxy.org/donate
 
     Work in progress.
 
-12) Support pipelining for outgoing connections.
-
 19) enable-forward-fallback. Syntax? Suggested by K.R.
 
 21) User Manual delivery doesn't accept multiple slashes. Should it?
