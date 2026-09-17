@@ -30,7 +30,7 @@ sub main() {
 
     for my $testnum (1..3500) {
         my $why;
-        if ($testnum == 1) {
+        if ($testnum == 1 or $testnum == 320) {
             $why = "Expected to fail. Multiple values in Connection header that get removed by Privoxy.";
         } elsif ($testnum == 2) {
             $why = "Expected to fail. Missing space after status code that gets added by Privoxy.";
@@ -57,6 +57,8 @@ sub main() {
                  $testnum == 1417 or
                  $testnum == 1493) {
             $why = "Expected to fail with Privoxy. Test contains non-standard 'Connection: mooo' header that Privoxy replaces with 'Connection: close'.";
+        } elsif ($testnum == 36) {
+            $why = "Expected to fail due to 'Connection: mooo' header.";
         } elsif ($testnum == 46) {
             $why = "Invalid URL and use of --resolv.";
         } elsif ($testnum == 58) {
@@ -81,6 +83,8 @@ sub main() {
             $why = "Chunked transfer with trailers which Privoxy does not understand. Needs investigating.";
         } elsif ($testnum == 389) {
             $why = "Known to fail depending on the DNS resolver on the system as Privoxy does not implement RFC6761 internally.";
+        } elsif ($testnum == 394) {
+            $why = "Known to fail. Privoxy removed an invalid Content-Length header which causes curl to accept the response.";
         } elsif ($testnum == 1052) {
             $why = "Expected to fail. Connection header expected in one response but not in the other. Not yet covered by runtests.pl's proxy mode.";
         } elsif ($testnum == 1118) {
@@ -157,6 +161,8 @@ sub main() {
             $why = "Expected to fail. Privoxy does not support chunked trailers.";
         } elsif ($testnum == 1533) {
             $why = "Sends an invalid method. Needs investigating.";
+        } elsif ($testnum == 1515) {
+            $why = "Depends on DNS and isn't relevant for Privoxy.";
         } elsif ($testnum == 1542) {
             $why = "Expected to fail. Expects HTTPPORT in logs which gets replaced by Privoxy's listening port.";
         } elsif ($testnum == 1543) {
@@ -171,6 +177,10 @@ sub main() {
             $why = "Known to fail as curl adds a Proxy-Connection header to the JSON output which the test doesn't expect.";
         } elsif ($testnum == 1685) {
             $why = "Known to fail as Privoxy converts a tab in a Cookie header to space.";
+        } elsif ($testnum == 1689) {
+            $why = "Known to fail as curl adds a Proxy-Connection header when using Privoxy.";
+        } elsif ($testnum == 1721) {
+            $why = "Known to fail. Looks like a curl bug that should be reported upstream.";
         } elsif ($testnum == 1915) {
             $why = "Known to fail. Uses tool that doesn't expect a proxy.";
         } elsif ($testnum == 1933) {
@@ -189,6 +199,8 @@ sub main() {
             $why = "Known to fail. Test does not expect proxy request.";
         } elsif ($testnum == 2100) {
             $why = "Known to fail. Use DNS-over-HTTP.";
+        } elsif ($testnum == 2105) {
+            $why = "Known to fail. Contains invalid header which Privoxy currently passes on truncated.";
         } elsif ($testnum == 3014 or $testnum == 3015) {
             $why = "Known to fail. Curl adds a Proxy-Connection header while test expect a certain number of headers.";
         }
@@ -217,7 +229,7 @@ sub main() {
         printf("keyword:%s: Protocol %s is supported by Privoxy but the tests need additional magic before they can be used.\n", $protocol, $protocol);
     }
 
-    foreach my $misc ('proxy', '--resolve', '--libcurl', 'CURLOPT_RESOLVE') {
+    foreach my $misc ('--connect-to', 'proxy', '--resolve', '--libcurl', 'CURLOPT_RESOLVE') {
         printf("keyword:%s: Tests with keyword '%s' currently don't work with Privoxy as they need additional runtests.pl changes.\n", $misc, $misc);
     }
     printf("keyword:%s: Tests with keyword '%s' aren't expected to work with Privoxy running in a jail without IPv6 connectivity.\n", 'IPv6', 'IPv6');
