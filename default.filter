@@ -61,7 +61,7 @@
 #     Note that '$' is a bad choice as delimiter for dynamic filters as you
 #     might end up with unintended variables if you use a variable name
 #     directly after the delimiter. Variables will be resolved without
-#     escaping anything, therefore you also have to be careful not to chose
+#     escaping anything, therefore you also have to be careful not to choose
 #     delimiters that appear in the replacement text. For example '<' should
 #     be save, while '?' will sooner or later cause conflicts with $url.
 #
