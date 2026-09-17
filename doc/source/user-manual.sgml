@@ -7308,6 +7308,13 @@ webmail.example.com
  be save, while '?' will sooner or later cause conflicts with $url.
 </para>
 
+<warning>
+<para>
+ Using variables in the pattern part is not recommended, as special
+ characters are not escaped and may cause problems.
+</para>
+</warning>
+
 <para>
  The non-standard option letter <literal>T</literal> (trivial) prevents
  parsing for backreferences in the substitute. Use it if you want to include
