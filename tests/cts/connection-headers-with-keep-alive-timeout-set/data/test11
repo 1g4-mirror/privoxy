@@ -37,7 +37,7 @@ Blafasel.
 http
 </server>
 <name>
-Multiple conflicting "Connection:" headers.
+Multiple conflicting "Connection:" headers. "Connection: keep-alive" wins.
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER

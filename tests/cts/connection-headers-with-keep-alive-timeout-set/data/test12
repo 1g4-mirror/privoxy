@@ -36,7 +36,7 @@ Blafasel.
 http
 </server>
 <name>
-Multiple conflicting "Connection:" headers.
+Multiple conflicting "Connection:" headers. "Connection: close" wins.
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
