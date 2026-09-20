@@ -29,6 +29,9 @@ X-Control: swsclose%CR
 100%CR
 %repeat[255 x %hex[%00]hex%]%
 %CR
+100%CR
+%repeat[255 x D]%
+%CR
 0%CR
 %CR
 </data>
@@ -48,6 +51,7 @@ X-Control: swsclose%CR
 %repeat[255 x B]%
 %repeat[255 x C]%
 %repeat[255 x %hex[%00]hex%]%
+%repeat[255 x D]%
 </data>
 </proxy-reply>
 
@@ -56,13 +60,13 @@ X-Control: swsclose%CR
 https
 </server>
 <name>
-Chunked transfer encoding - Multiple chunks, chunk at the end contains binary zeroes and is valid.
+Chunked transfer encoding - Multiple chunks, chunk in the middle contains binary zeroes and is valid.
 </name>
 <features>
 proxy
 </features>
 <command>
---insecure --raw https://%HOSTIP:%HTTPSPORT/chunked-transfer-encoding/%TESTNUMBER
+--insecure https://%HOSTIP:%HTTPSPORT/chunked-transfer-encoding/%TESTNUMBER
 </command>
 </client>
 
