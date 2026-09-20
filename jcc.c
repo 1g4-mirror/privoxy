@@ -1512,6 +1512,8 @@ static enum chunk_status chunked_body_is_complete(struct iob *iob, size_t *lengt
    unsigned int chunksize;
    char *p = iob->cur;
 
+   *length = 0;
+
    do
    {
       /*
