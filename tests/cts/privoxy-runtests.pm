@@ -210,6 +210,11 @@ sub startnew {
     return &$real_startnew($cmd, $pidfile, $timeout, $fake);
 }
 
+# Overwritten to allow test names longer than 70 characters.
+sub citest_starttest {
+    return 0;
+}
+
 sub main() {
 
     # Look but don't touch, @ARGV is still needed elsewhere
