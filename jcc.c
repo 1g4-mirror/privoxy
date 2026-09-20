@@ -1516,15 +1516,17 @@ static enum chunk_status chunked_body_is_complete(struct iob *iob, size_t *lengt
 
    do
    {
+      size_t data_left = (size_t)(iob->eod - p);
       /*
        * We need at least a single digit, followed by "\r\n",
        * followed by an unknown amount of data, followed by "\r\n".
        */
-      if (p + 5 > iob->eod)
+      if (5 > data_left)
       {
          return CHUNK_STATUS_MISSING_DATA;
       }
-      if (JB_ERR_OK != parse_chunk_size(p, *length, &chunksize))
+
+      if (JB_ERR_OK != parse_chunk_size(p, data_left, &chunksize))
       {
          return CHUNK_STATUS_PARSE_ERROR;
       }
