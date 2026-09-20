@@ -7,7 +7,7 @@ HTTP GET
 </keywords>
 </info>
 
-<<proxy-reply>
+<proxy-reply>
 <data>
 HTTP/1.1 503 Connect failed
 Content-Length: 44
@@ -19,7 +19,6 @@ Last-Modified: Wed, 08 Jun 1955 12:00:00 GMT
 Expires: Sat, 17 Jun 2000 12:00:00 GMT
 Pragma: no-cache
 
-Could not connect to destination 127.0.0.1.
 </data>
 </proxy-reply>
 
