@@ -190,6 +190,8 @@ main() {
         fi
     done
 
+    echo
+
     if [ -n "${scenarios_with_errors}" ]; then
        echo "The following test scenarios had at least one error:${scenarios_with_errors}"
        exit 1
