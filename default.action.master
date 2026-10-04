@@ -816,6 +816,8 @@ support./(.*/)?track
 /.*download
 # URL = https://gitlab.torproject.org/search/count?group_id=268&project_id=571&scope=users&search=src%2Ftest%2Ftest_util.c
 gitlab./search/count\?
+# URL = https://files.pythonhosted.org/packages/23/ad/28ecd7cb894d172f3c9c80a075eeeb2017ac62e3632cee05a5f9493547eb/lxml-6.1.3.tar.gz
+files.pythonhosted.org/packages/
 
 #----------------------------------------------------------------------------
 # Misc Web-bugs, JS and just plain Junk. Images here aren't normal images.
