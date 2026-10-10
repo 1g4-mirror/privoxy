@@ -2392,6 +2392,64 @@
           </dl>
         </div>
       </div>
+      <div class="SECT3">
+        <h4 class="SECT3"><a name="CONNECT-ATTEMPT-DELAY" id="CONNECT-ATTEMPT-DELAY">7.6.20.
+        connect-attempt-delay</a></h4>
+        <div class="VARIABLELIST">
+          <dl>
+            <dt>Specifies:</dt>
+            <dd>
+              <p>Number of milliseconds to wait before starting a connection attempt to the next address of a host
+              while previous attempts are still pending.</p>
+            </dd>
+            <dt>Type of value:</dt>
+            <dd>
+              <p><tt class="REPLACEABLE"><i>Time in milliseconds.</i></tt></p>
+            </dd>
+            <dt>Default value:</dt>
+            <dd>
+              <p>250</p>
+            </dd>
+            <dt>Effect if unset:</dt>
+            <dd>
+              <p>A default value of 250 milliseconds is used.</p>
+            </dd>
+            <dt>Notes:</dt>
+            <dd>
+              <p>If a host resolves to multiple addresses, <span class="APPLICATION">Privoxy</span> tries to connect to
+              them following the <span class="QUOTE">"Happy Eyeballs"</span> algorithm described in RFC 8305: the
+              addresses are sorted so that address families alternate, the first connection attempt is started right
+              away and additional attempts are started in parallel whenever a previous attempt fails or the <tt class=
+              "LITERAL">connect-attempt-delay</tt> expires. The first attempt to succeed wins, the other ones are
+              aborted.</p>
+              <p>This limits the delay caused by unreachable addresses, for example when a host has an IPv6 address but
+              the system only has working IPv4 connectivity, to the configured value instead of the connection
+              timeout.</p>
+              <p>RFC 8305 recommends a value between 100 and 2000 milliseconds. Setting the value to 0 disables
+              parallel connection attempts, so that the addresses are tried one after the other with the next attempt
+              only being started after the previous one failed.</p>
+              <p>Note that the addresses are resolved with a single synchronous lookup, the <span class=
+              "QUOTE">"Resolution Delay"</span> described in RFC 8305 doesn't apply. The first attempt is made to the
+              first address returned by the resolver, whichever family it belongs to, followed by an address of the
+              other family.</p>
+              <p>This directive has no effect if <span class="APPLICATION">Privoxy</span> has been compiled without
+              getaddrinfo() support. On platforms where the connection attempts can't be made non-blocking the
+              addresses are tried one after the other regardless of this setting.</p>
+            </dd>
+            <dt>Example:</dt>
+            <dd>
+              <table border="0" bgcolor="#E0E0E0" width="90%">
+                <tr>
+                  <td>
+                    <pre class="SCREEN">      # Give the first address a full second before trying the next one
+      connect-attempt-delay 1000</pre>
+                  </td>
+                </tr>
+              </table>
+            </dd>
+          </dl>
+        </div>
+      </div>
     </div>
     <div class="SECT2">
       <h2 class="SECT2"><a name="HTTPS-INSPECTION-DIRECTIVES" id="HTTPS-INSPECTION-DIRECTIVES">7.7. HTTPS

@@ -94,8 +94,21 @@
     executed.</p>
     <p>Note that '$' is a bad choice for a delimiter in a dynamic filter as you might end up with unintended variables
     if you use a variable name directly after the delimiter. Variables will be resolved without escaping anything,
-    therefore you also have to be careful not to chose delimiters that appear in the replacement text. For example
+    therefore you also have to be careful not to choose delimiters that appear in the replacement text. For example
     '&lt;' should be save, while '?' will sooner or later cause conflicts with $url.</p>
+    <div class="WARNING">
+      <table class="WARNING" border="1" width="100%">
+        <tr>
+          <td align="center"><b>Warning</b></td>
+        </tr>
+        <tr>
+          <td align="left">
+            <p>Using variables in the pattern part is not recommended, as special characters are not escaped and may
+            cause problems.</p>
+          </td>
+        </tr>
+      </table>
+    </div>
     <p>The non-standard option letter <tt class="LITERAL">T</tt> (trivial) prevents parsing for backreferences in the
     substitute. Use it if you want to include text like '$&#38;' in your substitute without quoting.</p>
     <p>If you are new to <a href="https://en.wikipedia.org/wiki/Regular_expressions" target="_top"><span class=
